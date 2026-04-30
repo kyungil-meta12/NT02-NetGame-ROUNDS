@@ -50,7 +50,7 @@ namespace Yagir.inc.HierarchyIcons.Editor
 
         private static void HandleHierarchyWindowItemOnGUI(int instanceID, Rect selectionRect)
         {
-            Object obj = EditorUtility.InstanceIDToObject(instanceID);
+            Object obj = EditorUtility.EntityIdToObject(instanceID);
 
             switch (Event.current.type)
             {
