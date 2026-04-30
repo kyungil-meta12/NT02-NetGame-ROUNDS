@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 4312055699109673938}
   - component: {fileID: 25329021740252246}
   m_Layer: 0
-  m_Name: GameManager
+  m_Name: Game Manager
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -58,7 +58,7 @@ GameObject:
   - component: {fileID: 5274531038399384934}
   - component: {fileID: 171322961070017356}
   m_Layer: 0
-  m_Name: MemoryPool
+  m_Name: Memory Pool Manager
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
