@@ -30,9 +30,9 @@ public class Player : MonoBehaviour
     {
         // 시작 시 외형 랜덤 지정(타 플레이어와 겹치지 않도록)
         faceRenderer.sprite = faces[Random.Range(0, faces.Length)];
-        bodyRenderer.sprite = bodies[Random.Range(0, bodies.Length)];
-        int handIndex = Random.Range(0, hands.Length);
-        foreach (var hr in handRenderer) { hr.sprite = hands[handIndex]; }
+        int colorIndex = Random.Range(0, hands.Length);
+        bodyRenderer.sprite = bodies[colorIndex];
+        foreach (var hr in handRenderer) { hr.sprite = hands[colorIndex]; }
 
         // 총 프리펩이 가지는 GunSpec 컴포넌트에서 스펙을 불러와 적용한다
         var spec = gun.GetComponent<GunSpec>().spec;

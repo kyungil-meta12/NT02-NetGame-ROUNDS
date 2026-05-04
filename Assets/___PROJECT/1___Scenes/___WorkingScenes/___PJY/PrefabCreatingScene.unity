@@ -777,10 +777,10 @@ MonoBehaviour:
   hands:
   - {fileID: 8746408966873610207, guid: 06d9cd6cfe4c7dc4aba558a05ef08e41, type: 3}
   - {fileID: 999086087502417402, guid: 6621811bf0f9a6e44a661f75de9831da, type: 3}
-  - {fileID: 4451844795045349985, guid: fc54daeb37342eb408a9af7bfa3de12b, type: 3}
   - {fileID: 5552809708258486942, guid: b220d77253085a745ace1b5b2111d048, type: 3}
   - {fileID: -4050110087270917399, guid: 770e1a2629d6f4a4380a8eeb6516c190, type: 3}
   - {fileID: 60602558200826325, guid: de7a928ba52bfa045b0f23c67645e0ce, type: 3}
+  - {fileID: 4451844795045349985, guid: fc54daeb37342eb408a9af7bfa3de12b, type: 3}
 --- !u!4 &1783666405
 Transform:
   m_ObjectHideFlags: 0
