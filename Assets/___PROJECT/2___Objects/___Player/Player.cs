@@ -23,7 +23,7 @@ public class Player : MonoBehaviour
     public float jumpForce;
 
     private Rigidbody2D rb;
-    private float circleColliderRadius;
+    private float rayCastLength;
 
     private float bodyRotation;
     private float gunRotation;
@@ -32,7 +32,10 @@ public class Player : MonoBehaviour
     private Vector2 handOffset;
 
     private bool moveLeft = false, moveRight = false;
-    private bool jump = false;
+    private bool jumpAvailable = false;
+    private bool jumpInput = false;
+
+    private LayerMask groundMask;
 
     private Matrix4x4 handMat = new();
     private Matrix4x4 gunMat = new();
@@ -47,7 +50,7 @@ public class Player : MonoBehaviour
         handOffset = spec.handPositionOffset;
 
         // 점프 가능 판정에 사용되는 원 콜라이더 반지름
-        circleColliderRadius = GetComponent<CircleCollider2D>().radius;
+        rayCastLength = GetComponent<BoxCollider2D>().size.y * 0.5f;
     }
 
     void Start()
@@ -57,6 +60,8 @@ public class Player : MonoBehaviour
         int colorIndex = Random.Range(0, hands.Length);
         bodyRenderer.sprite = bodies[colorIndex];
         foreach (var hr in handRenderer) { hr.sprite = hands[colorIndex]; }
+
+        groundMask = LayerMask.GetMask("Ground");
     }
 
     void Update()
@@ -76,7 +81,7 @@ public class Player : MonoBehaviour
     {
         moveLeft = Keyboard.current.aKey.isPressed;
         moveRight = Keyboard.current.dKey.isPressed;
-        jump = Keyboard.current.spaceKey.isPressed;
+        jumpInput = Keyboard.current.spaceKey.isPressed;
     }
 
     void UpdateMove()
@@ -98,17 +103,37 @@ public class Player : MonoBehaviour
         }
         else
         {
-            rb.linearVelocityX = Mathf.Lerp(rb.linearVelocityX, 0f, Time.fixedDeltaTime * 5f);
+            rb.linearVelocityX = Mathf.Lerp(rb.linearVelocityX, 0f, Time.fixedDeltaTime * 10f);
         }
 
         // 점프 // 땅에 닿으면 점프 가능
-        if(jump)
+        if(jumpAvailable && jumpInput)
         {
-            var groundMask = 1 << LayerMask.NameToLayer("Ground");
-            if (Physics2D.Raycast(body.position, Vector2.down, circleColliderRadius + 0.01f, groundMask))
+            rb.AddForce(Vector2.up * jumpForce, ForceMode2D.Impulse);
+            jumpAvailable = false;
+        }
+    }
+
+    void OnCollisionStay2D(Collision2D c)
+    {
+        if ((groundMask & (1 << c.gameObject.layer)) != 0) 
+        {
+            foreach (var contact in c.contacts)
             {
-                rb.AddForce(Vector2.up * jumpForce, ForceMode2D.Impulse);
+                if (contact.normal.y > 0.5f)
+                {
+                    jumpAvailable = true;
+                    return;
+                }
             }
+        }
+    }
+
+    void OnCollisionExit2D(Collision2D c)
+    {
+        if ((groundMask & (1 << c.gameObject.layer)) != 0)
+        {
+            jumpAvailable = false;
         }
     }
 
