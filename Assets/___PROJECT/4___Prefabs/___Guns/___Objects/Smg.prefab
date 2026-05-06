@@ -80,7 +80,7 @@ SpriteRenderer:
   m_LightmapParameters: {fileID: 0}
   m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: -869460259
-  m_SortingLayer: 1
+  m_SortingLayer: 2
   m_SortingOrder: 0
   m_MaskInteraction: 0
   m_Sprite: {fileID: 21300000, guid: 8647396bfa183d044a370094732b67c4, type: 3}
@@ -119,3 +119,4 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::GunController
   flashPrefab: {fileID: 448729192722140316, guid: 75770807953a61e45a4a074299a7fe33, type: 3}
+  bulletPrefab: {fileID: -6592787178303699396, guid: e8101bcb54789db4bb77c1f36c2aad24, type: 3}

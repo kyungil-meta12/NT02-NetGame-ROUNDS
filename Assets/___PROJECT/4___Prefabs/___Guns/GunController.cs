@@ -5,6 +5,7 @@ using UnityEngine.InputSystem;
 public class GunController : MonoBehaviour
 {
     public PoolObject flashPrefab;
+    public PoolObject bulletPrefab;
 
     private int totalAmmo;
     private int currAmmo;
@@ -31,8 +32,11 @@ public class GunController : MonoBehaviour
             var muzzleFire = MemoryPool.Inst.GetInstance<MuzzleFire>(flashPrefab);
             muzzleFire.Init(firePoint, rotation);
 
+            // 새로운 총알 인스턴스를 메모리 풀로부터 생성
+            var newBullet = MemoryPool.Inst.GetInstance<Bullet>(bulletPrefab);
+            newBullet.Init(firePoint, rotation, 30f);
+
             currFireTime += fireInterval;
-            //currAmmo--;
         }
     }
 
