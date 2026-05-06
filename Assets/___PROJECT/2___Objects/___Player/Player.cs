@@ -12,6 +12,8 @@ public enum GunType {
 
 public class Player : MonoBehaviour
 {
+    #region VALUES
+
     public Transform body;
     public Transform hand;
 
@@ -57,6 +59,8 @@ public class Player : MonoBehaviour
     private Matrix4x4 handMat = new();
     private Matrix4x4 gunMat = new();
     private Matrix4x4 firePointMat = new();
+
+    #endregion
 
     void Awake()
     {
@@ -130,6 +134,7 @@ public class Player : MonoBehaviour
 
     void OnCollisionStay2D(Collision2D c)
     {
+        // 땅 위에 있을 때 점프 가능
         if ((groundMask & (1 << c.gameObject.layer)) != 0) 
         {
             foreach (var contact in c.contacts)
@@ -145,6 +150,7 @@ public class Player : MonoBehaviour
 
     void OnCollisionExit2D(Collision2D c)
     {
+        // 땅에서 떨어지면 점프 불가능
         if ((groundMask & (1 << c.gameObject.layer)) != 0)
         {
             jumpAvailable = false;
