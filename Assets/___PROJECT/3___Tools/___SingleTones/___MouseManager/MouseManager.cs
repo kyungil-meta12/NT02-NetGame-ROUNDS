@@ -7,13 +7,16 @@ using UnityEngine.InputSystem;
 public class MouseManager : MonoBehaviour
 {
     public static MouseManager Inst;
+    [HideInInspector]
     public Vector2 worldPos;
+    [HideInInspector]
     public Vector2 viewPos;
+    [HideInInspector]
     public Vector2 screenPos;
 
     void Awake()
     {
-        if(Inst && Inst != this)
+        if (Inst && Inst != this)
         {
             DestroyImmediate(this);
             return;
@@ -25,9 +28,15 @@ public class MouseManager : MonoBehaviour
 
     void Update()
     {
-        screenPos = Mouse.current.position.ReadValue();
-        worldPos = Camera.main.ScreenToWorldPoint(screenPos);
-        viewPos = Camera.main.ScreenToViewportPoint(screenPos);
+        // 마우스가 스크린 내부에 있을 때만 위치 반영
+        var mousePos = Mouse.current.position.ReadValue();
+        bool isInside = mousePos.x >= 0 && mousePos.x <= Screen.width && mousePos.y >= 0 && mousePos.y <= Screen.height;
+        if(isInside) 
+        {
+            screenPos = mousePos;
+            worldPos = Camera.main.ScreenToWorldPoint(mousePos);
+            viewPos = Camera.main.ScreenToViewportPoint(mousePos);
+        }
     }
 
     /// <summary>
@@ -47,4 +56,4 @@ public class MouseManager : MonoBehaviour
     {
         Cursor.lockState = flag ? CursorLockMode.Locked : CursorLockMode.None;
     }
-}   
+}

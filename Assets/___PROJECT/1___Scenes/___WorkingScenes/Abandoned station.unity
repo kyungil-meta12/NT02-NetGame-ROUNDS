@@ -1327,16 +1327,8 @@ PrefabInstance:
       propertyPath: crossHair
       value: 
       objectReference: {fileID: 622167731}
-    - target: {fileID: 1551536365227942158, guid: b2656e86749174e4981ebc2341ccd9c1, type: 3}
-      propertyPath: m_Name
-      value: ShotPoint
-      objectReference: {fileID: 0}
     - target: {fileID: 4697393781432161188, guid: b2656e86749174e4981ebc2341ccd9c1, type: 3}
       propertyPath: m_Name
-      value: Player
-      objectReference: {fileID: 0}
-    - target: {fileID: 4697393781432161188, guid: b2656e86749174e4981ebc2341ccd9c1, type: 3}
-      propertyPath: m_TagString
       value: Player
       objectReference: {fileID: 0}
     - target: {fileID: 7806958631955041015, guid: b2656e86749174e4981ebc2341ccd9c1, type: 3}

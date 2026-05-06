@@ -12,9 +12,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7aa10b5a07c65d243a281a7f1d59bd42, type: 3}
   m_Name: Shotgun
   m_EditorClassIdentifier: Assembly-CSharp::GunSpecValue
-  gunPositionOffset: {x: 2.112, y: -0.173}
-  handPositionOffset: {x: 1.656, y: -0.402}
-  firePointOffset: {x: 3.504, y: -0.003}
+  gunPositionOffset: {x: 2.06, y: -0.2}
+  handPositionOffset: {x: 1.621, y: -0.447}
+  firePointOffset: {x: 3.397, y: 0}
   globalScale: 0.8
   maxAmmo: 0
   damage: 0

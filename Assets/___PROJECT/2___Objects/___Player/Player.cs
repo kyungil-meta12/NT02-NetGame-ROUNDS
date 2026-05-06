@@ -16,6 +16,7 @@ public class Player : MonoBehaviour
 
     public Transform body;
     public Transform hand;
+    public float playerScale;
 
     [Space(10)]
     public GunType currentGunType;
@@ -25,9 +26,6 @@ public class Player : MonoBehaviour
     public SpriteRenderer faceRenderer;
     public SpriteRenderer bodyRenderer;
     public SpriteRenderer[] handRenderer;
-
-    [Space(10)]
-    public CrossHair crossHair;
 
     [Space(10)]
     public float moveForce;
@@ -100,7 +98,7 @@ public class Player : MonoBehaviour
     {
         moveLeft = Keyboard.current.aKey.isPressed;
         moveRight = Keyboard.current.dKey.isPressed;
-        jumpInput = Keyboard.current.spaceKey.isPressed;
+        jumpInput = jumpAvailable && Keyboard.current.spaceKey.wasPressedThisFrame;
     }
 
     void UpdateMove()
@@ -129,6 +127,7 @@ public class Player : MonoBehaviour
         {
             rb.AddForce(Vector2.up * jumpForce, ForceMode2D.Impulse);
             jumpAvailable = false;
+            jumpInput = false;
         }
     }
 
@@ -173,7 +172,7 @@ public class Player : MonoBehaviour
         mat.Translate(ref gunMat, body.position);
         mat.Rotate(ref gunMat, new Vector3(lookingLeft ? 180f : 0f, 0f, lookingLeft ? -gunRotation : gunRotation));
         mat.Translate(ref gunMat, gunOffset);
-        mat.Scale(ref gunMat, Vector2.one * gunScale);
+        mat.Scale(ref gunMat, Vector2.one * gunScale * playerScale);
         mat.Dispatch(guns[gunIndex].transform, ref gunMat);
     }
 
@@ -184,7 +183,7 @@ public class Player : MonoBehaviour
         mat.Translate(ref handMat, body.position);
         mat.Rotate(ref handMat, new Vector3(lookingLeft ? 180f : 0f, 0f, lookingLeft ? -gunRotation : gunRotation));
         mat.Translate(ref handMat, handOffset);
-        mat.Scale(ref handMat, Vector2.one * 0.7f);
+        mat.Scale(ref handMat, Vector2.one * 0.7f * playerScale);
         mat.Dispatch(hand, ref handMat);
     }
 
@@ -195,8 +194,7 @@ public class Player : MonoBehaviour
         mat.Translate(ref firePointMat, body.position);
         mat.Rotate(ref firePointMat, new Vector3(lookingLeft ? 180f : 0f, 0f, lookingLeft ? -gunRotation : gunRotation));
         mat.Translate(ref firePointMat, firePointOffset);
-        // 크로스헤어에 현재 들고 있는 총의 총구 위치 전달
-        crossHair.InputOriginPoint(mat.WorldPos(ref firePointMat));
+        mat.Scale(ref firePointMat, Vector2.one * playerScale);
     }
 
     // 해당 타입의 총기로 설정
