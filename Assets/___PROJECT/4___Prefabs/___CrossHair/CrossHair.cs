@@ -3,6 +3,7 @@ using UnityEngine;
 
 public class CrossHair : MonoBehaviour
 {
+    public float scale;
     private RectTransform rt;
 
     void Awake()
@@ -13,5 +14,6 @@ public class CrossHair : MonoBehaviour
     void Update()
     {
         rt.position = MouseManager.Inst.screenPos;
+        rt.localScale = Vector2.one * scale;
     }
 }

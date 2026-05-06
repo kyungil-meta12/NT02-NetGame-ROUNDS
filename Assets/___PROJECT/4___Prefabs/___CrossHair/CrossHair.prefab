@@ -168,7 +168,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 21300000, guid: f59da9d595c3149b38d34a51ab038660, type: 3}
+  m_Sprite: {fileID: 21300000, guid: 8c89ed5746a4faa48bb97701cc2f2e35, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -190,3 +190,4 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: eb2aebcc88369bd45b01d0384545b4f8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CrossHair
+  scale: 0.8
