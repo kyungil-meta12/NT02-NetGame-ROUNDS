@@ -46,7 +46,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: eb2aebcc88369bd45b01d0384545b4f8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CrossHair
-  origin: {fileID: 0}
   lineWeight: 0.05
   startOffset: -0.35
   endOffset: 0.5

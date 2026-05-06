@@ -2,34 +2,51 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 using mat = MatrixTransform;
 
+public enum GunType {
+    Pistol = 0,
+    Smg = 1,
+    Shotgun = 2,
+    AR = 3,
+    Sniper = 4
+}
+
 public class Player : MonoBehaviour
 {
     public Transform body;
     public Transform hand;
-    public GameObject gun;
-    public SpriteRenderer faceRenderer;
-    public Sprite[] faces;
-    public Sprite damageFace;
 
     [Space(10)]
+    public GunType currentGunType;
+    public GameObject[] guns;
+
+    [Space(10)]
+    public SpriteRenderer faceRenderer;
     public SpriteRenderer bodyRenderer;
     public SpriteRenderer[] handRenderer;
-    public Sprite[] bodies;
-    public Sprite[] hands;
 
-    
+    [Space(10)]
+    public CrossHair crossHair;
+
+    [Space(10)]
     public float moveForce;
     public float moveSpeed;
     public float jumpForce;
 
-    private Rigidbody2D rb;
-    private float rayCastLength;
+    [Space(10)]
+    public Sprite[] faces;
+    public Sprite damageFace;
+    public Sprite[] bodies;
+    public Sprite[] hands;
 
+    private Rigidbody2D rb;
     private float bodyRotation;
     private float gunRotation;
     private bool lookingLeft;
     private Vector2 gunOffset;
     private Vector2 handOffset;
+    private Vector2 firePointOffset;
+    private int gunIndex = -1;
+    private float gunScale;
 
     private bool moveLeft = false, moveRight = false;
     private bool jumpAvailable = false;
@@ -39,18 +56,11 @@ public class Player : MonoBehaviour
 
     private Matrix4x4 handMat = new();
     private Matrix4x4 gunMat = new();
+    private Matrix4x4 firePointMat = new();
 
     void Awake()
     {
         rb = GetComponent<Rigidbody2D>();
-        
-        // 총 프리펩이 가지는 GunSpec 컴포넌트에서 스펙을 불러와 적용한다
-        var spec = gun.GetComponent<GunSpec>().spec;
-        gunOffset = spec.gunPositionOffset;
-        handOffset = spec.handPositionOffset;
-
-        // 점프 가능 판정에 사용되는 원 콜라이더 반지름
-        rayCastLength = GetComponent<BoxCollider2D>().size.y * 0.5f;
     }
 
     void Start()
@@ -61,7 +71,11 @@ public class Player : MonoBehaviour
         bodyRenderer.sprite = bodies[colorIndex];
         foreach (var hr in handRenderer) { hr.sprite = hands[colorIndex]; }
 
+        // GroundMask 미리 저장
         groundMask = LayerMask.GetMask("Ground");
+
+        // 현재 들고있는 총의 스펙 값을 기반으로 값 지정
+        SetGun(currentGunType);
     }
 
     void Update()
@@ -70,6 +84,7 @@ public class Player : MonoBehaviour
         UpdateBodyRotation();
         UpdateGunRotation();
         UpdateHandRotation();
+        UpdateFirePoint();
     }
 
     void FixedUpdate()
@@ -97,9 +112,8 @@ public class Player : MonoBehaviour
             {
                 rb.AddForce(Vector2.right * moveForce, ForceMode2D.Force);
             }
-
             // 속도 제한
-             rb.linearVelocityX = Mathf.Clamp(rb.linearVelocityX, -moveSpeed, moveSpeed);
+            rb.linearVelocityX = Mathf.Clamp(rb.linearVelocityX, -moveSpeed, moveSpeed);
         }
         else
         {
@@ -153,7 +167,8 @@ public class Player : MonoBehaviour
         mat.Translate(ref gunMat, body.position);
         mat.Rotate(ref gunMat, new Vector3(lookingLeft ? 180f : 0f, 0f, lookingLeft ? -gunRotation : gunRotation));
         mat.Translate(ref gunMat, gunOffset);
-        mat.Dispatch(gun.transform, ref gunMat);
+        mat.Scale(ref gunMat, Vector2.one * gunScale);
+        mat.Dispatch(guns[gunIndex].transform, ref gunMat);
     }
 
     // 손 회전 업데이트
@@ -165,5 +180,37 @@ public class Player : MonoBehaviour
         mat.Translate(ref handMat, handOffset);
         mat.Scale(ref handMat, Vector2.one * 0.7f);
         mat.Dispatch(hand, ref handMat);
+    }
+
+    // 총 화염 위치 업데이트
+    void UpdateFirePoint()
+    {
+        mat.Identity(ref firePointMat);
+        mat.Translate(ref firePointMat, body.position);
+        mat.Rotate(ref firePointMat, new Vector3(lookingLeft ? 180f : 0f, 0f, lookingLeft ? -gunRotation : gunRotation));
+        mat.Translate(ref firePointMat, firePointOffset);
+        // 크로스헤어에 현재 들고 있는 총의 총구 위치 전달
+        crossHair.InputOriginPoint(mat.WorldPos(ref firePointMat));
+    }
+
+    // 해당 타입의 총기로 설정
+    void SetGun(GunType type)
+    {
+        // 이전에 선택했었던 총이 있었다면 해당 총은 비활성화
+        if(gunIndex >= 0) {
+            guns[gunIndex].SetActive(false);
+        }
+
+        // type 파라미터에 따라 다른 총을 선택
+        var selectedGun = guns[(int)type];
+        selectedGun.SetActive(true);
+
+        // 선택된 총이 가지는 GunSpec 컴포넌트에서 스펙을 불러와 적용
+        var spec = selectedGun.GetComponent<GunSpec>().spec;
+        gunIndex = (int)type;
+        gunOffset = spec.gunPositionOffset;
+        handOffset = spec.handPositionOffset;
+        firePointOffset = spec.firePointOffset;
+        gunScale = spec.globalScale;
     }
 }

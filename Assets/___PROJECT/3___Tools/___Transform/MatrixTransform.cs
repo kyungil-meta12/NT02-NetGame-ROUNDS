@@ -1,3 +1,4 @@
+using NUnit.Framework;
 using UnityEngine;
 
 public static class MatrixTransform
@@ -27,14 +28,19 @@ public static class MatrixTransform
         T *= Matrix4x4.Scale((Vector3)val);
     }
 
-    public static void Dispatch(Transform target, ref Matrix4x4 matrix)
+    public static void Dispatch(Transform target, ref Matrix4x4 T)
     {
-        target.position = matrix.GetColumn(3);
-        target.rotation = matrix.rotation; 
+        target.position = T.GetColumn(3);
+        target.rotation = T.rotation; 
         target.localScale = new Vector3(
-            matrix.GetColumn(0).magnitude,
-            matrix.GetColumn(1).magnitude,
-            matrix.GetColumn(2).magnitude
+            T.GetColumn(0).magnitude,
+            T.GetColumn(1).magnitude,
+            T.GetColumn(2).magnitude
         );
+    }
+
+    public static Vector2 WorldPos(ref Matrix4x4 T)
+    {
+        return T.GetColumn(3);
     }
 }
