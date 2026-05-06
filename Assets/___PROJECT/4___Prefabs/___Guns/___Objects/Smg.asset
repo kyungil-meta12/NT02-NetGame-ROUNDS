@@ -19,4 +19,4 @@ MonoBehaviour:
   maxAmmo: 25
   damage: 0
   reloadTime: 0
-  fireInterval: 0.025
+  fireInterval: 0.04

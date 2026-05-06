@@ -78,7 +78,7 @@ SpriteRenderer:
   m_LightmapParameters: {fileID: 0}
   m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: 105235457
-  m_SortingLayer: 2
+  m_SortingLayer: 1
   m_SortingOrder: 0
   m_MaskInteraction: 0
   m_Sprite: {fileID: 8746408966873610207, guid: 06d9cd6cfe4c7dc4aba558a05ef08e41, type: 3}
@@ -173,7 +173,7 @@ SpriteRenderer:
   m_LightmapParameters: {fileID: 0}
   m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: 105235457
-  m_SortingLayer: 2
+  m_SortingLayer: 1
   m_SortingOrder: 0
   m_MaskInteraction: 0
   m_Sprite: {fileID: -5036926067937223484, guid: c22a50d8923c28246aeab3f62daea061, type: 3}
@@ -236,8 +236,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::PlayerController
   body: {fileID: 7639032197809060987}
   hand: {fileID: 6355613767645696734}
-  playerScale: 1
-  currentGunType: 4
+  currentGunType: 3
   guns:
   - {fileID: 1352074937576789351}
   - {fileID: 9083361897307231802}
@@ -454,7 +453,7 @@ SpriteRenderer:
   m_LightmapParameters: {fileID: 0}
   m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: 105235457
-  m_SortingLayer: 2
+  m_SortingLayer: 1
   m_SortingOrder: 0
   m_MaskInteraction: 0
   m_Sprite: {fileID: 21300000, guid: a6d7e7b70dbf5de45ba9e98192a739a9, type: 3}
@@ -581,7 +580,7 @@ SpriteRenderer:
   m_LightmapParameters: {fileID: 0}
   m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: 105235457
-  m_SortingLayer: 2
+  m_SortingLayer: 1
   m_SortingOrder: 0
   m_MaskInteraction: 0
   m_Sprite: {fileID: 8746408966873610207, guid: 06d9cd6cfe4c7dc4aba558a05ef08e41, type: 3}
@@ -866,6 +865,10 @@ PrefabInstance:
     - target: {fileID: 4784922115342619108, guid: 1eb768b66626bea4f9df4af43ec76475, type: 3}
       propertyPath: m_Name
       value: Sniper
+      objectReference: {fileID: 0}
+    - target: {fileID: 4784922115342619108, guid: 1eb768b66626bea4f9df4af43ec76475, type: 3}
+      propertyPath: m_IsActive
+      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

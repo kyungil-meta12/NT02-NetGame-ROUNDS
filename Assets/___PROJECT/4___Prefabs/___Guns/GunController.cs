@@ -7,6 +7,9 @@ public class GunController : MonoBehaviour
     public PoolObject flashPrefab;
     public PoolObject bulletPrefab;
 
+    [HideInInspector]
+    public Vector2 recoilOffset;
+
     private int totalAmmo;
     private int currAmmo;
     private int damage;
@@ -23,6 +26,8 @@ public class GunController : MonoBehaviour
     
     void Update()
     {
+        recoilOffset = Vector2.Lerp(recoilOffset, Vector2.zero, Time.deltaTime * 20f);
+
         // fireInterval 간격으로 발사
         currFireTime -= Time.deltaTime;
         currFireTime = Mathf.Clamp(currFireTime, 0f, 10f);
@@ -35,6 +40,9 @@ public class GunController : MonoBehaviour
             // 새로운 총알 인스턴스를 메모리 풀로부터 생성
             var newBullet = MemoryPool.Inst.GetInstance<Bullet>(bulletPrefab);
             newBullet.Init(firePoint, rotation, 30f);
+
+            // 반동 위치 오프셋 지정
+            recoilOffset.x = 0.5f;
 
             currFireTime += fireInterval;
         }

@@ -51,6 +51,7 @@ public class Player : MonoBehaviour
     private bool moveLeft = false, moveRight = false;
     private bool jumpAvailable = false;
     private bool jumpInput = false;
+    private Vector2 recoilOffset;
 
     private LayerMask groundMask;
 
@@ -84,8 +85,8 @@ public class Player : MonoBehaviour
     {
         InputControl();
         UpdateBodyRotation();
-        UpdateGunRotation();
-        UpdateHandRotation();
+        UpdateGunPosition();
+        UpdateHandPosition();
         UpdateFirePoint();
     }
 
@@ -167,26 +168,27 @@ public class Player : MonoBehaviour
         body.rotation = Quaternion.Euler(new Vector3(0f, bodyRotation, 0f));
     }
 
-    // 총 회전 업데이트
-    void UpdateGunRotation()
+    // 총 위치 업데이트
+    void UpdateGunPosition()
     {
         gunRotation = Mathf.Rad2Deg * Mathf.Atan2(MouseManager.Inst.worldPos.y - body.position.y, MouseManager.Inst.worldPos.x - body.position.x);
+        recoilOffset = gunController.recoilOffset;
         mat.Identity(ref gunMat);
         mat.Translate(ref gunMat, body.position);
         mat.Rotate(ref gunMat, new Vector3(lookingLeft ? 180f : 0f, 0f, lookingLeft ? -gunRotation : gunRotation));
-        mat.Translate(ref gunMat, gunOffset);
+        mat.Translate(ref gunMat, gunOffset - recoilOffset);
         mat.Scale(ref gunMat, Vector2.one * gunScale);
         mat.Dispatch(guns[gunIndex].transform, ref gunMat);
         gunController.InputRotation(gunRotation);
     }
 
-    // 손 회전 업데이트
-    void UpdateHandRotation()
+    // 손 위치 업데이트
+    void UpdateHandPosition()
     {
         mat.Identity(ref handMat);
         mat.Translate(ref handMat, body.position);
         mat.Rotate(ref handMat, new Vector3(lookingLeft ? 180f : 0f, 0f, lookingLeft ? -gunRotation : gunRotation));
-        mat.Translate(ref handMat, handOffset);
+        mat.Translate(ref handMat, handOffset - recoilOffset);
         mat.Scale(ref handMat, Vector2.one * 0.7f);
         mat.Dispatch(hand, ref handMat);
     }
