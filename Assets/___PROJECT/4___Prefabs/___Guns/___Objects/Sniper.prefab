@@ -11,6 +11,7 @@ GameObject:
   - component: {fileID: 1047457796632729120}
   - component: {fileID: 339188147510452177}
   - component: {fileID: 4967083627642474376}
+  - component: {fileID: -5615685134198770625}
   m_Layer: 0
   m_Name: Sniper
   m_TagString: Untagged
@@ -105,3 +106,16 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::GunSpec
   spec: {fileID: 11400000, guid: 3c3fdb44a76c0af4bac413945c6e435f, type: 2}
+--- !u!114 &-5615685134198770625
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4784922115342619108}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ef532b88a78bdc4468bc2ba429671918, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::GunController
+  flashPrefab: {fileID: 448729192722140316, guid: 75770807953a61e45a4a074299a7fe33, type: 3}

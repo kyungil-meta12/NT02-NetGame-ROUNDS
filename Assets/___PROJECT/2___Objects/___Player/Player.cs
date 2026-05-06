@@ -38,6 +38,7 @@ public class Player : MonoBehaviour
     public Sprite[] hands;
 
     private Rigidbody2D rb;
+    private GunController gunController;
     private float bodyRotation;
     private float gunRotation;
     private bool lookingLeft;
@@ -81,7 +82,7 @@ public class Player : MonoBehaviour
 
     void Update()
     {
-        InputMove();
+        InputControl();
         UpdateBodyRotation();
         UpdateGunRotation();
         UpdateHandRotation();
@@ -93,11 +94,14 @@ public class Player : MonoBehaviour
         UpdateMove();
     }
 
-    void InputMove()
+    void InputControl()
     {
         moveLeft = Keyboard.current.aKey.isPressed;
         moveRight = Keyboard.current.dKey.isPressed;
         jumpInput = jumpAvailable && Keyboard.current.spaceKey.wasPressedThisFrame;
+
+        // 총 방아쇠 당기기/놓기
+        gunController.PullTrigger(Mouse.current.leftButton.isPressed);
     }
 
     void UpdateMove()
@@ -173,6 +177,7 @@ public class Player : MonoBehaviour
         mat.Translate(ref gunMat, gunOffset);
         mat.Scale(ref gunMat, Vector2.one * gunScale);
         mat.Dispatch(guns[gunIndex].transform, ref gunMat);
+        gunController.InputRotation(gunRotation);
     }
 
     // 손 회전 업데이트
@@ -193,6 +198,7 @@ public class Player : MonoBehaviour
         mat.Translate(ref firePointMat, body.position);
         mat.Rotate(ref firePointMat, new Vector3(lookingLeft ? 180f : 0f, 0f, lookingLeft ? -gunRotation : gunRotation));
         mat.Translate(ref firePointMat, firePointOffset);
+        gunController.InputFirePoint(mat.WorldPos(ref firePointMat));
     }
 
     // 해당 타입의 총기로 설정
@@ -214,5 +220,9 @@ public class Player : MonoBehaviour
         handOffset = spec.handPositionOffset;
         firePointOffset = spec.firePointOffset;
         gunScale = spec.globalScale;
+
+        // 총의 GunController의 값 설정
+        gunController = selectedGun.GetComponent<GunController>();
+        gunController.InputSpec(spec);
     }
 }

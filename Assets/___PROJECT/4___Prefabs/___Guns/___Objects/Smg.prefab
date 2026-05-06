@@ -11,6 +11,7 @@ GameObject:
   - component: {fileID: 9067751832621056938}
   - component: {fileID: 6693743135739291963}
   - component: {fileID: -8222366040720842421}
+  - component: {fileID: 1652806840762391688}
   m_Layer: 0
   m_Name: Smg
   m_TagString: Untagged
@@ -105,3 +106,16 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::GunSpec
   spec: {fileID: 11400000, guid: 1f45b0bc0e524bf4a8276f45652adba7, type: 2}
+--- !u!114 &1652806840762391688
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1782684027742844280}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ef532b88a78bdc4468bc2ba429671918, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::GunController
+  flashPrefab: {fileID: 448729192722140316, guid: 75770807953a61e45a4a074299a7fe33, type: 3}

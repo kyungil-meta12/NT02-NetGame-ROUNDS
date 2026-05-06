@@ -44,11 +44,14 @@ TagManager:
   - name: Default
     uniqueID: 0
     locked: 0
+  - name: Player
+    uniqueID: 105235457
+    locked: 0
   - name: Weapon
     uniqueID: 3425507037
     locked: 0
-  - name: Player
-    uniqueID: 105235457
+  - name: Particle
+    uniqueID: 551551581
     locked: 0
   - name: WorldUI
     uniqueID: 1525005273

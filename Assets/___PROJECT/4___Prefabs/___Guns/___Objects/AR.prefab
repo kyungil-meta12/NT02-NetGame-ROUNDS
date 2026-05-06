@@ -11,6 +11,7 @@ GameObject:
   - component: {fileID: 7760348154073616851}
   - component: {fileID: 4664240533125843371}
   - component: {fileID: 5034438915514178241}
+  - component: {fileID: 4675381676688673104}
   m_Layer: 0
   m_Name: AR
   m_TagString: Untagged
@@ -105,3 +106,16 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::GunSpec
   spec: {fileID: 11400000, guid: 02e377b0487551842ac44619ecc1c567, type: 2}
+--- !u!114 &4675381676688673104
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 301320968163927846}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ef532b88a78bdc4468bc2ba429671918, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::GunController
+  flashPrefab: {fileID: 448729192722140316, guid: 75770807953a61e45a4a074299a7fe33, type: 3}

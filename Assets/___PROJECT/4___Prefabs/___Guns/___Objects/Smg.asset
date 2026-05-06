@@ -16,7 +16,7 @@ MonoBehaviour:
   handPositionOffset: {x: 1.249, y: -0.314}
   firePointOffset: {x: 2.929, y: 0}
   globalScale: 1
-  maxAmmo: 0
+  maxAmmo: 25
   damage: 0
   reloadTime: 0
-  fireInterval: 0
+  fireInterval: 0.025
