@@ -20,5 +20,5 @@ MonoBehaviour:
   damage: 0
   ammoSpeed: 25
   reloadTime: 1
-  fireInterval: 0.04
+  fireInterval: 0.1
   recoilRecoverySpeed: 25

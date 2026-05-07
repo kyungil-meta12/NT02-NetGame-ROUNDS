@@ -7,15 +7,13 @@ public class GunController : MonoBehaviour
     public PoolObject flashPrefab;
     public PoolObject bulletPrefab;
     public float multiShotSpread; // 여러발 발사 시 흩어지는 각도
+    public int multiShellCount; // 한 번에 여러발을 발사할 때 발사되는 총알 개수
     
     [HideInInspector]
     private GunType gunType; // 현재 사용 중인 총 타입
 
     [HideInInspector]
     public bool isMultiShot = false; // 샷건 등의 한 번에 여러발을 발사해야할 경우 활성화
-
-    [HideInInspector]
-    public int multiShellCount = 4; // 한 번에 여러발을 발사할 때 발사되는 총알 개수 // 기본 4개
 
     [HideInInspector]
     public Vector2 recoilOffset; // 렌더링으로 표현되는 반동 offset 값
