@@ -14,8 +14,17 @@ public class Player : MonoBehaviour
 {
     #region VALUES
 
+    public bool controllable = true;
+
     public Transform body;
     public Transform hand;
+
+    [Space(10)]
+    public GameObject deathParticlePrefab;
+
+    [Space(10)]
+    public int totalHP;
+    private int currHP;
 
     [Space(10)]
     public GunType currentGunType;
@@ -37,6 +46,10 @@ public class Player : MonoBehaviour
     public Sprite[] bodies;
     public Sprite[] hands;
 
+    [Space(10)]
+    public float damageFaceDuration;
+    private float currDamageFaceTime;
+
     private Rigidbody2D rb;
     private GunController gunController;
     private float bodyRotation;
@@ -54,6 +67,7 @@ public class Player : MonoBehaviour
     private Vector2 recoilOffset;
 
     private int groundLayer;
+    private int faceIndex;
 
     private Matrix4x4 handMat = new();
     private Matrix4x4 gunMat = new();
@@ -64,17 +78,19 @@ public class Player : MonoBehaviour
     void Awake()
     {
         rb = GetComponent<Rigidbody2D>();
+        currHP = totalHP;
     }
 
     void Start()
     {
         // 시작 시 외형 랜덤 지정(타 플레이어와 겹치지 않도록)
-        faceRenderer.sprite = faces[Random.Range(0, faces.Length)];
+        faceIndex = Random.Range(0, faces.Length);
+        faceRenderer.sprite = faces[faceIndex];
         int colorIndex = Random.Range(0, hands.Length);
         bodyRenderer.sprite = bodies[colorIndex];
         foreach (var hr in handRenderer) { hr.sprite = hands[colorIndex]; }
 
-        // GroundMask 미리 저장
+        // 땅 레이어 저장
         groundLayer = LayerMask.NameToLayer("Ground");
 
         // 현재 들고있는 총의 스펙 값을 기반으로 값 지정
@@ -83,11 +99,15 @@ public class Player : MonoBehaviour
 
     void Update()
     {
-        InputControl();
+        if (controllable) 
+        {
+            InputControl();
+        }
         UpdateBodyRotation();
         UpdateGunPosition();
         UpdateHandPosition();
         UpdateFirePoint();
+        UpdateDamageFace();
     }
 
     void FixedUpdate()
@@ -100,6 +120,7 @@ public class Player : MonoBehaviour
         moveLeft = Keyboard.current.aKey.isPressed;
         moveRight = Keyboard.current.dKey.isPressed;
         jumpInput = jumpAvailable && Keyboard.current.spaceKey.wasPressedThisFrame;
+        gunRotation = Mathf.Rad2Deg * Mathf.Atan2(MouseManager.Inst.worldPos.y - body.position.y, MouseManager.Inst.worldPos.x - body.position.x);
 
         // 총 방아쇠 당기기/놓기
         gunController.PullTrigger(Mouse.current.leftButton.isPressed);
@@ -110,14 +131,7 @@ public class Player : MonoBehaviour
         // 좌우 이동
         if(moveLeft != moveRight)
         {
-            if(moveLeft)
-            {
-                rb.AddForce(Vector2.left * moveForce, ForceMode2D.Force);
-            }
-            else if(moveRight)
-            {
-                rb.AddForce(Vector2.right * moveForce, ForceMode2D.Force);
-            }
+            rb.AddForce(new Vector2(moveLeft ? -moveForce : moveForce, 0f), ForceMode2D.Force);
             // 속도 제한
             rb.linearVelocityX = Mathf.Clamp(rb.linearVelocityX, -moveSpeed, moveSpeed);
         }
@@ -160,6 +174,23 @@ public class Player : MonoBehaviour
         }
     }
 
+    // 대미지 부여
+    public void GiveDamage(int dmg)
+    {
+        currHP -= dmg;
+        currHP = Mathf.Clamp(currHP, 0, totalHP);
+
+        // 대미지를 받은 표정으로 변경한다
+        currDamageFaceTime = damageFaceDuration;
+
+        // 체력이 완전히 떨어지게 되면 파티클을 생성한 후 삭제된다
+        if(currHP == 0)
+        {
+            Instantiate(deathParticlePrefab, transform.position,Quaternion.identity);
+            Destroy(gameObject);
+        }
+    }
+
     // 몸통 좌우 회전 업데이트
     void UpdateBodyRotation()
     {
@@ -171,7 +202,6 @@ public class Player : MonoBehaviour
     // 총 위치 업데이트
     void UpdateGunPosition()
     {
-        gunRotation = Mathf.Rad2Deg * Mathf.Atan2(MouseManager.Inst.worldPos.y - body.position.y, MouseManager.Inst.worldPos.x - body.position.x);
         recoilOffset = gunController.recoilOffset;
         mat.Identity(ref gunMat);
         mat.Translate(ref gunMat, body.position);
@@ -201,6 +231,26 @@ public class Player : MonoBehaviour
         mat.Rotate(ref firePointMat, new Vector3(lookingLeft ? 180f : 0f, 0f, lookingLeft ? -gunRotation : gunRotation));
         mat.Translate(ref firePointMat, firePointOffset);
         gunController.InputFirePoint(mat.WorldPos(ref firePointMat));
+    }
+
+    // 대미지를 받을 시 dmageFaceDuration 동안 대미지를 입는 표정을 짓는다
+    void UpdateDamageFace()
+    {
+        if (currDamageFaceTime > 0f)
+        {
+            currDamageFaceTime -= Time.deltaTime;
+            if (faceRenderer.sprite != damageFace)
+            {
+                faceRenderer.sprite = damageFace;
+            }
+        }
+        else
+        {
+            if (faceRenderer.sprite != faces[faceIndex])
+            {
+                faceRenderer.sprite = faces[faceIndex];
+            }
+        }
     }
 
     // 해당 타입의 총기로 설정
