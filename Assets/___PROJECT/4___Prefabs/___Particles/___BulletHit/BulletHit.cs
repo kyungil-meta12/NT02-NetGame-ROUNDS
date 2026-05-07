@@ -17,9 +17,10 @@ public class BulletHit : PoolObject
         }
     }
 
-    public void Init(Vector2 point)
+    public void Init(Vector2 point, float rotation)
     {
         transform.position = point;
+        transform.rotation = Quaternion.Euler(0f, 0f, rotation);
         particle.Simulate(0f, true, true);
         particle.Play();
     }
