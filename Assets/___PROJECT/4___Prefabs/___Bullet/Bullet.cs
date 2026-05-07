@@ -5,6 +5,7 @@ public class Bullet : PoolObject
     public PoolObject bulletHitPrefab;
     private Rigidbody2D rb;
     private Vector2 startPoint;
+    private LayerMask layerMask;
 
     void Awake()
     {
@@ -24,6 +25,7 @@ public class Bullet : PoolObject
     // 충돌하면 인스턴스 반환
     void OnCollisionEnter2D(Collision2D collision)
     {
+
         // 새로운 충돌 파티클 인스턴스를 메모리 풀로부터 생성
         var newHit = MemoryPool.Inst.GetInstance<BulletHit>(bulletHitPrefab);
         newHit.Init(collision.contacts[0].point);

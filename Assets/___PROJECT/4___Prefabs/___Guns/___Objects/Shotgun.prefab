@@ -120,3 +120,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::GunController
   flashPrefab: {fileID: 448729192722140316, guid: 75770807953a61e45a4a074299a7fe33, type: 3}
   bulletPrefab: {fileID: -6592787178303699396, guid: e8101bcb54789db4bb77c1f36c2aad24, type: 3}
+  recoilOffset: {x: 0, y: 0}
+  isMultiShot: 0
+  multiShellCount: 4
+  multiShotSpread: 15

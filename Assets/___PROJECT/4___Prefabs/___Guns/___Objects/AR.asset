@@ -18,5 +18,7 @@ MonoBehaviour:
   globalScale: 0.8
   maxAmmo: 30
   damage: 0
-  reloadTime: 0
+  ammoSpeed: 30
+  reloadTime: 2
   fireInterval: 0.08
+  recoilRecoverySpeed: 20

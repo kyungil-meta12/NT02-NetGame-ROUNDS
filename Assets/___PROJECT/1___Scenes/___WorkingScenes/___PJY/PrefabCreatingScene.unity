@@ -599,7 +599,11 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 278434255957157911, guid: b2656e86749174e4981ebc2341ccd9c1, type: 3}
       propertyPath: currentGunType
-      value: 1
+      value: 4
+      objectReference: {fileID: 0}
+    - target: {fileID: 3657677795666846426, guid: b2656e86749174e4981ebc2341ccd9c1, type: 3}
+      propertyPath: m_IsActive
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 4697393781432161188, guid: b2656e86749174e4981ebc2341ccd9c1, type: 3}
       propertyPath: m_Name

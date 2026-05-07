@@ -225,6 +225,6 @@ public class Player : MonoBehaviour
 
         // 총의 GunController의 값 설정
         gunController = selectedGun.GetComponent<GunController>();
-        gunController.InputSpec(spec);
+        gunController.InputSpec(spec, type);
     }
 }

@@ -11,6 +11,8 @@ public class GunSpecValue : ScriptableObject
     [Space(10)]
     public int maxAmmo;
     public int damage;
+    public float ammoSpeed;
     public float reloadTime;
     public float fireInterval;
+    public float recoilRecoverySpeed;
 }
