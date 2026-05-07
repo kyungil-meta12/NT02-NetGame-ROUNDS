@@ -1,8 +1,10 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
+using Unity.Netcode;
 using mat = MatrixTransform;
 
-public enum GunType {
+public enum GunType
+{
     Pistol = 0,
     Smg = 1,
     Shotgun = 2,
@@ -10,7 +12,7 @@ public enum GunType {
     Sniper = 4
 }
 
-public class Player : MonoBehaviour
+public class Player : NetworkBehaviour
 {
     #region VALUES
 
@@ -53,38 +55,73 @@ public class Player : MonoBehaviour
     private bool jumpInput = false;
     private Vector2 recoilOffset;
 
-    private int groundLayer;
+    private LayerMask groundMask;
 
     private Matrix4x4 handMat = new();
     private Matrix4x4 gunMat = new();
     private Matrix4x4 firePointMat = new();
 
+    // 네트워크 동기화를 위한 변수 (총기 회전값 전달용)
+    private NetworkVariable<float> netGunRotaion = new NetworkVariable<float>(0, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Owner);
+
     #endregion
+
 
     void Awake()
     {
         rb = GetComponent<Rigidbody2D>();
     }
 
-    void Start()
+    // 네트워크 오브젝트가 생성될 때 실행되는 초기화 함수
+    public override void OnNetworkSpawn()
     {
-        // 시작 시 외형 랜덤 지정(타 플레이어와 겹치지 않도록)
+        // 시작 시 외형 랜덤 지정 (구조 유지)
         faceRenderer.sprite = faces[Random.Range(0, faces.Length)];
         int colorIndex = Random.Range(0, hands.Length);
         bodyRenderer.sprite = bodies[colorIndex];
-        foreach (var hr in handRenderer) { hr.sprite = hands[colorIndex]; }
+        foreach (var hr in handRenderer)
+        {
+            hr.sprite = hands[colorIndex];
+        }
 
         // GroundMask 미리 저장
-        groundLayer = LayerMask.NameToLayer("Ground");
+        groundMask = LayerMask.GetMask("Ground");
 
         // 현재 들고있는 총의 스펙 값을 기반으로 값 지정
         SetGun(currentGunType);
+
+        // 내 캐릭터가 아니면 물리 연산을 비활성화하여 위치 동기화 간섭 방지
+        if (!IsOwner)
+        {
+            rb.simulated = false;
+        }
     }
 
     void Update()
     {
-        InputControl();
-        UpdateBodyRotation();
+        if (IsOwner)
+        {
+            InputControl();
+            UpdateBodyRotation();
+
+            // 내 총의 회전값을 네트워크 변수에 기록 (타인에게 전송됨)
+            netGunRotaion.Value = gunRotation;
+        }
+        else
+        {
+            // [타인 캐릭터 동기화]
+            // 네트워크로부터 회전값을 받아와서 적용
+            gunRotation = netGunRotaion.Value;
+
+            // 받아온 회전값으로 바라보는 방향 판정
+            lookingLeft = (gunRotation > 90 || gunRotation < -90);
+
+            // 타인의 몸통 회전 부드럽게 동기화
+            bodyRotation = Mathf.Lerp(bodyRotation, lookingLeft ? 180f : 0f, Time.deltaTime * 5f);
+            body.rotation = Quaternion.Euler(new Vector3(0f, bodyRotation, 0f));
+        }
+
+        // 행렬 연산은 모든 클라이언트에서 매 프레임 실행 (부드러운 움직임)
         UpdateGunPosition();
         UpdateHandPosition();
         UpdateFirePoint();
@@ -92,6 +129,8 @@ public class Player : MonoBehaviour
 
     void FixedUpdate()
     {
+        // 물리 이동은 내 캐릭터(Owner)만 수행
+        if (!IsOwner) return;
         UpdateMove();
     }
 
@@ -99,22 +138,48 @@ public class Player : MonoBehaviour
     {
         moveLeft = Keyboard.current.aKey.isPressed;
         moveRight = Keyboard.current.dKey.isPressed;
-        jumpInput = jumpAvailable && Keyboard.current.spaceKey.wasPressedThisFrame;
+
+        // 점프 입력 체크
+        if (jumpAvailable && Keyboard.current.spaceKey.wasPressedThisFrame)
+        {
+            jumpInput = true;
+        }
 
         // 총 방아쇠 당기기/놓기
-        gunController.PullTrigger(Mouse.current.leftButton.isPressed);
+        if (gunController != null)
+        {
+            gunController.PullTrigger(Mouse.current.leftButton.isPressed);
+        }
+    }
+
+    // --- ServerRpc : 클라이언트가 서버에 발사 요청 ---
+    [ServerRpc]
+    void RequestFireServerRpc()
+    {
+        // 서버가 모든 클라이언트에게 발사 실행 명령
+        ExecuteFireClientRpc();
+    }
+
+    // --- ClientRpc : 서버가 모든 클라이언트에게 발사 시각화 명령 ---
+    [ClientRpc]
+    void ExecuteFireClientRpc()
+    {
+        // 내 캐릭터가 아닐 때만 수동으로 이펙트를 실행하거나, 
+        // 전체에게 사운드/이펙트를 출력하는 로직을 여기에 넣습니다.
+        Debug.Log($"Player {OwnerClientId} Fired!");
+        // 예: gunController.ShootEffect(); 
     }
 
     void UpdateMove()
     {
         // 좌우 이동
-        if(moveLeft != moveRight)
+        if (moveLeft != moveRight)
         {
-            if(moveLeft)
+            if (moveLeft)
             {
                 rb.AddForce(Vector2.left * moveForce, ForceMode2D.Force);
             }
-            else if(moveRight)
+            else if (moveRight)
             {
                 rb.AddForce(Vector2.right * moveForce, ForceMode2D.Force);
             }
@@ -127,7 +192,7 @@ public class Player : MonoBehaviour
         }
 
         // 점프 // 땅에 닿으면 점프 가능
-        if(jumpInput)
+        if (jumpAvailable && jumpInput)
         {
             rb.AddForce(Vector2.up * jumpForce, ForceMode2D.Impulse);
             jumpAvailable = false;
@@ -137,8 +202,10 @@ public class Player : MonoBehaviour
 
     void OnCollisionStay2D(Collision2D c)
     {
+        if (!IsOwner) return;
+
         // 땅 위에 있을 때 점프 가능
-        if (c.collider.gameObject.layer == groundLayer) 
+        if ((groundMask & (1 << c.gameObject.layer)) != 0)
         {
             foreach (var contact in c.contacts)
             {
@@ -153,8 +220,10 @@ public class Player : MonoBehaviour
 
     void OnCollisionExit2D(Collision2D c)
     {
+        if (!IsOwner) return;
+
         // 땅에서 떨어지면 점프 불가능
-        if (c.collider.gameObject.layer == groundLayer)
+        if ((groundMask & (1 << c.gameObject.layer)) != 0)
         {
             jumpAvailable = false;
         }
@@ -207,7 +276,8 @@ public class Player : MonoBehaviour
     void SetGun(GunType type)
     {
         // 이전에 선택했었던 총이 있었다면 해당 총은 비활성화
-        if(gunIndex >= 0) {
+        if (gunIndex >= 0)
+        {
             guns[gunIndex].SetActive(false);
         }
 
