@@ -233,9 +233,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 68be032130fc9734a93bbe908d45d514, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerController
+  controllable: 1
   body: {fileID: 7639032197809060987}
   hand: {fileID: 6355613767645696734}
-  currentGunType: 3
+  deathParticlePrefab: {fileID: 8885057346391128513, guid: 7ec5935a6ff43cd41845c47d81958b64, type: 3}
+  totalHP: 100
+  currentGunType: 0
   guns:
   - {fileID: 1352074937576789351}
   - {fileID: 9083361897307231802}
@@ -275,6 +278,7 @@ MonoBehaviour:
   - {fileID: -4050110087270917399, guid: 770e1a2629d6f4a4380a8eeb6516c190, type: 3}
   - {fileID: 60602558200826325, guid: de7a928ba52bfa045b0f23c67645e0ce, type: 3}
   - {fileID: 4451844795045349985, guid: fc54daeb37342eb408a9af7bfa3de12b, type: 3}
+  damageFaceDuration: 0.5
 --- !u!50 &6068838659610345177
 Rigidbody2D:
   serializedVersion: 5

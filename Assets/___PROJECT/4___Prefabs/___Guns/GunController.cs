@@ -102,6 +102,6 @@ public class GunController : MonoBehaviour
     private void CreateAmmo(float rotation)
     {
         var newBullet = MemoryPool.Inst.GetInstance<Bullet>(bulletPrefab);
-        newBullet.Init(firePoint, rotation, ammoSpeed);
+        newBullet.Init(firePoint, rotation, ammoSpeed, damage);
     }
 }

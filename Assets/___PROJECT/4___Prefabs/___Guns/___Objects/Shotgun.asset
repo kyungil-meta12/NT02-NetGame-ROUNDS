@@ -17,7 +17,7 @@ MonoBehaviour:
   firePointOffset: {x: 3.397, y: 0}
   globalScale: 0.8
   maxAmmo: 6
-  damage: 0
+  damage: 10
   ammoSpeed: 20
   reloadTime: 2
   fireInterval: 0.8

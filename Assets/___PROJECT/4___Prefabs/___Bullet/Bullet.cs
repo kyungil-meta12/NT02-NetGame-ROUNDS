@@ -7,6 +7,7 @@ public class Bullet : PoolObject
 
     private Rigidbody2D rb;
     private Vector2 startPoint;
+    private int damage;
     private int groundLayer;
     private int playerLayer;
 
@@ -43,12 +44,12 @@ public class Bullet : PoolObject
             newHit.Init(c.contacts[0].point, degrees);
         }
 
-        // 사람 오브젝트와 충돌한 경우 피 파티클 생성
+        // 사람 오브젝트와 충돌한 경우 대미지를 가하고 파티클을 생성항 후 삭제
         else if(otherLayer == playerLayer) 
         {
-            // 새로운 피 파티클 인스턴스를 메모리 풀로부터 생성
+            c.collider.gameObject.GetComponent<Player>().GiveDamage(damage);
             var newHit = MemoryPool.Inst.GetInstance<PlayerHit>(playerHitPrefab);
-            newHit.Init(c.contacts[0].point, degrees);
+            newHit.Init(c.contacts[0].point, 0f);
         }
         
         ReturnInstance();
@@ -62,7 +63,7 @@ public class Bullet : PoolObject
         return new Vector2(x, y);
     }
 
-    public void Init(Vector2 firePoint, float rotation, float speed)
+    public void Init(Vector2 firePoint, float rotation, float speed, int dmg)
     {
         var direction = GetDirectionFromAngle(rotation);
         transform.position = firePoint;
@@ -72,5 +73,6 @@ public class Bullet : PoolObject
         rb.linearVelocity = direction * speed;
         rb.angularVelocity = 0f;
         startPoint = firePoint;
+        damage = dmg;
     }
 }

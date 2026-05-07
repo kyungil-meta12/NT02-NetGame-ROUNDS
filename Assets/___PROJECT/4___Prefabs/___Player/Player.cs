@@ -1,10 +1,8 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
-using Unity.Netcode;
 using mat = MatrixTransform;
 
-public enum GunType
-{
+public enum GunType {
     Pistol = 0,
     Smg = 1,
     Shotgun = 2,
@@ -12,12 +10,21 @@ public enum GunType
     Sniper = 4
 }
 
-public class Player : NetworkBehaviour
+public class Player : MonoBehaviour
 {
     #region VALUES
 
+    public bool controllable = true;
+
     public Transform body;
     public Transform hand;
+
+    [Space(10)]
+    public GameObject deathParticlePrefab;
+
+    [Space(10)]
+    public int totalHP;
+    private int currHP;
 
     [Space(10)]
     public GunType currentGunType;
@@ -39,6 +46,10 @@ public class Player : NetworkBehaviour
     public Sprite[] bodies;
     public Sprite[] hands;
 
+    [Space(10)]
+    public float damageFaceDuration;
+    private float currDamageFaceTime;
+
     private Rigidbody2D rb;
     private GunController gunController;
     private float bodyRotation;
@@ -55,82 +66,52 @@ public class Player : NetworkBehaviour
     private bool jumpInput = false;
     private Vector2 recoilOffset;
 
-    private LayerMask groundMask;
+    private int groundLayer;
+    private int faceIndex;
 
     private Matrix4x4 handMat = new();
     private Matrix4x4 gunMat = new();
     private Matrix4x4 firePointMat = new();
 
-    // 네트워크 동기화를 위한 변수 (총기 회전값 전달용)
-    private NetworkVariable<float> netGunRotaion = new NetworkVariable<float>(0, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Owner);
-
     #endregion
-
 
     void Awake()
     {
         rb = GetComponent<Rigidbody2D>();
+        currHP = totalHP;
     }
 
-    // 네트워크 오브젝트가 생성될 때 실행되는 초기화 함수
-    public override void OnNetworkSpawn()
+    void Start()
     {
-        // 시작 시 외형 랜덤 지정 (구조 유지)
-        faceRenderer.sprite = faces[Random.Range(0, faces.Length)];
+        // 시작 시 외형 랜덤 지정(타 플레이어와 겹치지 않도록)
+        faceIndex = Random.Range(0, faces.Length);
+        faceRenderer.sprite = faces[faceIndex];
         int colorIndex = Random.Range(0, hands.Length);
         bodyRenderer.sprite = bodies[colorIndex];
-        foreach (var hr in handRenderer)
-        {
-            hr.sprite = hands[colorIndex];
-        }
+        foreach (var hr in handRenderer) { hr.sprite = hands[colorIndex]; }
 
-        // GroundMask 미리 저장
-        groundMask = LayerMask.GetMask("Ground");
+        // 땅 레이어 저장
+        groundLayer = LayerMask.NameToLayer("Ground");
 
         // 현재 들고있는 총의 스펙 값을 기반으로 값 지정
         SetGun(currentGunType);
-
-        // 내 캐릭터가 아니면 물리 연산을 비활성화하여 위치 동기화 간섭 방지
-        if (!IsOwner)
-        {
-            rb.simulated = false;
-        }
     }
 
     void Update()
     {
-        if (IsOwner)
+        if (controllable) 
         {
             InputControl();
-            UpdateBodyRotation();
-
-            // 내 총의 회전값을 네트워크 변수에 기록 (타인에게 전송됨)
-            netGunRotaion.Value = gunRotation;
         }
-        else
-        {
-            // [타인 캐릭터 동기화]
-            // 네트워크로부터 회전값을 받아와서 적용
-            gunRotation = netGunRotaion.Value;
-
-            // 받아온 회전값으로 바라보는 방향 판정
-            lookingLeft = (gunRotation > 90 || gunRotation < -90);
-
-            // 타인의 몸통 회전 부드럽게 동기화
-            bodyRotation = Mathf.Lerp(bodyRotation, lookingLeft ? 180f : 0f, Time.deltaTime * 5f);
-            body.rotation = Quaternion.Euler(new Vector3(0f, bodyRotation, 0f));
-        }
-
-        // 행렬 연산은 모든 클라이언트에서 매 프레임 실행 (부드러운 움직임)
+        UpdateBodyRotation();
         UpdateGunPosition();
         UpdateHandPosition();
         UpdateFirePoint();
+        UpdateDamageFace();
     }
 
     void FixedUpdate()
     {
-        // 물리 이동은 내 캐릭터(Owner)만 수행
-        if (!IsOwner) return;
         UpdateMove();
     }
 
@@ -138,51 +119,19 @@ public class Player : NetworkBehaviour
     {
         moveLeft = Keyboard.current.aKey.isPressed;
         moveRight = Keyboard.current.dKey.isPressed;
-
-        // 점프 입력 체크
-        if (jumpAvailable && Keyboard.current.spaceKey.wasPressedThisFrame)
-        {
-            jumpInput = true;
-        }
+        jumpInput = jumpAvailable && Keyboard.current.spaceKey.wasPressedThisFrame;
+        gunRotation = Mathf.Rad2Deg * Mathf.Atan2(MouseManager.Inst.worldPos.y - body.position.y, MouseManager.Inst.worldPos.x - body.position.x);
 
         // 총 방아쇠 당기기/놓기
-        if (gunController != null)
-        {
-            gunController.PullTrigger(Mouse.current.leftButton.isPressed);
-        }
-    }
-
-    // --- ServerRpc : 클라이언트가 서버에 발사 요청 ---
-    [ServerRpc]
-    void RequestFireServerRpc()
-    {
-        // 서버가 모든 클라이언트에게 발사 실행 명령
-        ExecuteFireClientRpc();
-    }
-
-    // --- ClientRpc : 서버가 모든 클라이언트에게 발사 시각화 명령 ---
-    [ClientRpc]
-    void ExecuteFireClientRpc()
-    {
-        // 내 캐릭터가 아닐 때만 수동으로 이펙트를 실행하거나, 
-        // 전체에게 사운드/이펙트를 출력하는 로직을 여기에 넣습니다.
-        Debug.Log($"Player {OwnerClientId} Fired!");
-        // 예: gunController.ShootEffect(); 
+        gunController.PullTrigger(Mouse.current.leftButton.isPressed);
     }
 
     void UpdateMove()
     {
         // 좌우 이동
-        if (moveLeft != moveRight)
+        if(moveLeft != moveRight)
         {
-            if (moveLeft)
-            {
-                rb.AddForce(Vector2.left * moveForce, ForceMode2D.Force);
-            }
-            else if (moveRight)
-            {
-                rb.AddForce(Vector2.right * moveForce, ForceMode2D.Force);
-            }
+            rb.AddForce(new Vector2(moveLeft ? -moveForce : moveForce, 0f), ForceMode2D.Force);
             // 속도 제한
             rb.linearVelocityX = Mathf.Clamp(rb.linearVelocityX, -moveSpeed, moveSpeed);
         }
@@ -192,7 +141,7 @@ public class Player : NetworkBehaviour
         }
 
         // 점프 // 땅에 닿으면 점프 가능
-        if (jumpAvailable && jumpInput)
+        if(jumpInput)
         {
             rb.AddForce(Vector2.up * jumpForce, ForceMode2D.Impulse);
             jumpAvailable = false;
@@ -202,10 +151,8 @@ public class Player : NetworkBehaviour
 
     void OnCollisionStay2D(Collision2D c)
     {
-        if (!IsOwner) return;
-
         // 땅 위에 있을 때 점프 가능
-        if ((groundMask & (1 << c.gameObject.layer)) != 0)
+        if (c.collider.gameObject.layer == groundLayer) 
         {
             foreach (var contact in c.contacts)
             {
@@ -220,12 +167,27 @@ public class Player : NetworkBehaviour
 
     void OnCollisionExit2D(Collision2D c)
     {
-        if (!IsOwner) return;
-
         // 땅에서 떨어지면 점프 불가능
-        if ((groundMask & (1 << c.gameObject.layer)) != 0)
+        if (c.collider.gameObject.layer == groundLayer)
         {
             jumpAvailable = false;
+        }
+    }
+
+    // 대미지 부여
+    public void GiveDamage(int dmg)
+    {
+        currHP -= dmg;
+        currHP = Mathf.Clamp(currHP, 0, totalHP);
+
+        // 대미지를 받은 표정으로 변경한다
+        currDamageFaceTime = damageFaceDuration;
+
+        // 체력이 완전히 떨어지게 되면 파티클을 생성한 후 삭제된다
+        if(currHP == 0)
+        {
+            Instantiate(deathParticlePrefab, transform.position,Quaternion.identity);
+            Destroy(gameObject);
         }
     }
 
@@ -240,7 +202,6 @@ public class Player : NetworkBehaviour
     // 총 위치 업데이트
     void UpdateGunPosition()
     {
-        gunRotation = Mathf.Rad2Deg * Mathf.Atan2(MouseManager.Inst.worldPos.y - body.position.y, MouseManager.Inst.worldPos.x - body.position.x);
         recoilOffset = gunController.recoilOffset;
         mat.Identity(ref gunMat);
         mat.Translate(ref gunMat, body.position);
@@ -272,12 +233,31 @@ public class Player : NetworkBehaviour
         gunController.InputFirePoint(mat.WorldPos(ref firePointMat));
     }
 
+    // 대미지를 받을 시 dmageFaceDuration 동안 대미지를 입는 표정을 짓는다
+    void UpdateDamageFace()
+    {
+        if (currDamageFaceTime > 0f)
+        {
+            currDamageFaceTime -= Time.deltaTime;
+            if (faceRenderer.sprite != damageFace)
+            {
+                faceRenderer.sprite = damageFace;
+            }
+        }
+        else
+        {
+            if (faceRenderer.sprite != faces[faceIndex])
+            {
+                faceRenderer.sprite = faces[faceIndex];
+            }
+        }
+    }
+
     // 해당 타입의 총기로 설정
     void SetGun(GunType type)
     {
         // 이전에 선택했었던 총이 있었다면 해당 총은 비활성화
-        if (gunIndex >= 0)
-        {
+        if(gunIndex >= 0) {
             guns[gunIndex].SetActive(false);
         }
 
