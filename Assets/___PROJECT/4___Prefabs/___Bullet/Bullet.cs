@@ -3,13 +3,18 @@ using UnityEngine;
 public class Bullet : PoolObject
 {
     public PoolObject bulletHitPrefab;
+    public PoolObject playerHitPrefab;
+
     private Rigidbody2D rb;
     private Vector2 startPoint;
-    private LayerMask layerMask;
+    private int groundLayer;
+    private int playerLayer;
 
     void Awake()
     {
         rb = GetComponent<Rigidbody2D>();
+        groundLayer = LayerMask.NameToLayer("Ground");
+        playerLayer = LayerMask.NameToLayer("Player");
     }
 
     void FixedUpdate()
@@ -23,25 +28,37 @@ public class Bullet : PoolObject
     }
 
     // 충돌하면 인스턴스 반환
-    void OnCollisionEnter2D(Collision2D collision)
+    void OnCollisionEnter2D(Collision2D c)
     {
+        // 충돌 각도에 따라 파티클 방향이 달라짐
+        var n = c.contacts[0].normal;
+        var degrees = Mathf.Atan2(n.y, n.x) * Mathf.Rad2Deg;
+        var otherLayer = c.collider.gameObject.layer;
 
-        // 새로운 충돌 파티클 인스턴스를 메모리 풀로부터 생성
-        var newHit = MemoryPool.Inst.GetInstance<BulletHit>(bulletHitPrefab);
-        newHit.Init(collision.contacts[0].point);
+        // 땅 오브젝트와 충돌한 경우 불꽃 파티클 생성
+        if(otherLayer == groundLayer) 
+        {
+            // 새로운 충돌 파티클 인스턴스를 메모리 풀로부터 생성
+            var newHit = MemoryPool.Inst.GetInstance<BulletHit>(bulletHitPrefab);
+            newHit.Init(c.contacts[0].point, degrees);
+        }
+
+        // 사람 오브젝트와 충돌한 경우 피 파티클 생성
+        else if(otherLayer == playerLayer) 
+        {
+            // 새로운 피 파티클 인스턴스를 메모리 풀로부터 생성
+            var newHit = MemoryPool.Inst.GetInstance<PlayerHit>(playerHitPrefab);
+            newHit.Init(c.contacts[0].point, degrees);
+        }
+        
         ReturnInstance();
     }
 
-    private Vector2 GetDirectionFromAngle(float angleDegrees)
+    private Vector2 GetDirectionFromAngle(float rot)
     {
-        // 1. 도(Degrees)를 라디안(Radians)으로 변환
-        float angleRadians = angleDegrees * Mathf.Deg2Rad;
-
-        // 2. Cos, Sin을 이용해 x, y 성분 계산
-        float x = Mathf.Cos(angleRadians);
-        float y = Mathf.Sin(angleRadians);
-
-        // 3. 방향 벡터 반환 (크기가 1인 단위 벡터)
+        float rad = rot * Mathf.Deg2Rad;
+        float x = Mathf.Cos(rad);
+        float y = Mathf.Sin(rad);
         return new Vector2(x, y);
     }
 

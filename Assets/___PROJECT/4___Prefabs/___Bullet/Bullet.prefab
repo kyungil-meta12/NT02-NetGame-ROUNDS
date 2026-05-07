@@ -152,7 +152,7 @@ Rigidbody2D:
   m_Simulated: 1
   m_UseFullKinematicContacts: 0
   m_UseAutoMass: 0
-  m_Mass: 1
+  m_Mass: 0.001
   m_LinearDamping: 0
   m_AngularDamping: 0
   m_GravityScale: 0
@@ -180,3 +180,4 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::BulletObject
   bulletHitPrefab: {fileID: 1322866508142720861, guid: dbd3c564fbbb24f4cbfafd35cbccf364, type: 3}
+  playerHitPrefab: {fileID: 9027165276528059398, guid: fe93fac6cb79c834783b5ea96fbf8dc0, type: 3}

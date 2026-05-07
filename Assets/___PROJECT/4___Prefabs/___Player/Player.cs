@@ -53,7 +53,7 @@ public class Player : MonoBehaviour
     private bool jumpInput = false;
     private Vector2 recoilOffset;
 
-    private LayerMask groundMask;
+    private int groundLayer;
 
     private Matrix4x4 handMat = new();
     private Matrix4x4 gunMat = new();
@@ -75,7 +75,7 @@ public class Player : MonoBehaviour
         foreach (var hr in handRenderer) { hr.sprite = hands[colorIndex]; }
 
         // GroundMask 미리 저장
-        groundMask = LayerMask.GetMask("Ground");
+        groundLayer = LayerMask.NameToLayer("Ground");
 
         // 현재 들고있는 총의 스펙 값을 기반으로 값 지정
         SetGun(currentGunType);
@@ -127,7 +127,7 @@ public class Player : MonoBehaviour
         }
 
         // 점프 // 땅에 닿으면 점프 가능
-        if(jumpAvailable && jumpInput)
+        if(jumpInput)
         {
             rb.AddForce(Vector2.up * jumpForce, ForceMode2D.Impulse);
             jumpAvailable = false;
@@ -138,7 +138,7 @@ public class Player : MonoBehaviour
     void OnCollisionStay2D(Collision2D c)
     {
         // 땅 위에 있을 때 점프 가능
-        if ((groundMask & (1 << c.gameObject.layer)) != 0) 
+        if (c.collider.gameObject.layer == groundLayer) 
         {
             foreach (var contact in c.contacts)
             {
@@ -154,7 +154,7 @@ public class Player : MonoBehaviour
     void OnCollisionExit2D(Collision2D c)
     {
         // 땅에서 떨어지면 점프 불가능
-        if ((groundMask & (1 << c.gameObject.layer)) != 0)
+        if (c.collider.gameObject.layer == groundLayer)
         {
             jumpAvailable = false;
         }
