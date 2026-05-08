@@ -1,4 +1,5 @@
 using UnityEngine;
+using Unity.Netcode;
 using UnityEngine.InputSystem;
 using mat = MatrixTransform;
 
@@ -72,6 +73,11 @@ public class Player : MonoBehaviour
     private Matrix4x4 handMat = new();
     private Matrix4x4 gunMat = new();
     private Matrix4x4 firePointMat = new();
+
+    private NetworkVariable<float> newtGunRotaion = new NetworkVariable<float>(0f, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Owner);
+
+    // 네트워크상에서 체력을 동기화 (선택 사항 : UI 등에 표시할 때 유용)
+    private NetworkVariable<int> netCurrHP = new NetworkVariable<int>(0, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
 
     #endregion
 

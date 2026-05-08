@@ -1378,13 +1378,97 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 7806958631955041015, guid: b2656e86749174e4981ebc2341ccd9c1, type: 3}
       insertIndex: 0
       addedObject: {fileID: 637081455}
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 4697393781432161188, guid: b2656e86749174e4981ebc2341ccd9c1, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 96031811}
+    - targetCorrespondingSourceObject: {fileID: 4697393781432161188, guid: b2656e86749174e4981ebc2341ccd9c1, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 96031810}
   m_SourcePrefab: {fileID: 100100000, guid: b2656e86749174e4981ebc2341ccd9c1, type: 3}
 --- !u!4 &96031803 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 7806958631955041015, guid: b2656e86749174e4981ebc2341ccd9c1, type: 3}
   m_PrefabInstance: {fileID: 96031802}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &96031804 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 4697393781432161188, guid: b2656e86749174e4981ebc2341ccd9c1, type: 3}
+  m_PrefabInstance: {fileID: 96031802}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &96031810
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 96031804}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6960e84d07fb87f47956e7a81d71c4e6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Unity.Netcode.Runtime::Unity.Netcode.Transports.UTP.UnityTransport
+  m_ProtocolType: 0
+  m_UseWebSockets: 0
+  m_UseEncryption: 0
+  m_MaxPacketQueueSize: 128
+  m_MaxPayloadSize: 6144
+  m_HeartbeatTimeoutMS: 500
+  m_ConnectTimeoutMS: 1000
+  m_MaxConnectAttempts: 60
+  m_DisconnectTimeoutMS: 30000
+  ConnectionData:
+    Address: 127.0.0.1
+    Port: 7777
+    WebSocketPath: /
+    ServerListenAddress: 127.0.0.1
+    ClientBindPort: 0
+  DebugSimulator:
+    PacketDelayMS: 0
+    PacketJitterMS: 0
+    PacketDropRate: 0
+--- !u!114 &96031811
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 96031804}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 593a2fe42fa9d37498c96f9a383b6521, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Unity.Netcode.Runtime::Unity.Netcode.NetworkManager
+  NetworkManagerExpanded: 0
+  NetworkConfig:
+    ProtocolVersion: 0
+    NetworkTransport: {fileID: 96031810}
+    PlayerPrefab: {fileID: 0}
+    Prefabs:
+      NetworkPrefabsLists:
+      - {fileID: 11400000, guid: c6e0f13126163a44eb6dcfdfaeb16a4b, type: 2}
+    TickRate: 30
+    ClientConnectionBufferTimeout: 10
+    ConnectionApproval: 0
+    ConnectionData: 
+    EnableTimeResync: 0
+    TimeResyncInterval: 30
+    EnsureNetworkVariableLengthSafety: 0
+    EnableSceneManagement: 1
+    ForceSamePrefabs: 1
+    RecycleNetworkIds: 1
+    NetworkIdRecycleDelay: 120
+    RpcHashSize: 0
+    LoadSceneTimeOut: 120
+    SpawnTimeout: 10
+    EnableNetworkLogs: 1
+    NetworkTopology: 0
+    UseCMBService: 0
+    AutoSpawnPlayerPrefabClientSide: 1
+    NetworkProfilingMetrics: 1
+    OldPrefabList: []
+  RunInBackground: 1
+  LogLevel: 1
 --- !u!1 &96695917
 GameObject:
   m_ObjectHideFlags: 0
@@ -16123,22 +16207,15 @@ PrefabInstance:
       propertyPath: m_PresetInfoIsWorld
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 8998159941199379687, guid: b25f6bc2eeb88ea47ab12198ec312e67, type: 3}
+      propertyPath: m_AnchoredPosition.y
+      value: 0
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: b25f6bc2eeb88ea47ab12198ec312e67, type: 3}
---- !u!114 &757005481 stripped
-MonoBehaviour:
-  m_CorrespondingSourceObject: {fileID: 994568174779973362, guid: b25f6bc2eeb88ea47ab12198ec312e67, type: 3}
-  m_PrefabInstance: {fileID: 757005480}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: a5ee0234090484337addeac1461eaa6b, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!1 &762801435
 GameObject:
   m_ObjectHideFlags: 0
@@ -17518,7 +17595,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: dcfbbfb5c4a2d0d42ac60f926c055247, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::BGMController
-  bgmSlider: {fileID: 757005481}
+  bgmSlider: {fileID: 0}
   bgmClips: []
 --- !u!1 &826892012
 GameObject:
