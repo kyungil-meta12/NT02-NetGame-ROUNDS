@@ -1,5 +1,5 @@
+using Unity.VisualScripting;
 using UnityEngine;
-using Unity.Netcode;
 using UnityEngine.InputSystem;
 using mat = MatrixTransform;
 
@@ -15,7 +15,8 @@ public class Player : MonoBehaviour
 {
     #region VALUES
 
-    public bool controllable = true;
+    // 플레이어 자신이 조작하는 오브젝트인지?
+    public bool isOwner = true;
 
     public Transform body;
     public Transform hand;
@@ -49,7 +50,6 @@ public class Player : MonoBehaviour
 
     [Space(10)]
     public float damageFaceDuration;
-    private float currDamageFaceTime;
 
     private Rigidbody2D rb;
     private GunController gunController;
@@ -65,6 +65,7 @@ public class Player : MonoBehaviour
     private bool moveLeft = false, moveRight = false;
     private bool jumpAvailable = false;
     private bool jumpInput = false;
+    private Vector2 mouseWorldPos;
     private Vector2 recoilOffset;
 
     private int groundLayer;
@@ -74,10 +75,9 @@ public class Player : MonoBehaviour
     private Matrix4x4 gunMat = new();
     private Matrix4x4 firePointMat = new();
 
-    private NetworkVariable<float> newtGunRotaion = new NetworkVariable<float>(0f, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Owner);
+    private Color deathParticleColor;
 
-    // 네트워크상에서 체력을 동기화 (선택 사항 : UI 등에 표시할 때 유용)
-    private NetworkVariable<int> netCurrHP = new NetworkVariable<int>(0, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
+    private DeltaTimer faceTimer = new();
 
     #endregion
 
@@ -89,12 +89,15 @@ public class Player : MonoBehaviour
 
     void Start()
     {
-        // 시작 시 외형 랜덤 지정(타 플레이어와 겹치지 않도록)
+        // 외형 랜덤 지정
         faceIndex = Random.Range(0, faces.Length);
         faceRenderer.sprite = faces[faceIndex];
         int colorIndex = Random.Range(0, hands.Length);
         bodyRenderer.sprite = bodies[colorIndex];
         foreach (var hr in handRenderer) { hr.sprite = hands[colorIndex]; }
+
+        // PlayerDeath 파티클에 사용할 색상 구하기 // 선택된 body 스프라이트를 샘플링하여 색상 구함
+        deathParticleColor = GetBodyColor(bodies[colorIndex]);
 
         // 땅 레이어 저장
         groundLayer = LayerMask.NameToLayer("Ground");
@@ -105,9 +108,13 @@ public class Player : MonoBehaviour
 
     void Update()
     {
-        if (controllable) 
+        if (isOwner) // 자신이 조작하는 경우에만 입력 받음
         {
             InputControl();
+        }
+        else // 아니라면 서버로부터 패킷을 받아 처리(위치, 손의 회전 각도 등)
+        {
+            InputPacket();
         }
         UpdateBodyRotation();
         UpdateGunPosition();
@@ -121,6 +128,7 @@ public class Player : MonoBehaviour
         UpdateMove();
     }
 
+    // isOwner == true일 때 입력 받기
     void InputControl()
     {
         moveLeft = Keyboard.current.aKey.isPressed;
@@ -128,8 +136,17 @@ public class Player : MonoBehaviour
         jumpInput = jumpAvailable && Keyboard.current.spaceKey.wasPressedThisFrame;
         gunRotation = Mathf.Rad2Deg * Mathf.Atan2(MouseManager.Inst.worldPos.y - body.position.y, MouseManager.Inst.worldPos.x - body.position.x);
 
+        // 마우스 위치 얻기
+        mouseWorldPos = MouseManager.Inst.worldPos;
+
         // 총 방아쇠 당기기/놓기
-        gunController.PullTrigger(Mouse.current.leftButton.isPressed);
+        gunController.PullTrigger(MouseManager.Inst.IsLeftPressing());
+    }
+
+    // isOwner == false일 때 패킷 처리하기
+    void InputPacket()
+    {
+        
     }
 
     void UpdateMove()
@@ -183,16 +200,20 @@ public class Player : MonoBehaviour
     // 대미지 부여
     public void GiveDamage(int dmg)
     {
+        // 현재 체력에서 dmg 만큼 차감
         currHP -= dmg;
         currHP = Mathf.Clamp(currHP, 0, totalHP);
 
         // 대미지를 받은 표정으로 변경한다
-        currDamageFaceTime = damageFaceDuration;
+        faceTimer.Reset();
+        faceTimer.SetRunningState(true);
 
         // 체력이 완전히 떨어지게 되면 파티클을 생성한 후 삭제된다
         if(currHP == 0)
         {
-            Instantiate(deathParticlePrefab, transform.position,Quaternion.identity);
+            // 사망 파티클의 색상이 플레이어의 body 스프라이트 색상에 맞춰짐
+            var newParticle = Instantiate(deathParticlePrefab, transform.position,Quaternion.identity);
+            newParticle.GetComponent<PlayerDeath>().createColor = deathParticleColor;
             Destroy(gameObject);
         }
     }
@@ -200,8 +221,8 @@ public class Player : MonoBehaviour
     // 몸통 좌우 회전 업데이트
     void UpdateBodyRotation()
     {
-        lookingLeft = MouseManager.Inst.worldPos.x < transform.position.x;
-        bodyRotation = Mathf.Lerp(bodyRotation, lookingLeft ? 180f : 0f, Time.deltaTime * 5f);
+        lookingLeft = mouseWorldPos.x < transform.position.x;
+        bodyRotation = Mathf.Lerp(bodyRotation, lookingLeft ? 180f : 0f, Time.deltaTime * 10f);
         body.rotation = Quaternion.Euler(new Vector3(0f, bodyRotation, 0f));
     }
 
@@ -242,20 +263,14 @@ public class Player : MonoBehaviour
     // 대미지를 받을 시 dmageFaceDuration 동안 대미지를 입는 표정을 짓는다
     void UpdateDamageFace()
     {
-        if (currDamageFaceTime > 0f)
+        faceTimer.Update();
+        if(faceTimer.isRunning && !faceTimer.CheckTime(damageFaceDuration, CheckOption.StopReset))
         {
-            currDamageFaceTime -= Time.deltaTime;
-            if (faceRenderer.sprite != damageFace)
-            {
-                faceRenderer.sprite = damageFace;
-            }
+            faceRenderer.sprite = damageFace;
         }
         else
         {
-            if (faceRenderer.sprite != faces[faceIndex])
-            {
-                faceRenderer.sprite = faces[faceIndex];
-            }
+            faceRenderer.sprite = faces[faceIndex];
         }
     }
 
@@ -282,5 +297,28 @@ public class Player : MonoBehaviour
         // 총의 GunController의 값 설정
         gunController = selectedGun.GetComponent<GunController>();
         gunController.InputSpec(spec, type);
+    }
+
+    Color GetBodyColor(Sprite sprite)
+    {
+        var texture = sprite.texture;
+        int centerX = texture.width / 2;
+        int centerY = texture.height / 2;
+        int startX = Mathf.Max(0, centerX - 5);
+        int startY = centerY;
+
+        // 중앙 10 x 10 픽셀을 샘플링하여 PlayerDeath 파티클 생성 시 해당 색상으로 설정
+        Color[] pixels = sprite.texture.GetPixels(startX, startY, 10, 10);
+        Color sumColor = new Color(0, 0, 0, 0);
+
+        foreach (Color pixel in pixels)
+        {
+            sumColor += pixel;
+        }
+
+        float totalPixels = pixels.Length;
+        Color avgColor = sumColor / totalPixels;
+
+        return avgColor;
     }
 }

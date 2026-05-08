@@ -44,7 +44,7 @@ public class Bullet : PoolObject
             newHit.Init(c.contacts[0].point, degrees);
         }
 
-        // 사람 오브젝트와 충돌한 경우 대미지를 가하고 파티클을 생성항 후 삭제
+        // 사람 오브젝트와 충돌한 경우 대미지를 가하고 파티클을 생성한 후 삭제
         else if(otherLayer == playerLayer) 
         {
             c.collider.gameObject.GetComponent<Player>().GiveDamage(damage);
