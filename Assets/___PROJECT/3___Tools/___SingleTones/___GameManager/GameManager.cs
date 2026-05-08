@@ -41,4 +41,20 @@ public class GameManager : MonoBehaviour
     {
         currentRound++;
     }
+    
+    /// <summary>
+    /// 게임을 완전히 종료
+    /// </summary>
+    public void QuitGame()
+    {
+        Debug.Log("게임을 종료합니다.");
+
+#if UNITY_EDITOR
+        // 유니티 에디터용
+        UnityEditor.EditorApplication.isPlaying = false;
+#else
+        // 빌드용
+        Application.Quit();
+#endif
+    }
 }
