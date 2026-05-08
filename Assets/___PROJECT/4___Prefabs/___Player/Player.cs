@@ -59,14 +59,24 @@ public class Player : MonoBehaviour
     private Vector2 gunOffset;
     private Vector2 handOffset;
     private Vector2 firePointOffset;
+    private Vector2 recoilOffset;
     private int gunIndex = -1;
     private float gunScale;
+
+    #endregion
+
+
+    #region INPUTS
 
     private bool moveLeft = false, moveRight = false;
     private bool jumpAvailable = false;
     private bool jumpInput = false;
     private Vector2 mouseWorldPos;
-    private Vector2 recoilOffset;
+
+    #endregion
+
+
+    #region ETC
 
     private int groundLayer;
     private int faceIndex;
@@ -80,6 +90,7 @@ public class Player : MonoBehaviour
     private DeltaTimer faceTimer = new();
 
     #endregion
+
 
     void Awake()
     {
@@ -302,13 +313,11 @@ public class Player : MonoBehaviour
     Color GetBodyColor(Sprite sprite)
     {
         var texture = sprite.texture;
-        int centerX = texture.width / 2;
-        int centerY = texture.height / 2;
-        int startX = Mathf.Max(0, centerX - 5);
-        int startY = centerY;
+        int x = (texture.width / 2) - 5;
+        int y = (texture.height / 2) - 5;
 
         // 중앙 10 x 10 픽셀을 샘플링하여 PlayerDeath 파티클 생성 시 해당 색상으로 설정
-        Color[] pixels = sprite.texture.GetPixels(startX, startY, 10, 10);
+        Color[] pixels = sprite.texture.GetPixels(x, y, 10, 10);
         Color sumColor = new Color(0, 0, 0, 0);
 
         foreach (Color pixel in pixels)
