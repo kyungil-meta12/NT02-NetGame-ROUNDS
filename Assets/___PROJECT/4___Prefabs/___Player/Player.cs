@@ -50,7 +50,6 @@ public class Player : MonoBehaviour
 
     [Space(10)]
     public float damageFaceDuration;
-    private float currDamageFaceTime;
 
     private Rigidbody2D rb;
     private GunController gunController;
@@ -77,6 +76,8 @@ public class Player : MonoBehaviour
     private Matrix4x4 firePointMat = new();
 
     private Color deathParticleColor;
+
+    private DeltaTimer faceTimer = new();
 
     #endregion
 
@@ -199,11 +200,13 @@ public class Player : MonoBehaviour
     // 대미지 부여
     public void GiveDamage(int dmg)
     {
+        // 현재 체력에서 dmg 만큼 차감
         currHP -= dmg;
         currHP = Mathf.Clamp(currHP, 0, totalHP);
 
         // 대미지를 받은 표정으로 변경한다
-        currDamageFaceTime = damageFaceDuration;
+        faceTimer.Reset();
+        faceTimer.SetRunningState(true);
 
         // 체력이 완전히 떨어지게 되면 파티클을 생성한 후 삭제된다
         if(currHP == 0)
@@ -260,20 +263,14 @@ public class Player : MonoBehaviour
     // 대미지를 받을 시 dmageFaceDuration 동안 대미지를 입는 표정을 짓는다
     void UpdateDamageFace()
     {
-        if (currDamageFaceTime > 0f)
+        faceTimer.Update();
+        if(faceTimer.isRunning && !faceTimer.CheckTime(damageFaceDuration, CheckOption.StopReset))
         {
-            currDamageFaceTime -= Time.deltaTime;
-            if (faceRenderer.sprite != damageFace)
-            {
-                faceRenderer.sprite = damageFace;
-            }
+            faceRenderer.sprite = damageFace;
         }
         else
         {
-            if (faceRenderer.sprite != faces[faceIndex])
-            {
-                faceRenderer.sprite = faces[faceIndex];
-            }
+            faceRenderer.sprite = faces[faceIndex];
         }
     }
 
