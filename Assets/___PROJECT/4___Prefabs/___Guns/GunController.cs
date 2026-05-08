@@ -24,7 +24,6 @@ public class GunController : MonoBehaviour
     private int damage;
     private float fireInterval;
     private float currFireTime;
-    private float recoil;
     private float reloadTime;
     private float currReloadTime;
     private float recoilRecoverySpeed;
@@ -67,7 +66,7 @@ public class GunController : MonoBehaviour
         }
     }
 
-    // 방아쇠 당기기 놓기
+    // 방아쇠 당기기/놓기
     public void PullTrigger(bool flag)
     {
         triggerPulled = flag;
