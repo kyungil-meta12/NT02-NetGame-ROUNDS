@@ -12,8 +12,8 @@ public enum CheckOption
 
 public class DeltaTimer
 {
-    public float time{ get; private set; }
-    public bool isRunning{ get; private set; }
+    public float time{ get; private set; } = 0f;
+    public bool isRunning{ get; private set; } = true;
 
     public void Update()
     {

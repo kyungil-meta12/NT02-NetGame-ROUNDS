@@ -19,7 +19,8 @@ public class Player : MonoBehaviour
     public bool isOwner = true;
 
     public Transform body;
-    public Transform hand;
+    public Transform gunHand;
+    public Transform gunAxis;
 
     [Space(10)]
     public GameObject deathParticlePrefab;
@@ -51,17 +52,14 @@ public class Player : MonoBehaviour
     [Space(10)]
     public float damageFaceDuration;
 
+
+    private Transform gripPoint;
     private Rigidbody2D rb;
     private GunController gunController;
     private float bodyRotation;
-    private float gunRotation;
-    private bool lookingLeft;
-    private Vector2 gunOffset;
-    private Vector2 handOffset;
-    private Vector2 firePointOffset;
-    private Vector2 recoilOffset;
+    private float gunAxisRotation;
     private int gunIndex = -1;
-    private float gunScale;
+    private bool lookingLeft;
 
     #endregion
 
@@ -80,13 +78,7 @@ public class Player : MonoBehaviour
 
     private int groundLayer;
     private int faceIndex;
-
-    private Matrix4x4 handMat = new();
-    private Matrix4x4 gunMat = new();
-    private Matrix4x4 firePointMat = new();
-
     private Color deathParticleColor;
-
     private DeltaTimer faceTimer = new();
 
     #endregion
@@ -96,6 +88,7 @@ public class Player : MonoBehaviour
     {
         rb = GetComponent<Rigidbody2D>();
         currHP = totalHP;
+        faceTimer.SetRunningState(false);
     }
 
     void Start()
@@ -127,10 +120,9 @@ public class Player : MonoBehaviour
         {
             InputPacket();
         }
-        UpdateBodyRotation();
-        UpdateGunPosition();
-        UpdateHandPosition();
-        UpdateFirePoint();
+        UpdateBody();
+        UpdateGunAxis();
+        UpdateGunHand();
         UpdateDamageFace();
     }
 
@@ -145,13 +137,19 @@ public class Player : MonoBehaviour
         moveLeft = Keyboard.current.aKey.isPressed;
         moveRight = Keyboard.current.dKey.isPressed;
         jumpInput = jumpAvailable && Keyboard.current.spaceKey.wasPressedThisFrame;
-        gunRotation = Mathf.Rad2Deg * Mathf.Atan2(MouseManager.Inst.worldPos.y - body.position.y, MouseManager.Inst.worldPos.x - body.position.x);
+        gunAxisRotation = Mathf.Rad2Deg * Mathf.Atan2(MouseManager.Inst.worldPos.y - body.position.y, MouseManager.Inst.worldPos.x - body.position.x);
 
         // 마우스 위치 얻기
         mouseWorldPos = MouseManager.Inst.worldPos;
 
+        // 뱡향 지정
+        lookingLeft = mouseWorldPos.x < transform.position.x;
+        
         // 총 방아쇠 당기기/놓기
         gunController.PullTrigger(MouseManager.Inst.IsLeftPressing());
+
+        // 방향 입력
+        gunController.InputDirection(lookingLeft);
     }
 
     // isOwner == false일 때 패킷 처리하기
@@ -229,46 +227,25 @@ public class Player : MonoBehaviour
         }
     }
 
-    // 몸통 좌우 회전 업데이트
-    void UpdateBodyRotation()
+    // 몸통 업데이트
+    void UpdateBody()
     {
-        lookingLeft = mouseWorldPos.x < transform.position.x;
         bodyRotation = Mathf.Lerp(bodyRotation, lookingLeft ? 180f : 0f, Time.deltaTime * 10f);
         body.rotation = Quaternion.Euler(new Vector3(0f, bodyRotation, 0f));
     }
 
-    // 총 위치 업데이트
-    void UpdateGunPosition()
+    // 총  업데이트
+    void UpdateGunAxis()
     {
-        recoilOffset = gunController.recoilOffset;
-        mat.Identity(ref gunMat);
-        mat.Translate(ref gunMat, body.position);
-        mat.Rotate(ref gunMat, new Vector3(lookingLeft ? 180f : 0f, 0f, lookingLeft ? -gunRotation : gunRotation));
-        mat.Translate(ref gunMat, gunOffset - recoilOffset);
-        mat.Scale(ref gunMat, Vector2.one * gunScale);
-        mat.Dispatch(guns[gunIndex].transform, ref gunMat);
-        gunController.InputRotation(gunRotation);
+        gunAxis.position = body.position;
+        gunAxis.rotation = Quaternion.Euler(lookingLeft ? 180f : 0f, 0f, lookingLeft ? -gunAxisRotation : gunAxisRotation);
     }
 
-    // 손 위치 업데이트
-    void UpdateHandPosition()
+    // 총 쥐는 손 업데이트
+    void UpdateGunHand()
     {
-        mat.Identity(ref handMat);
-        mat.Translate(ref handMat, body.position);
-        mat.Rotate(ref handMat, new Vector3(lookingLeft ? 180f : 0f, 0f, lookingLeft ? -gunRotation : gunRotation));
-        mat.Translate(ref handMat, handOffset - recoilOffset);
-        mat.Scale(ref handMat, Vector2.one * 0.7f);
-        mat.Dispatch(hand, ref handMat);
-    }
-
-    // 총 화염 위치 업데이트
-    void UpdateFirePoint()
-    {
-        mat.Identity(ref firePointMat);
-        mat.Translate(ref firePointMat, body.position);
-        mat.Rotate(ref firePointMat, new Vector3(lookingLeft ? 180f : 0f, 0f, lookingLeft ? -gunRotation : gunRotation));
-        mat.Translate(ref firePointMat, firePointOffset);
-        gunController.InputFirePoint(mat.WorldPos(ref firePointMat));
+        gunHand.position = gripPoint.position;
+        gunHand.rotation = gripPoint.rotation;
     }
 
     // 대미지를 받을 시 dmageFaceDuration 동안 대미지를 입는 표정을 짓는다
@@ -288,9 +265,10 @@ public class Player : MonoBehaviour
     // 해당 타입의 총기로 설정
     void SetGun(GunType type)
     {
-        // 이전에 선택했었던 총이 있었다면 해당 총은 비활성화
-        if(gunIndex >= 0) {
-            guns[gunIndex].SetActive(false);
+        // 먼저 모든 총 비활성화
+        foreach(var gun in guns)
+        {
+            gun.gameObject.SetActive(false);
         }
 
         // type 파라미터에 따라 다른 총을 선택
@@ -298,16 +276,13 @@ public class Player : MonoBehaviour
         selectedGun.SetActive(true);
 
         // 선택된 총이 가지는 GunSpec 컴포넌트에서 스펙을 불러와 적용
-        var spec = selectedGun.GetComponent<GunSpec>().spec;
+        var spec = selectedGun.GetComponentInChildren<GunSpec>().spec;
         gunIndex = (int)type;
-        gunOffset = spec.gunPositionOffset;
-        handOffset = spec.handPositionOffset;
-        firePointOffset = spec.firePointOffset;
-        gunScale = spec.globalScale;
 
         // 총의 GunController의 값 설정
-        gunController = selectedGun.GetComponent<GunController>();
+        gunController = selectedGun.GetComponentInChildren<GunController>();
         gunController.InputSpec(spec, type);
+        gripPoint = guns[gunIndex].transform.Find("Body").transform.Find("GripPoint").transform;
     }
 
     Color GetBodyColor(Sprite sprite)
