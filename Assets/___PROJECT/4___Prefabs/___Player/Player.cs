@@ -1,3 +1,4 @@
+using Unity.Netcode;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -11,12 +12,12 @@ public enum GunType {
     Sniper = 4
 }
 
-public class Player : MonoBehaviour
+public class Player : NetworkBehaviour
 {
     #region VALUES
 
     // 플레이어 자신이 조작하는 오브젝트인지?
-    public bool isOwner = true;
+    // [삭제] public bool isOwner = true; 내장 속성인 IsOwner 를 사용하여 네트워크 권한을 판별.
 
     public Transform body;
     public Transform gunHand;
@@ -81,6 +82,9 @@ public class Player : MonoBehaviour
     private Color deathParticleColor;
     private DeltaTimer faceTimer = new();
 
+    // [추가] 조준 각도를 동기화하기 위한 네트워크 변수
+    private NetworkVariable<float> netGunRotaion = new NetworkVariable<float>(0, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Owner);
+
     #endregion
 
 
@@ -91,7 +95,8 @@ public class Player : MonoBehaviour
         faceTimer.SetRunningState(false);
     }
 
-    void Start()
+    // [변경] Strat 대신 OnNetworkSpawn 사용 (네트워크 오브젝트가 활성화될 때 호출)
+    public override void OnNetworkSpawn()
     {
         // 외형 랜덤 지정
         faceIndex = Random.Range(0, faces.Length);
@@ -108,18 +113,34 @@ public class Player : MonoBehaviour
 
         // 현재 들고있는 총의 스펙 값을 기반으로 값 지정
         SetGun(currentGunType);
+
+        // [추가] 내가 아닌 캐릭터의 물리 연산 비활성화
+        // 소유자가 아닌 클라이언트에서 물리 시뮬레이션이 돌면 서버 위치와 충돌하여 캐릭터가 떨림.
+        if (!IsOwner)
+        {
+            rb.simulated = false;
+        }
     }
 
     void Update()
     {
-        if (isOwner) // 자신이 조작하는 경우에만 입력 받음
+        if (IsOwner) // 자신이 조작하는 경우에만 입력 받음
         {
             InputControl();
+            // 내 조준 각도를 네트워크 변수에 기록하여 다른 플레이어들에게 전송
+            netGunRotaion.Value = gunAxisRotation;
         }
         else // 아니라면 서버로부터 패킷을 받아 처리(위치, 손의 회전 각도 등)
         {
-            InputPacket();
+            // [통합] InputPacket(); 대신 사용
+            // 타인의 경우 네트워크 변수로부터 각도를 받아와 동기화
+            gunAxisRotation = netGunRotaion.Value;
+            // 각도에 따라 마우스 위치를 가상으로 설정하여 lookingLeft 로직 유지
+            mouseWorldPos = (gunAxisRotation > 90 || gunAxisRotation < -90) ?
+                (Vector2)transform.position + Vector2.left :
+                (Vector2)transform.position + Vector2.right;
         }
+
         UpdateBody();
         UpdateGunAxis();
         UpdateGunHand();
@@ -152,10 +173,50 @@ public class Player : MonoBehaviour
         gunController.InputDirection(lookingLeft);
     }
 
-    // isOwner == false일 때 패킷 처리하기
-    void InputPacket()
+    //// isOwner == false일 때 패킷 처리하기
+    //void InputPacket()
+    //{
+
+    //} [삭제] Update의 else 문으로 통합됨.
+
+    // --- [RPC 추가 : 데미지 및 사망 로직] ---
+    public void GiveDamage(int dmg)
     {
-        
+        // 서버에게 데미지 계산을 요청
+        RequestDamageServerRpc(dmg);
+    }
+    [Rpc(SendTo.Server)] // 서버에서 실행
+    private void RequestDamageServerRpc(int dmg)
+    {
+        if (currHP <= 0) return;
+
+        currHP -= dmg;
+        currHP = Mathf.Clamp(currHP, 0, totalHP);
+
+        // 모든 클라이언트에게 피격 연출 명령
+        PlayDamageEffectRpc();
+
+        if(currHP == 0)
+        {
+            // 모든 클라이언트에게 사망 효과 명령 후 오브젝트 제거
+            PerformDeathRpc();
+            GetComponent<NetworkObject>().Despawn(); // 서버에서 오브젝트 제거 (모든 클라이언트 동기화)
+        }
+    }
+
+    [Rpc(SendTo.Everyone)] // 모든 클라이언트에서 실행
+    private void PlayDamageEffectRpc()
+    {
+        faceTimer.Reset();
+        faceTimer.SetRunningState(true);
+    }
+
+    [Rpc(SendTo.Everyone)]
+    private void PerformDeathRpc()
+    {
+        var newParticle = Instantiate(deathParticlePrefab, transform.position, Quaternion.identity);
+        newParticle.GetComponent<PlayerDeath>().createColor = deathParticleColor;
+        // [삭제] Destroy(gameObject) -> 서버의 Despawn()이 처리함
     }
 
     void UpdateMove()
@@ -203,27 +264,6 @@ public class Player : MonoBehaviour
         if (c.collider.gameObject.layer == groundLayer)
         {
             jumpAvailable = false;
-        }
-    }
-
-    // 대미지 부여
-    public void GiveDamage(int dmg)
-    {
-        // 현재 체력에서 dmg 만큼 차감
-        currHP -= dmg;
-        currHP = Mathf.Clamp(currHP, 0, totalHP);
-
-        // 대미지를 받은 표정으로 변경한다
-        faceTimer.Reset();
-        faceTimer.SetRunningState(true);
-
-        // 체력이 완전히 떨어지게 되면 파티클을 생성한 후 삭제된다
-        if(currHP == 0)
-        {
-            // 사망 파티클의 색상이 플레이어의 body 스프라이트 색상에 맞춰짐
-            var newParticle = Instantiate(deathParticlePrefab, transform.position,Quaternion.identity);
-            newParticle.GetComponent<PlayerDeath>().createColor = deathParticleColor;
-            Destroy(gameObject);
         }
     }
 
