@@ -148,6 +148,12 @@ public class Player : MonoBehaviour
         // 총 방아쇠 당기기/놓기
         gunController.PullTrigger(MouseManager.Inst.IsLeftPressing());
 
+        // 총 재장전하기
+        if(Keyboard.current.rKey.wasPressedThisFrame) 
+        {
+            gunController.ReloadGun();
+        }
+
         // 방향 입력
         gunController.InputDirection(lookingLeft);
     }

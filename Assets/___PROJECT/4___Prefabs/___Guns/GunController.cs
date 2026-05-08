@@ -25,10 +25,14 @@ public class GunController : MonoBehaviour
     private int currAmmo;
     private float ammoSpeed;
     private int damage;
+
     private float fireInterval;
     private float currFireTime;
-    private float reloadTime;
-    private float currReloadTime;
+
+    private float reloadDuration;
+    private float currReloadTime = 0f;
+    private bool reloadState = false;
+
     private float recoilRecoverySpeed;
 
     private bool triggerPulled;
@@ -41,10 +45,18 @@ public class GunController : MonoBehaviour
 
     void Update()
     {
+       UpdateFire();
+       UpdateReload();
+       UpdateRecoilOffset();
+    }
+
+    // 총 발사 업데이트
+    void UpdateFire()
+    {
         // fireInterval 간격으로 발사
         currFireTime -= Time.deltaTime;
         currFireTime = Mathf.Clamp(currFireTime, 0f, 10f);
-        if(triggerPulled && currFireTime <= 0f && currAmmo > 0)
+        if(triggerPulled && !reloadState && currFireTime <= 0f && currAmmo > 0)
         {
             var firePointRot = lookingLeft ? -firePoint.rotation.eulerAngles.z + 180f : firePoint.rotation.eulerAngles.z;
 
@@ -72,11 +84,35 @@ public class GunController : MonoBehaviour
             // 반동 위치 오프셋 지정
             transform.localPosition = new Vector2(-0.6f, 0f);
 
+            // 현재 장탄수를 인디케이터로 전달
+            currAmmo--;
+            AmmoIndicator.Inst.InputAmmo(currAmmo);
+
             // 다음 발사 딜레이 추가
             currFireTime += fireInterval;
         }
+    }
 
-        // 반동 오프셋 업데이트
+    // 재장전 업데이트
+    void UpdateReload()
+    {
+        if(reloadState)
+        {
+            currReloadTime += Time.deltaTime;
+            if(currReloadTime >= reloadDuration)
+            {
+                currReloadTime = 0f;
+                currAmmo = totalAmmo;
+                AmmoIndicator.Inst.InputAmmo(currAmmo);
+                reloadState = false;
+            }
+            AmmoIndicator.Inst.InputReloadTime(currReloadTime, reloadDuration);
+        }
+    }
+
+    // 반동 오프셋 업데이트
+    void UpdateRecoilOffset()
+    {
         transform.localPosition = Vector2.Lerp(transform.localPosition, Vector2.zero, Time.deltaTime * recoilRecoverySpeed);
     }
 
@@ -84,6 +120,15 @@ public class GunController : MonoBehaviour
     public void PullTrigger(bool flag)
     {
         triggerPulled = flag;
+    }
+
+    public void ReloadGun()
+    {
+        if(!reloadState && currAmmo < totalAmmo)
+        {
+            reloadState = true;
+            triggerPulled = false;
+        }
     }
 
     // 방향 입력
@@ -102,13 +147,15 @@ public class GunController : MonoBehaviour
         ammoSpeed = spec.ammoSpeed;
         damage = spec.damage;
         fireInterval = spec.fireInterval;
-        reloadTime = spec.reloadTime;
+        reloadDuration = spec.reloadTime;
         recoilRecoverySpeed = spec.recoilRecoverySpeed;
 
         isMultiShot = type == GunType.Shotgun;
 
         firePoint = transform.Find("FirePoint");
         shellPoint = transform.Find("ShellPoint");
+        AmmoIndicator.Inst.InitAmmo(currAmmo);
+        AmmoIndicator.Inst.InputGunType(type);
     }
 
     private void CreateAmmo(float rotation)

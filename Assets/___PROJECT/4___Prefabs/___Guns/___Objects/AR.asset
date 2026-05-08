@@ -12,13 +12,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7aa10b5a07c65d243a281a7f1d59bd42, type: 3}
   m_Name: AR
   m_EditorClassIdentifier: Assembly-CSharp::GunSpecValue
-  gunPositionOffset: {x: 2.086, y: -0.146}
-  handPositionOffset: {x: 1.575, y: -0.392}
-  firePointOffset: {x: 3.505, y: 0}
-  globalScale: 0.8
   maxAmmo: 30
   damage: 7
   ammoSpeed: 25
-  reloadTime: 2
-  fireInterval: 0.15
+  reloadTime: 1.5
+  fireInterval: 0.12
   recoilRecoverySpeed: 20

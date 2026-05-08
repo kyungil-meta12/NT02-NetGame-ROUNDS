@@ -12,13 +12,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7aa10b5a07c65d243a281a7f1d59bd42, type: 3}
   m_Name: Smg
   m_EditorClassIdentifier: Assembly-CSharp::GunSpecValue
-  gunPositionOffset: {x: 1.973, y: -0.156}
-  handPositionOffset: {x: 1.249, y: -0.314}
-  firePointOffset: {x: 2.929, y: 0}
-  globalScale: 1
   maxAmmo: 25
-  damage: 5
+  damage: 4
   ammoSpeed: 25
-  reloadTime: 1
-  fireInterval: 0.1
+  reloadTime: 0.8
+  fireInterval: 0.08
   recoilRecoverySpeed: 25

@@ -240,7 +240,7 @@ MonoBehaviour:
   gunAxis: {fileID: 6459683156501884271}
   deathParticlePrefab: {fileID: 8885057346391128513, guid: 7ec5935a6ff43cd41845c47d81958b64, type: 3}
   totalHP: 100
-  currentGunType: 3
+  currentGunType: 0
   guns:
   - {fileID: 1977947850721096023}
   - {fileID: 1755660240718329603}
