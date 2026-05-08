@@ -9,16 +9,16 @@ EditorBuildSettings:
     path: Assets/___PROJECT/1___Scenes/StartScene.unity
     guid: 4c913419b6558b546ac31d7eeb550b95
   - enabled: 1
-    path: Assets/___PROJECT/1___Scenes/___WorkingScenes/Abandoned station.unity
+    path: Assets/___PROJECT/1___Scenes/Abandoned station.unity
     guid: caf4146179d6f33439006a63eb5fd78e
   - enabled: 1
-    path: Assets/___PROJECT/1___Scenes/___WorkingScenes/Island pack.unity
+    path: Assets/___PROJECT/1___Scenes/Island pack.unity
     guid: a168564a2c0cb2c42b38993d6a77ba0c
   - enabled: 1
-    path: Assets/___PROJECT/1___Scenes/___WorkingScenes/Mounts.unity
+    path: Assets/___PROJECT/1___Scenes/Mounts.unity
     guid: 1a053b145b884de4f9a5ac8fe2d50134
   - enabled: 1
-    path: Assets/___PROJECT/1___Scenes/___WorkingScenes/CardSelectScene.unity
+    path: Assets/___PROJECT/1___Scenes/CardSelectScene.unity
     guid: 609215ca4a6d9b04b86065f8e42d2966
   m_configObjects:
     com.unity.input.settings.actions: {fileID: -944628639613478452, guid: 2bcd2660ca9b64942af0de543d8d7100, type: 3}
