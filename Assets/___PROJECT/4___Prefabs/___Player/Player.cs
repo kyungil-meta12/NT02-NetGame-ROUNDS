@@ -1,8 +1,6 @@
-using Unity.Netcode;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.InputSystem;
-using Unity.Netcode;
 using mat = MatrixTransform;
 
 public enum GunType {
@@ -13,15 +11,16 @@ public enum GunType {
     Sniper = 4
 }
 
-public class Player : NetworkBehaviour
+public class Player : MonoBehaviour
 {
     #region VALUES
 
     // 플레이어 자신이 조작하는 오브젝트인지?
-    // public bool isOwner = true; Netcode 내장 속성인 IsOwner 를 사용 하여 네트워크 권한 판별
+    public bool isOwner = true;
 
     public Transform body;
-    public Transform hand;
+    public Transform gunHand;
+    public Transform gunAxis;
 
     [Space(10)]
     public GameObject deathParticlePrefab;
@@ -53,17 +52,14 @@ public class Player : NetworkBehaviour
     [Space(10)]
     public float damageFaceDuration;
 
+
+    private Transform gripPoint;
     private Rigidbody2D rb;
     private GunController gunController;
     private float bodyRotation;
-    private float gunRotation;
-    private bool lookingLeft;
-    private Vector2 gunOffset;
-    private Vector2 handOffset;
-    private Vector2 firePointOffset;
-    private Vector2 recoilOffset;
+    private float gunAxisRotation;
     private int gunIndex = -1;
-    private float gunScale;
+    private bool lookingLeft;
 
     #endregion
 
@@ -82,17 +78,8 @@ public class Player : NetworkBehaviour
 
     private int groundLayer;
     private int faceIndex;
-
-    private Matrix4x4 handMat = new();
-    private Matrix4x4 gunMat = new();
-    private Matrix4x4 firePointMat = new();
-
     private Color deathParticleColor;
-
     private DeltaTimer faceTimer = new();
-
-    // 조준 각도를 동기화하기 위한 네트워크 변수
-    private NetworkVariable<float> netGunRotaion = new NetworkVariable<float>(0, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Owner);
 
     #endregion
 
@@ -101,10 +88,10 @@ public class Player : NetworkBehaviour
     {
         rb = GetComponent<Rigidbody2D>();
         currHP = totalHP;
+        faceTimer.SetRunningState(false);
     }
 
-    // [변경] Start 대신 OnNetworkSpawn 사용 (네트워크 오브젝트가 활성화될 때 호출)
-    public override void OnNetworkSpawn()
+    void Start()
     {
         // 외형 랜덤 지정
         faceIndex = Random.Range(0, faces.Length);
@@ -121,45 +108,26 @@ public class Player : NetworkBehaviour
 
         // 현재 들고있는 총의 스펙 값을 기반으로 값 지정
         SetGun(currentGunType);
-
-        // [추가] 내가 아닌 캐릭터의 물리 연산 비활성화
-        // 소유자가 아닌 클라이언트에서 물리 시뮬레이션이 돌면 서버 위치와 충돌하여 캐릭터가 떨림.
-        if (!IsOwner)
-        {
-            rb.simulated = false;
-        }
     }
 
     void Update()
     {
-        if (IsOwner) // 자신이 조작하는 경우에만 입력 받음
+        if (isOwner) // 자신이 조작하는 경우에만 입력 받음
         {
             InputControl();
-            // 내 조준 각도를 네트워크 변수에 기록하여 다른 플레이어들에게 전송
-            netGunRotaion.Value = gunRotation;
         }
         else // 아니라면 서버로부터 패킷을 받아 처리(위치, 손의 회전 각도 등)
         {
-            // [통합] InputPacket(); 대신사용
-            // 타인의 경우 네트워크 변수로부터 각도를 받아와 동기화
-            gunRotation = netGunRotaion.Value;
-            // 각도에 따라 마우스 위치를 가상으로 설정하여 lookingLeft 로직 유지
-            mouseWorldPos = (gunRotation > 90 || gunRotation < -90) ?
-                (Vector2)transform.position + Vector2.left :
-                (Vector2)transform.position + Vector2.right;
+            InputPacket();
         }
-
-        UpdateBodyRotation();
-        UpdateGunPosition();
-        UpdateHandPosition();
-        UpdateFirePoint();
+        UpdateBody();
+        UpdateGunAxis();
+        UpdateGunHand();
         UpdateDamageFace();
     }
 
     void FixedUpdate()
     {
-        // 물리 이동은 소유자(Owner)만 수행함.
-        if (!IsOwner) return;
         UpdateMove();
     }
 
@@ -169,60 +137,25 @@ public class Player : NetworkBehaviour
         moveLeft = Keyboard.current.aKey.isPressed;
         moveRight = Keyboard.current.dKey.isPressed;
         jumpInput = jumpAvailable && Keyboard.current.spaceKey.wasPressedThisFrame;
-        gunRotation = Mathf.Rad2Deg * Mathf.Atan2(MouseManager.Inst.worldPos.y - body.position.y, MouseManager.Inst.worldPos.x - body.position.x);
+        gunAxisRotation = Mathf.Rad2Deg * Mathf.Atan2(MouseManager.Inst.worldPos.y - body.position.y, MouseManager.Inst.worldPos.x - body.position.x);
 
         // 마우스 위치 얻기
         mouseWorldPos = MouseManager.Inst.worldPos;
 
+        // 뱡향 지정
+        lookingLeft = mouseWorldPos.x < transform.position.x;
+        
         // 총 방아쇠 당기기/놓기
         gunController.PullTrigger(MouseManager.Inst.IsLeftPressing());
+
+        // 방향 입력
+        gunController.InputDirection(lookingLeft);
     }
 
-    //// isOwner == false일 때 패킷 처리하기
-    //void InputPacket()
-    //{
-
-    //} [삭제] Update의 else 문으로 통합됨.
-
-    // [RPC 추가 수정 : 데미지 및 사망로직] 
-    public void GiveDamage(int dmg)
+    // isOwner == false일 때 패킷 처리하기
+    void InputPacket()
     {
-        // 서버에게 데미지 계산을 요청
-        RequestDamageServerRpc(dmg);
-    }
-
-    [Rpc(SendTo.Server)] // 서버에서 실행
-    private void RequestDamageServerRpc(int dmg)
-    {
-        if (currHP <= 0) return;
-
-        currHP -= dmg;
-        currHP = Mathf.Clamp(currHP, 0, totalHP);
-
-        // 모든 클라이언트에게 피격 연출 명령
-        PlayDamageEffectRpc();
-
-        if (currHP == 0)
-        {
-            // 모든 클라이언트에게 사망 효과 명령 후 오브젝트 제거
-            PerformDeathRpc();
-            GetComponent<NetworkObject>().Despawn(); // 서버에서 오브젝트 제거 (모든 클라이언트 동기화)
-        }
-    }
-
-    [Rpc(SendTo.Everyone)] // 모든 클라이언트에서 실행
-    private void PlayDamageEffectRpc()
-    {
-        faceTimer.Reset();
-        faceTimer.SetRunningState(true);
-    }
-
-    [Rpc(SendTo.Everyone)]
-    private void PerformDeathRpc()
-    {
-        var newParticle = Instantiate(deathParticlePrefab, transform.position, Quaternion.identity);
-        newParticle.GetComponent<PlayerDeath>().createColor = deathParticleColor;
-        // [삭제] Destroy(gameObject) -> 서버의 Despawn()이 처리함.
+        
     }
 
     void UpdateMove()
@@ -273,46 +206,46 @@ public class Player : NetworkBehaviour
         }
     }
 
-    // 몸통 좌우 회전 업데이트
-    void UpdateBodyRotation()
+    // 대미지 부여
+    public void GiveDamage(int dmg)
     {
-        lookingLeft = mouseWorldPos.x < transform.position.x;
+        // 현재 체력에서 dmg 만큼 차감
+        currHP -= dmg;
+        currHP = Mathf.Clamp(currHP, 0, totalHP);
+
+        // 대미지를 받은 표정으로 변경한다
+        faceTimer.Reset();
+        faceTimer.SetRunningState(true);
+
+        // 체력이 완전히 떨어지게 되면 파티클을 생성한 후 삭제된다
+        if(currHP == 0)
+        {
+            // 사망 파티클의 색상이 플레이어의 body 스프라이트 색상에 맞춰짐
+            var newParticle = Instantiate(deathParticlePrefab, transform.position,Quaternion.identity);
+            newParticle.GetComponent<PlayerDeath>().createColor = deathParticleColor;
+            Destroy(gameObject);
+        }
+    }
+
+    // 몸통 업데이트
+    void UpdateBody()
+    {
         bodyRotation = Mathf.Lerp(bodyRotation, lookingLeft ? 180f : 0f, Time.deltaTime * 10f);
         body.rotation = Quaternion.Euler(new Vector3(0f, bodyRotation, 0f));
     }
 
-    // 총 위치 업데이트
-    void UpdateGunPosition()
+    // 총  업데이트
+    void UpdateGunAxis()
     {
-        recoilOffset = gunController.recoilOffset;
-        mat.Identity(ref gunMat);
-        mat.Translate(ref gunMat, body.position);
-        mat.Rotate(ref gunMat, new Vector3(lookingLeft ? 180f : 0f, 0f, lookingLeft ? -gunRotation : gunRotation));
-        mat.Translate(ref gunMat, gunOffset - recoilOffset);
-        mat.Scale(ref gunMat, Vector2.one * gunScale);
-        mat.Dispatch(guns[gunIndex].transform, ref gunMat);
-        gunController.InputRotation(gunRotation);
+        gunAxis.position = body.position;
+        gunAxis.rotation = Quaternion.Euler(lookingLeft ? 180f : 0f, 0f, lookingLeft ? -gunAxisRotation : gunAxisRotation);
     }
 
-    // 손 위치 업데이트
-    void UpdateHandPosition()
+    // 총 쥐는 손 업데이트
+    void UpdateGunHand()
     {
-        mat.Identity(ref handMat);
-        mat.Translate(ref handMat, body.position);
-        mat.Rotate(ref handMat, new Vector3(lookingLeft ? 180f : 0f, 0f, lookingLeft ? -gunRotation : gunRotation));
-        mat.Translate(ref handMat, handOffset - recoilOffset);
-        mat.Scale(ref handMat, Vector2.one * 0.7f);
-        mat.Dispatch(hand, ref handMat);
-    }
-
-    // 총 화염 위치 업데이트
-    void UpdateFirePoint()
-    {
-        mat.Identity(ref firePointMat);
-        mat.Translate(ref firePointMat, body.position);
-        mat.Rotate(ref firePointMat, new Vector3(lookingLeft ? 180f : 0f, 0f, lookingLeft ? -gunRotation : gunRotation));
-        mat.Translate(ref firePointMat, firePointOffset);
-        gunController.InputFirePoint(mat.WorldPos(ref firePointMat));
+        gunHand.position = gripPoint.position;
+        gunHand.rotation = gripPoint.rotation;
     }
 
     // 대미지를 받을 시 dmageFaceDuration 동안 대미지를 입는 표정을 짓는다
@@ -332,9 +265,10 @@ public class Player : NetworkBehaviour
     // 해당 타입의 총기로 설정
     void SetGun(GunType type)
     {
-        // 이전에 선택했었던 총이 있었다면 해당 총은 비활성화
-        if(gunIndex >= 0) {
-            guns[gunIndex].SetActive(false);
+        // 먼저 모든 총 비활성화
+        foreach(var gun in guns)
+        {
+            gun.gameObject.SetActive(false);
         }
 
         // type 파라미터에 따라 다른 총을 선택
@@ -342,16 +276,13 @@ public class Player : NetworkBehaviour
         selectedGun.SetActive(true);
 
         // 선택된 총이 가지는 GunSpec 컴포넌트에서 스펙을 불러와 적용
-        var spec = selectedGun.GetComponent<GunSpec>().spec;
+        var spec = selectedGun.GetComponentInChildren<GunSpec>().spec;
         gunIndex = (int)type;
-        gunOffset = spec.gunPositionOffset;
-        handOffset = spec.handPositionOffset;
-        firePointOffset = spec.firePointOffset;
-        gunScale = spec.globalScale;
 
         // 총의 GunController의 값 설정
-        gunController = selectedGun.GetComponent<GunController>();
+        gunController = selectedGun.GetComponentInChildren<GunController>();
         gunController.InputSpec(spec, type);
+        gripPoint = guns[gunIndex].transform.Find("Body").transform.Find("GripPoint").transform;
     }
 
     Color GetBodyColor(Sprite sprite)

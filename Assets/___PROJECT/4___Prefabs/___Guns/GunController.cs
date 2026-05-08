@@ -6,6 +6,8 @@ public class GunController : MonoBehaviour
 {
     public PoolObject flashPrefab;
     public PoolObject bulletPrefab;
+    public PoolObject shellPrefab;
+
     public float multiShotSpread; // 여러발 발사 시 흩어지는 각도
     public int multiShellCount; // 한 번에 여러발을 발사할 때 발사되는 총알 개수
     
@@ -15,8 +17,9 @@ public class GunController : MonoBehaviour
     [HideInInspector]
     public bool isMultiShot = false; // 샷건 등의 한 번에 여러발을 발사해야할 경우 활성화
 
-    [HideInInspector]
-    public Vector2 recoilOffset; // 렌더링으로 표현되는 반동 offset 값
+    private SpriteRenderer sr;
+    private Transform firePoint;
+    private Transform shellPoint;
 
     private int totalAmmo;
     private int currAmmo;
@@ -29,41 +32,52 @@ public class GunController : MonoBehaviour
     private float recoilRecoverySpeed;
 
     private bool triggerPulled;
+    private bool lookingLeft;
 
-    private float rotation;
-    private Vector2 firePoint;
-    
+    void Awake()
+    {
+        sr = GetComponent<SpriteRenderer>();
+    }
+
     void Update()
     {
-        recoilOffset = Vector2.Lerp(recoilOffset, Vector2.zero, Time.deltaTime * recoilRecoverySpeed);
-
         // fireInterval 간격으로 발사
         currFireTime -= Time.deltaTime;
         currFireTime = Mathf.Clamp(currFireTime, 0f, 10f);
         if(triggerPulled && currFireTime <= 0f && currAmmo > 0)
         {
+            var firePointRot = lookingLeft ? -firePoint.rotation.eulerAngles.z + 180f : firePoint.rotation.eulerAngles.z;
+
             // 새로운 총구 화염 인스턴스를 메모리 풀로부터 생성
             var muzzleFire = MemoryPool.Inst.GetInstance<MuzzleFire>(flashPrefab);
-            muzzleFire.Init(firePoint, rotation);
+            muzzleFire.Init(firePoint.position, firePointRot);
 
             // 새로운 총알 인스턴스를 메모리 풀로부터 생성
             if(!isMultiShot)
             {
-                CreateAmmo(rotation);
+                CreateAmmo(firePointRot);
             }
             else // isMultiShot이 true일 경우 한 번에 multiShellCount개의 인스턴스를 생성
             {
                 for(int i = 0; i < multiShellCount; i ++)
                 {
-                    CreateAmmo(Random.Range(rotation - multiShotSpread, rotation + multiShotSpread));
+                    CreateAmmo(Random.Range(firePointRot - multiShotSpread, firePointRot + multiShotSpread));
                 }
             }
 
-            // 반동 위치 오프셋 지정
-            recoilOffset.x = 0.5f;
+            // 탄피 생성
+            var newShell = MemoryPool.Inst.GetInstance<Shell>(shellPrefab);
+            newShell.Init(shellPoint.position, lookingLeft);
 
+            // 반동 위치 오프셋 지정
+            transform.localPosition = new Vector2(-0.6f, 0f);
+
+            // 다음 발사 딜레이 추가
             currFireTime += fireInterval;
         }
+
+        // 반동 오프셋 업데이트
+        transform.localPosition = Vector2.Lerp(transform.localPosition, Vector2.zero, Time.deltaTime * recoilRecoverySpeed);
     }
 
     // 방아쇠 당기기/놓기
@@ -72,35 +86,34 @@ public class GunController : MonoBehaviour
         triggerPulled = flag;
     }
 
+    // 방향 입력
+    public void InputDirection(bool isLeft)
+    {
+        lookingLeft = isLeft;
+    }
+
     // 총기 값 설정
     public void InputSpec(GunSpecValue spec, GunType type)
     {
+        gunType = type;
+
         totalAmmo = spec.maxAmmo;
         currAmmo = spec.maxAmmo;
         ammoSpeed = spec.ammoSpeed;
+        damage = spec.damage;
         fireInterval = spec.fireInterval;
         reloadTime = spec.reloadTime;
-        damage = spec.damage;
         recoilRecoverySpeed = spec.recoilRecoverySpeed;
-        gunType = type;
+
         isMultiShot = type == GunType.Shotgun;
-    }
 
-    // 회전 입력
-    public void InputRotation(float val)
-    {
-        rotation = val;
-    }
-
-    // 총구 위치 입력
-    public void InputFirePoint(Vector2 val)
-    {
-        firePoint = val;
+        firePoint = transform.Find("FirePoint");
+        shellPoint = transform.Find("ShellPoint");
     }
 
     private void CreateAmmo(float rotation)
     {
         var newBullet = MemoryPool.Inst.GetInstance<Bullet>(bulletPrefab);
-        newBullet.Init(firePoint, rotation, ammoSpeed, damage);
+        newBullet.Init(firePoint.position, rotation, ammoSpeed, damage);
     }
 }
