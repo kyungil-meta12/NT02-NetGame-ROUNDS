@@ -15844,6 +15844,10 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 1815189588298821311, guid: e27ba8795386f9248a6f00ea08648cbf, type: 3}
       propertyPath: m_Enabled
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2991341770912136506, guid: e27ba8795386f9248a6f00ea08648cbf, type: 3}
+      propertyPath: m_IsActive
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 6956409934956890959, guid: e27ba8795386f9248a6f00ea08648cbf, type: 3}
@@ -17328,6 +17332,7 @@ CanvasRenderer:
 SceneRoots:
   m_ObjectHideFlags: 0
   m_Roots:
+  - {fileID: 1917474321}
   - {fileID: 281833650}
   - {fileID: 1395349645}
   - {fileID: 1315926748}
@@ -17335,5 +17340,4 @@ SceneRoots:
   - {fileID: 301542580}
   - {fileID: 1895748602}
   - {fileID: 567985028}
-  - {fileID: 1917474321}
   - {fileID: 1106559213}
