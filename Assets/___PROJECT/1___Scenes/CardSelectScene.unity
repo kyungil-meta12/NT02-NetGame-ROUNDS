@@ -2085,6 +2085,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 2991341770912136506, guid: e27ba8795386f9248a6f00ea08648cbf, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 6956409934956890959, guid: e27ba8795386f9248a6f00ea08648cbf, type: 3}
       propertyPath: m_Name
       value: SingleTone Toolkits
