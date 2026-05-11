@@ -1922,16 +1922,20 @@ PrefabInstance:
       value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 9072122999544161167, guid: d8dd546af11c4684ead6b9318100468a, type: 3}
+      propertyPath: m_Sprite
+      value: 
+      objectReference: {fileID: 6447557908883669126, guid: 99ff995850aebcd46af4a5ef51343b3a, type: 3}
+    - target: {fileID: 9072122999544161167, guid: d8dd546af11c4684ead6b9318100468a, type: 3}
       propertyPath: m_Color.b
-      value: 0.269
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 9072122999544161167, guid: d8dd546af11c4684ead6b9318100468a, type: 3}
       propertyPath: m_Color.g
-      value: 0.15864186
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 9072122999544161167, guid: d8dd546af11c4684ead6b9318100468a, type: 3}
       propertyPath: m_Color.r
-      value: 0.11080456
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -7880,7 +7884,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e5f45762bc9a84906b62fb6b794a6feb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Color1: {r: 0.8207547, g: 0.18195976, b: 0.34367985, a: 1}
+  Color1: {r: 0, g: 0, b: 0, a: 1}
   Color2: {r: 0.6627451, g: 0.22352941, b: 0.7254902, a: 1}
   Angle: -90
 --- !u!114 &1490761084
@@ -19403,7 +19407,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e5f45762bc9a84906b62fb6b794a6feb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Color1: {r: 0.8207547, g: 0.18195976, b: 0.34367985, a: 1}
+  Color1: {r: 0, g: 0, b: 0, a: 1}
   Color2: {r: 0.6627451, g: 0.22352941, b: 0.7254902, a: 1}
   Angle: -90
 --- !u!1 &6704255907470360772
