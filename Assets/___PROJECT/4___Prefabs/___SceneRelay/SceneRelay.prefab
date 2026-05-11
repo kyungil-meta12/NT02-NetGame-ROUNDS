@@ -45,8 +45,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: dcdf959eea5b24c87ab626c662c26994, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::UltimateClean.SceneTransition
-  scene: <Insert scene name>
-  duration: 1
+  scene: StartScene
+  duration: 5
   color: {r: 0, g: 0, b: 0, a: 1}
 --- !u!114 &729403480395688675
 MonoBehaviour:
@@ -61,6 +61,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::SceneRelay
   sceneNames:
+  - StartScene
   - Abandoned station
   - Island pack
   - Mounts
