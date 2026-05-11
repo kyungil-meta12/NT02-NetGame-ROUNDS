@@ -13,8 +13,7 @@ public class AmmoIndicator : MonoBehaviour
     public TextMeshProUGUI numText;
     public Image icon;
     public Image reloadBar;
-    public Sprite defaultShellIcon;
-    public Sprite shotgunShellIcon;
+    public Sprite[] shellIcons;
 
     private int prevAmmo;
     private int currAmmo;
@@ -100,6 +99,6 @@ public class AmmoIndicator : MonoBehaviour
     /// <param name="type"></param>
     public void InputGunType(GunType type)
     {
-        icon.sprite = type == GunType.Shotgun ? shotgunShellIcon : defaultShellIcon;
+        icon.sprite = shellIcons[(int)type];
     }
 }
