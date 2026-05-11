@@ -27,7 +27,7 @@ public class GunController : MonoBehaviour
     private int damage;
 
     private float fireInterval;
-    private float currFireTime;
+    private DeltaTimer fireTimer = new();
 
     private float reloadDuration;
     private float currReloadTime = 0f;
@@ -54,9 +54,8 @@ public class GunController : MonoBehaviour
     void UpdateFire()
     {
         // fireInterval 간격으로 발사
-        currFireTime -= Time.deltaTime;
-        currFireTime = Mathf.Clamp(currFireTime, 0f, 10f);
-        if(triggerPulled && !reloadState && currFireTime <= 0f && currAmmo > 0)
+        fireTimer.Update();
+        if (fireTimer.CheckTime(fireInterval, CheckOption.Stop) && triggerPulled && !reloadState && currAmmo > 0)
         {
             var firePointRot = lookingLeft ? -firePoint.rotation.eulerAngles.z + 180f : firePoint.rotation.eulerAngles.z;
 
@@ -85,11 +84,11 @@ public class GunController : MonoBehaviour
             transform.localPosition = new Vector2(-0.6f, 0f);
 
             // 현재 장탄수를 인디케이터로 전달
-            currAmmo--;
-            AmmoIndicator.Inst.InputAmmo(currAmmo);
+            AmmoIndicator.Inst.InputAmmo(--currAmmo);
 
-            // 다음 발사 딜레이 추가
-            currFireTime += fireInterval;
+            // 발사 타이머 갱신 후 다시 시작
+            fireTimer.Reset();
+            fireTimer.SetRunningState(true);
         }
     }
 
@@ -156,6 +155,8 @@ public class GunController : MonoBehaviour
         shellPoint = transform.Find("ShellPoint");
         AmmoIndicator.Inst.InitAmmo(currAmmo);
         AmmoIndicator.Inst.InputGunType(type);
+
+        fireTimer.SetTime(fireInterval);
     }
 
     private void CreateAmmo(float rotation)

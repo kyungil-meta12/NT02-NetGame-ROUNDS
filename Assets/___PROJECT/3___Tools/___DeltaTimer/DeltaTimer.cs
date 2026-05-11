@@ -7,7 +7,7 @@ public enum CheckOption
     Stop,
     Reset,
     StopReset,
-    Interpolate
+    Interpolate,
 }
 
 public class DeltaTimer
@@ -23,6 +23,11 @@ public class DeltaTimer
         }
     }
 
+    public void SetTime(float val)
+    {
+        time = val;
+    }
+
     public void SetRunningState(bool flag)
     {
         isRunning = flag;
@@ -31,6 +36,11 @@ public class DeltaTimer
     public void Reset()
     {
         time = 0f;
+    }
+
+    public void Interpolate(float val)
+    {
+        time -= val;
     }
 
     public bool CheckTime(float destTime, CheckOption opt)
