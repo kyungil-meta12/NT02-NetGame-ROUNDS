@@ -2,14 +2,6 @@ using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
-public enum GunType {
-    Pistol = 0,
-    Smg = 1,
-    Shotgun = 2,
-    AR = 3,
-    Sniper = 4
-}
-
 public class Player : NetworkBehaviour
 {
     #region VALUES
