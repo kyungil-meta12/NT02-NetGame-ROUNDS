@@ -88,20 +88,14 @@ public class Player : NetworkBehaviour
     // [변경] Start 대신 OnNetworkSpawn 사용 (네트워크 오브젝트가 활성화될 때 호출)
     public override void OnNetworkSpawn()
     {
+        netFaceIndex.OnValueChanged += OnFaceIndexChanged;
+        netBodyIndex.OnValueChanged += OnBodyIndexChanged;
+
         // [변경] 물리 및 권한 설정 (클라이언트 이동 보장)
         if (IsOwner)
         {
             rb.bodyType = RigidbodyType2D.Dynamic;
             rb.simulated = true;
-
-            netFaceIndex.OnValueChanged += (oldValue, newValue) => {
-                ApplyFaceSprite(netFaceIndex.Value);
-            };
-
-            netBodyIndex.OnValueChanged += (oldValue, newValue) => {
-                ApplyBodySprite(netBodyIndex.Value);
-            };
-
             netFaceIndex.Value = Random.Range(0, faces.Length);
             netBodyIndex.Value = Random.Range(0, bodies.Length);
         }
@@ -119,8 +113,20 @@ public class Player : NetworkBehaviour
 
     public override void OnNetworkDespawn()
     {
-        netFaceIndex.OnValueChanged -= (oldValue, newValue) => { };
-        netBodyIndex.OnValueChanged -= (oldValue, newValue) => { };
+        // 3. [수정] 등록했던 기명 함수를 정확히 해제합니다.
+        netFaceIndex.OnValueChanged -= OnFaceIndexChanged;
+        netBodyIndex.OnValueChanged -= OnBodyIndexChanged;
+    }
+
+    // 4. [추가] 람다식 대신 사용할 콜백 메서드를 명시적으로 선언합니다.
+    private void OnFaceIndexChanged(int oldValue, int newValue)
+    {
+        ApplyFaceSprite(newValue);
+    }
+
+    private void OnBodyIndexChanged(int oldValue, int newValue)
+    {
+        ApplyBodySprite(newValue);
     }
 
     public void ApplyFaceSprite(int index)

@@ -2,7 +2,7 @@ using Unity.Netcode;
 using UnityEngine;
 
 [RequireComponent(typeof(GunSpec))]
-public class GunController : NetworkBehaviour
+public class GunController : MonoBehaviour
 {
     public PoolObject flashPrefab;
     public PoolObject bulletPrefab;
@@ -49,7 +49,7 @@ public class GunController : NetworkBehaviour
     void Update()
     {
         // [변경] 소유자(Owner)만 발사 로직을 계산하고 서버에 요청함
-        if (IsOwner)
+        if (netObject.IsOwner)
         {
            UpdateFire();
            UpdateReload();
@@ -156,7 +156,7 @@ public class GunController : NetworkBehaviour
         isMultiShot = type == GunType.Shotgun;
         firePoint = transform.Find("FirePoint"); 
         shellPoint = transform.Find("ShellPoint");
-        if(IsOwner) { 
+        if(netObject.IsOwner) { 
             AmmoIndicator.Inst.InitAmmo(currAmmo); 
             AmmoIndicator.Inst.InputGunType(type); 
         }
