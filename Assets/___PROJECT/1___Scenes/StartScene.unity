@@ -3053,7 +3053,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4781279897447431803, guid: e1ee6e553472b4dd8bc0a73835fad807, type: 3}
       propertyPath: m_text
-      value: Team Rounds
+      value: Team Mini Bites
       objectReference: {fileID: 0}
     - target: {fileID: 4781279897447431803, guid: e1ee6e553472b4dd8bc0a73835fad807, type: 3}
       propertyPath: m_fontSize
@@ -3141,7 +3141,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4781279898815579796, guid: e1ee6e553472b4dd8bc0a73835fad807, type: 3}
       propertyPath: m_SizeDelta.y
-      value: 488.61
+      value: 858.46
       objectReference: {fileID: 0}
     - target: {fileID: 4781279898815579796, guid: e1ee6e553472b4dd8bc0a73835fad807, type: 3}
       propertyPath: m_LocalScale.x
@@ -3189,7 +3189,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4781279898815579796, guid: e1ee6e553472b4dd8bc0a73835fad807, type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: -39
+      value: -0.24
       objectReference: {fileID: 0}
     - target: {fileID: 4781279898815579796, guid: e1ee6e553472b4dd8bc0a73835fad807, type: 3}
       propertyPath: m_LocalEulerAnglesHint.x
@@ -3221,7 +3221,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4781279899343287713, guid: e1ee6e553472b4dd8bc0a73835fad807, type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: 0.00090026855
+      value: 0.00061035156
       objectReference: {fileID: 0}
     - target: {fileID: 4858316508503852874, guid: e1ee6e553472b4dd8bc0a73835fad807, type: 3}
       propertyPath: 'm_ActiveFontFeatures.Array.data[0]'
@@ -3293,11 +3293,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6325855591693561737, guid: e1ee6e553472b4dd8bc0a73835fad807, type: 3}
       propertyPath: m_AnchorMax.y
-      value: 0.9999967
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 6325855591693561737, guid: e1ee6e553472b4dd8bc0a73835fad807, type: 3}
       propertyPath: m_AnchorMin.y
-      value: 0.05972107
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 6325855592186571934, guid: e1ee6e553472b4dd8bc0a73835fad807, type: 3}
       propertyPath: m_Size
