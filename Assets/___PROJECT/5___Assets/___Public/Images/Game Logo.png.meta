@@ -3,8 +3,14 @@ guid: f94ebbb08411869459e2779a8d3d3728
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: 6229114125728488102
-    second: Gemini_Generated_Image_9yds099yds099yds_0
+      213: -1942645314456094108
+    second: Game Logo_0
+  - first:
+      213: -582889221523359865
+    second: Game Logo_1
+  - first:
+      213: 2080156025147232272
+    second: Game Logo_2
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -46,12 +52,12 @@ TextureImporter:
   nPOTScale: 0
   lightmap: 0
   compressionQuality: 50
-  spriteMode: 1
+  spriteMode: 2
   spriteExtrude: 1
   spriteMeshType: 1
   alignment: 0
   spritePivot: {x: 0.5, y: 0.5}
-  spritePixelsToUnits: 2
+  spritePixelsToUnits: 100
   spriteBorder: {x: 0, y: 0, z: 0, w: 0}
   spriteGenerateFallbackPhysicsShape: 1
   alphaUsage: 1
@@ -126,7 +132,7 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: Gemini_Generated_Image_9yds099yds099yds_0
+      name: Game Logo_0
       rect:
         serializedVersion: 2
         x: 0
@@ -134,15 +140,15 @@ TextureImporter:
         width: 2760
         height: 773
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
-      tessellationDetail: -1
+      tessellationDetail: 0
       bones: []
-      spriteID: 6aa1a694b42427650800000000000000
-      internalID: 6229114125728488102
+      spriteID: 7d3454f0973f7864a9d4f148c38f64ad
+      internalID: -1942645314456094108
       vertices: []
       indices: 
       edges: []
@@ -159,9 +165,13 @@ TextureImporter:
     weights: []
     secondaryTextures: []
     spriteCustomMetadata:
-      entries: []
+      entries:
+      - key: SpriteEditor.SliceSettings
+        value: '{"sliceOnImport":false,"gridCellCount":{"x":1.0,"y":1.0},"gridSpriteSize":{"x":64.0,"y":64.0},"gridSpriteOffset":{"x":0.0,"y":0.0},"gridSpritePadding":{"x":0.0,"y":0.0},"pivot":{"x":0.5,"y":0.5},"pivotPixels":{"x":0.0,"y":0.0},"autoSlicingMethod":0,"spriteAlignment":0,"pivotUnitMode":0,"slicingType":0,"keepEmptyRects":false,"isAlternate":false}'
     nameFileIdTable:
-      Gemini_Generated_Image_9yds099yds099yds_0: 6229114125728488102
+      Game Logo_0: -1942645314456094108
+      Game Logo_1: -582889221523359865
+      Game Logo_2: 2080156025147232272
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 
