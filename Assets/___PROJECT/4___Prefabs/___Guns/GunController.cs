@@ -1,8 +1,5 @@
 using Unity.Netcode;
 using UnityEngine;
-using UnityEngine.InputSystem;
-using static UnityEditor.FilePathAttribute;
-using static UnityEngine.Rendering.DebugUI.Table;
 
 [RequireComponent(typeof(GunSpec))]
 public class GunController : NetworkBehaviour

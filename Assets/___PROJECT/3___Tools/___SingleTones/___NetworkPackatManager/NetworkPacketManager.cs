@@ -20,21 +20,6 @@ public class NetworkPacketManager : NetworkBehaviour
 
     #region Player Packets (플레이어 관련)
 
-    // [외형 동기화] 서버가 결정한 외형 정보를 모든 클라이언트에 전파
-    [Rpc(SendTo.Everyone)]
-    public void SyncPlayerAppearanceRpc(NetworkObjectReference playerRef, int faceIdx, int colorIdx)
-    {
-        if(playerRef.TryGet(out NetworkObject netObj))
-        {
-            var player = netObj.GetComponent<Player>();
-            if(player != null)
-            {
-                player.ApplyAppearance(faceIdx, colorIdx);
-            }
-        }
-    }
-
-
     // [데미지 요청] 클라이언트 -> 서버
     [Rpc(SendTo.Server)]
     public void RequestDamageServerRpc(NetworkObjectReference targetRef, int dmg)

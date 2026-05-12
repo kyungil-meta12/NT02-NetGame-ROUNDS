@@ -11,6 +11,7 @@ GameObject:
   - component: {fileID: 5777792114732598877}
   - component: {fileID: 3487779319290315879}
   - component: {fileID: 8318744206798290837}
+  - component: {fileID: 4895294368193811996}
   - component: {fileID: 559945844258102436}
   m_Layer: 0
   m_Name: Body
@@ -109,6 +110,31 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::GunHeightOffset
   spec: {fileID: 11400000, guid: c4c5f8fa04b15ae4c9d57819c5cb639d, type: 2}
+--- !u!114 &4895294368193811996
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1552513263724626976}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Unity.Netcode.Runtime::Unity.Netcode.NetworkObject
+  GlobalObjectIdHash: 0
+  InScenePlacedSourceGlobalObjectIdHash: 0
+  DeferredDespawnTick: 0
+  Ownership: 1
+  AlwaysReplicateAsRoot: 0
+  SynchronizeTransform: 1
+  ActiveSceneSynchronization: 0
+  SceneMigrationSynchronization: 1
+  SpawnWithObservers: 1
+  DontDestroyWithOwner: 0
+  AutoObjectParentSync: 1
+  SyncOwnerTransformWhenParented: 1
+  AllowOwnerToParent: 0
 --- !u!114 &559945844258102436
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -121,6 +147,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ef532b88a78bdc4468bc2ba429671918, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::GunController
+  ShowTopMostFoldoutHeaderGroup: 1
   flashPrefab: {fileID: 448729192722140316, guid: 75770807953a61e45a4a074299a7fe33, type: 3}
   bulletPrefab: {fileID: -6592787178303699396, guid: e8101bcb54789db4bb77c1f36c2aad24, type: 3}
   shellPrefab: {fileID: 5803152954781527603, guid: 41d99c452813cbd48b62e35ac54b3ee0, type: 3}

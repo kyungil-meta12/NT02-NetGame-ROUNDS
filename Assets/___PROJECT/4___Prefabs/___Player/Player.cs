@@ -1,8 +1,6 @@
 using Unity.Netcode;
-using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.InputSystem;
-using mat = MatrixTransform;
 
 public enum GunType {
     Pistol = 0,
@@ -98,21 +96,20 @@ public class Player : NetworkBehaviour
     // [변경] Start 대신 OnNetworkSpawn 사용 (네트워크 오브젝트가 활성화될 때 호출)
     public override void OnNetworkSpawn()
     {
-        netFaceIndex.OnValueChanged += (oldValue, newValue) => {
-            faceIndex = newValue;
-            ApplyAppearance(faceIndex, bodyIndex);
-        };
-
-        netBodyIndex.OnValueChanged += (oldValue, newValue) => {
-            bodyIndex = newValue;
-            ApplyAppearance(faceIndex, bodyIndex);
-        };
-
         // [변경] 물리 및 권한 설정 (클라이언트 이동 보장)
         if (IsOwner)
         {
             rb.bodyType = RigidbodyType2D.Dynamic;
             rb.simulated = true;
+
+            netFaceIndex.OnValueChanged += (oldValue, newValue) => {
+                ApplyFaceSprite(netFaceIndex.Value);
+            };
+
+            netBodyIndex.OnValueChanged += (oldValue, newValue) => {
+                ApplyBodySprite(netBodyIndex.Value);
+            };
+
             netFaceIndex.Value = Random.Range(0, faces.Length);
             netBodyIndex.Value = Random.Range(0, bodies.Length);
         }
@@ -120,7 +117,8 @@ public class Player : NetworkBehaviour
         {
             rb.bodyType = RigidbodyType2D.Kinematic;
             rb.simulated = true;
-            ApplyAppearance(netFaceIndex.Value, netBodyIndex.Value);
+            ApplyFaceSprite(netFaceIndex.Value);
+            ApplyBodySprite(netBodyIndex.Value);
         }
 
         groundLayer = LayerMask.NameToLayer("Ground");
@@ -133,20 +131,20 @@ public class Player : NetworkBehaviour
         netBodyIndex.OnValueChanged -= (oldValue, newValue) => { };
     }
 
-    // [추가] PacketManager 가 호출할 외형 적용 함수
-    public void ApplyAppearance(int faceIndex_, int bodyIndex_)
+    public void ApplyFaceSprite(int index)
     {
-        faceIndex = faceIndex_;
-        bodyIndex = bodyIndex_;
-
+        faceIndex = index;
         faceRenderer.sprite = faces[faceIndex];
-        bodyRenderer.sprite = bodies[bodyIndex];
+    }
 
+    public void ApplyBodySprite(int index)
+    {
+        bodyIndex = index;
+        bodyRenderer.sprite = bodies[bodyIndex];
         foreach (var hr in handRenderer)
         {
             hr.sprite = hands[bodyIndex];
         }
-
         deathParticleColor = GetBodyColor(bodies[bodyIndex]);
     }
 
