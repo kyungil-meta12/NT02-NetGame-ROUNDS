@@ -53,6 +53,8 @@ public class Bullet : PoolObject
             var targetNetworkObjec = c.collider.gameObject.GetComponent<NetworkObject>();
             if(targetNetworkObjec != null)
             {
+                // 서버 상에서 실제 대미지 입힘
+                NetworkPacketManager.Inst.RequestDamageServerRpc(targetNetworkObjec, damage);
                 // 피격 이펙트 생성
                 var newHit = MemoryPool.Inst.GetInstance<PlayerHit>(playerHitPrefab);
                 newHit.Init(c.contacts[0].point, 0f);

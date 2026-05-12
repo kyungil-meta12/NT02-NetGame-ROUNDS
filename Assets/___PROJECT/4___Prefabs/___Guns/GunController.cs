@@ -1,6 +1,8 @@
-using UnityEngine;
 using Unity.Netcode;
+using UnityEngine;
 using UnityEngine.InputSystem;
+using static UnityEditor.FilePathAttribute;
+using static UnityEngine.Rendering.DebugUI.Table;
 
 [RequireComponent(typeof(GunSpec))]
 public class GunController : NetworkBehaviour
@@ -28,7 +30,7 @@ public class GunController : NetworkBehaviour
     private int damage;
 
     private float fireInterval;
-    private DeltaTimer fireTimer = new();
+    private float currFireTime;
 
     private float reloadDuration;
     private float currReloadTime = 0f;
@@ -39,9 +41,12 @@ public class GunController : NetworkBehaviour
     private bool triggerPulled;
     private bool lookingLeft;
 
+    private NetworkObject netObject;
+
     void Awake()
     {
         sr = GetComponent<SpriteRenderer>();
+        netObject = transform.root.GetComponent<NetworkObject>();
     }
 
     void Update()
@@ -60,14 +65,27 @@ public class GunController : NetworkBehaviour
     {
         // fireInterval 간격으로 발사
         currFireTime -= Time.deltaTime;
+        currFireTime = Mathf.Clamp(currFireTime, 0f, fireInterval);
+
         if (triggerPulled && !reloadState && currFireTime <= 0f && currAmmo > 0)
         {
             var firePointRot = lookingLeft ? -firePoint.rotation.eulerAngles.z + 180f : firePoint.rotation.eulerAngles.z;
 
             // [변경] 직접 생성하지 않고 서버에 발사 요청
-            NetworkPacketManager.Inst.RequestFireServerRpc(
-                transform.root.GetComponent<NetworkObject>(),
-                firePointRot, firePoint.position, lookingLeft);
+            NetworkPacketManager.Inst.RequestCreateFireEffectServerRpc(netObject, firePoint.position, firePointRot, lookingLeft);
+
+            if (isMultiShot)
+            {
+                for (int i = 0; i < multiShellCount; i++)
+                {
+                    var randomRot = Random.Range(firePointRot - multiShotSpread, firePointRot + multiShotSpread);
+                    NetworkPacketManager.Inst.RequestCreateBulletServerRpc(netObject, firePoint.position, randomRot, ammoSpeed, damage);
+                }
+            }
+            else
+            {
+                NetworkPacketManager.Inst.RequestCreateBulletServerRpc(netObject, firePoint.position, firePointRot, ammoSpeed, damage);
+            }
 
             // [변경] 로컬 클라이언트에서 즉시 처리할 내용 (장탄수 UI 등)
             currAmmo--;
@@ -80,7 +98,7 @@ public class GunController : NetworkBehaviour
     }
 
     // [추가] 서버로부터 발사 승인을 받았을 때 모든 클라이언트에서 실행될 로직 (총알/이펙트 생성)
-    public void ExecuteFireEffects(float rotation, Vector2 pos, bool isLeft)
+    public void ExecuteCreateFireEffects(Vector2 pos, float rotation, bool isLeft)
     {
         // 총구 화염 및 탄피 생성 (시간 효과)
         var muzzleFire = MemoryPool.Inst.GetInstance<MuzzleFire>(flashPrefab);
@@ -88,16 +106,14 @@ public class GunController : NetworkBehaviour
         var newShell = MemoryPool.Inst.GetInstance<Shell>(shellPrefab);
         newShell.Init(shellPoint.position, isLeft);
 
-        // [변경] 실제 데미지를 주는 총알 생성을 여기서 처리 (동기화 보장)
-        if (!isMultiShot) CreateAmmo(rotation);
-        else
-        {
-            for (int i = 0; i < multiShellCount; i++)
-                CreateAmmo(Random.Range(rotation - multiShotSpread, rotation + multiShotSpread));
-        }
-
         // 비소유자 화면에서도 반동이 보이도록 설정
         transform.localPosition = new Vector2(-0.6f, 0f);
+    }
+
+    public void ExecuteCreateBullets(Vector2 pos, float rotation, float ammoSpeed, int dmg)
+    {
+        var newBullet = MemoryPool.Inst.GetInstance<Bullet>(bulletPrefab);
+        newBullet.Init(pos, rotation, ammoSpeed, dmg);
     }
 
     void UpdateReload()
@@ -116,24 +132,36 @@ public class GunController : NetworkBehaviour
         }
     }
 
-    private void CreateAmmo(float rot)
-    {
-        var newBullet = MemoryPool.Inst.GetInstance<Bullet>(bulletPrefab);
-        // [참고] Bullet 스크립트 내부에서 데미지 판정 시 PacketManager.Inst.RequestDamageServerRpc를 호출해야 함.
-        newBullet.Init(firePoint.position, rot, ammoSpeed, damage);
+    public void PullTrigger(bool flag) => triggerPulled = flag;
+
+    public void ReloadGun() { 
+        if (!reloadState && currAmmo < totalAmmo) 
+        { 
+            reloadState = true; 
+            triggerPulled = false; 
+        } 
     }
 
-    public void PullTrigger(bool flag) => triggerPulled = flag;
-    public void ReloadGun() { if (!reloadState && currAmmo < totalAmmo) { reloadState = true; triggerPulled = false; } }
     public void InputDirection(bool isLeft) => lookingLeft = isLeft;
+
     public void UpdateRecoilOffset() => transform.localPosition = Vector2.Lerp(transform.localPosition, Vector2.zero, Time.deltaTime * recoilRecoverySpeed);
 
     public void InputSpec(GunSpecValue spec, GunType type)
     {
-        gunType = type; totalAmmo = spec.maxAmmo; currAmmo = spec.maxAmmo;
-        ammoSpeed = spec.reloadTime; recoilRecoverySpeed = spec.recoilRecoverySpeed;
+        gunType = type; 
+        totalAmmo = spec.maxAmmo; 
+        currAmmo = spec.maxAmmo;
+        ammoSpeed = spec.ammoSpeed;
+        damage = spec.damage;
+        fireInterval = spec.fireInterval;
+        reloadDuration = spec.reloadTime;
+        recoilRecoverySpeed = spec.recoilRecoverySpeed;
         isMultiShot = type == GunType.Shotgun;
-        firePoint = transform.Find("FirePoint"); shellPoint = transform.Find("ShellPoint");
-        if(IsOwner) { AmmoIndicator.Inst.InitAmmo(currAmmo); AmmoIndicator.Inst.InputGunType(type); }
+        firePoint = transform.Find("FirePoint"); 
+        shellPoint = transform.Find("ShellPoint");
+        if(IsOwner) { 
+            AmmoIndicator.Inst.InitAmmo(currAmmo); 
+            AmmoIndicator.Inst.InputGunType(type); 
+        }
     }
 }

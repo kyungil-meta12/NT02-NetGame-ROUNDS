@@ -64,7 +64,6 @@ public class Player : NetworkBehaviour
 
     #endregion
 
-
     #region INPUTS
 
     private bool moveLeft = false, moveRight = false;
@@ -78,14 +77,15 @@ public class Player : NetworkBehaviour
 
     private int groundLayer;
     private int faceIndex;
+    private int bodyIndex;
     private Color deathParticleColor;
     private DeltaTimer faceTimer = new();
 
     // [변경] 조준 각도는 즉각적인 반응을 위해 NetworkVariable 유지 (나머지 RPC는 매니저로 이동)
     private NetworkVariable<float> netGunRotaion = new NetworkVariable<float>(0, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Owner);
-
-    private NetworkVariable<int> netFaceIndex = new NetworkVariable<int>(0, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
-    private NetworkVariable<int> netBodyIndex = new NetworkVariable<int>(0, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
+    private NetworkVariable<bool> netLookingLeft = new NetworkVariable<bool>(false, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Owner);
+    private NetworkVariable<int> netFaceIndex = new NetworkVariable<int>(0, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Owner);
+    private NetworkVariable<int> netBodyIndex = new NetworkVariable<int>(0, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Owner);
     #endregion
 
     void Awake()
@@ -95,56 +95,59 @@ public class Player : NetworkBehaviour
         faceTimer.SetRunningState(false);
     }
     
-    // [변경] Strat 대신 OnNetworkSpawn 사용 (네트워크 오브젝트가 활성화될 때 호출)
+    // [변경] Start 대신 OnNetworkSpawn 사용 (네트워크 오브젝트가 활성화될 때 호출)
     public override void OnNetworkSpawn()
     {
-        // [변경] 외형 결정 시 PacketManager를 통해 모든 클라이언트에 알림
-        if (IsServer)
-        {
-            int seed = (int)(System.DateTime.Now.Ticks % int.MaxValue) + (int)NetworkObjectId;
-            Random.InitState(seed);
+        netFaceIndex.OnValueChanged += (oldValue, newValue) => {
+            faceIndex = newValue;
+            ApplyAppearance(faceIndex, bodyIndex);
+        };
 
-            int fIdx = Random.Range(0, faces.Length);
-            int cIdx = Random.Range(0, bodies.Length);
-            NetworkPacketManager.Inst.SyncPlayerAppearanceRpc(NetworkObject, fIdx, cIdx);
-        }
-
-        // 값이 변경될 떄 실행될 콜백 등록 (나중에 들어온 유저도 자동 실행됨)
-        netFaceIndex.OnValueChanged += (oldV, newV) => ApplyAppearance(newV, netBodyIndex.Value);
-        netBodyIndex.OnValueChanged += (oldV, newV) => ApplyAppearance(netFaceIndex.Value, newV);
-
-        // 초기 값 즉시 적용
-        ApplyAppearance(netFaceIndex.Value, netBodyIndex.Value);
+        netBodyIndex.OnValueChanged += (oldValue, newValue) => {
+            bodyIndex = newValue;
+            ApplyAppearance(faceIndex, bodyIndex);
+        };
 
         // [변경] 물리 및 권한 설정 (클라이언트 이동 보장)
         if (IsOwner)
         {
             rb.bodyType = RigidbodyType2D.Dynamic;
             rb.simulated = true;
+            netFaceIndex.Value = Random.Range(0, faces.Length);
+            netBodyIndex.Value = Random.Range(0, bodies.Length);
         }
         else
         {
             rb.bodyType = RigidbodyType2D.Kinematic;
             rb.simulated = true;
+            ApplyAppearance(netFaceIndex.Value, netBodyIndex.Value);
         }
 
         groundLayer = LayerMask.NameToLayer("Ground");
         SetGun(currentGunType);
     }
 
-    // [추가] PacketManager 가 호출할 외형 적용 함수
-    public void ApplyAppearance(int fIdx, int cIdx)
+    public override void OnNetworkDespawn()
     {
-        faceIndex = fIdx;
-        if (faceIndex >= 0 && faceIndex < faces.Length)
-            faceRenderer.sprite = faces[faceIndex];
+        netFaceIndex.OnValueChanged -= (oldValue, newValue) => { };
+        netBodyIndex.OnValueChanged -= (oldValue, newValue) => { };
+    }
 
-        if(cIdx >= 0 && cIdx < bodies.Length)
+    // [추가] PacketManager 가 호출할 외형 적용 함수
+    public void ApplyAppearance(int faceIndex_, int bodyIndex_)
+    {
+        faceIndex = faceIndex_;
+        bodyIndex = bodyIndex_;
+
+        faceRenderer.sprite = faces[faceIndex];
+        bodyRenderer.sprite = bodies[bodyIndex];
+
+        foreach (var hr in handRenderer)
         {
-            bodyRenderer.sprite = bodies[cIdx];
-            foreach (var hr in handRenderer) hr.sprite = hands[cIdx];
-            deathParticleColor = GetBodyColor(bodies[cIdx]);
+            hr.sprite = hands[bodyIndex];
         }
+
+        deathParticleColor = GetBodyColor(bodies[bodyIndex]);
     }
 
     void Update()
@@ -153,12 +156,12 @@ public class Player : NetworkBehaviour
         {
             InputControl();
             netGunRotaion.Value = gunAxisRotation;
+            netLookingLeft.Value = lookingLeft;
         }
         else
         {
             gunAxisRotation = netGunRotaion.Value;
-            // [수정] 타인 캐릭터 방향 판정 로직
-            lookingLeft = (gunAxisRotation > 90f || gunAxisRotation < -90f);
+            lookingLeft = netLookingLeft.Value;
         }
 
         // 시각적 업데이트는 공통 실행
@@ -170,20 +173,20 @@ public class Player : NetworkBehaviour
 
     private void FixedUpdate()
     {
-        if (IsOwner) UpdateMove();
+        if (IsOwner)
+        {
+            UpdateMove();
+        }
     }
 
     // isOwner == true일 때 입력 받기
     void InputControl()
     {
-        var kbd = Keyboard.current;
-        if (kbd == null) return;
-
         moveLeft = Keyboard.current.aKey.isPressed;
         moveRight = Keyboard.current.dKey.isPressed;
 
         // [변경] wasPressedThisFrame 입력을 FixedUpdate에서 유실하지 않도록 플래그로 저장
-        if (kbd.spaceKey.wasPressedThisFrame && jumpAvailable)
+        if (Keyboard.current.spaceKey.wasPressedThisFrame && jumpAvailable)
         {
             jumpInput = true;
         }
@@ -196,11 +199,14 @@ public class Player : NetworkBehaviour
         lookingLeft = mouseWorldPos.x < transform.position.x;
 
         // [수정] 총 컨트롤 (방아쇠 당기기/놓기, 재장전, 방향입력)
-        if (gunController != null)
+        if (gunController)
         {
             gunController.PullTrigger(MouseManager.Inst.IsLeftPressing());
             gunController.InputDirection(lookingLeft);
-            if (kbd.rKey.wasPressedThisFrame) gunController.ReloadGun();
+            if (Keyboard.current.rKey.wasPressedThisFrame)
+            {
+                gunController.ReloadGun();
+            }
         }
     }
 
@@ -236,18 +242,12 @@ public class Player : NetworkBehaviour
         gunHand.rotation = gripPoint.rotation;
     }
 
-    //// isOwner == false일 때 패킷 처리하기
-    //void InputPacket()
-    //{
-
-    //} [삭제] Update의 else 문으로 통합됨.
-
-    // [변경] 기존 GiveDamage와 RequestDamageServerRpc를 PacketManager로 이전.
-    // 여기서는 서버가 계산 후 결과를 통보받는 로직만 남김.
     public void OnDamageCalculated(int dmg)
     {
-        if (!IsServer) return;
-        if (currHP <= 0) return;
+        if (!IsServer || currHP <= 0)
+        {
+            return;
+        }
 
         currHP -= dmg;
         currHP = Mathf.Clamp(currHP, 0, totalHP);
@@ -273,8 +273,8 @@ public class Player : NetworkBehaviour
     public void ExecuteDeathEffect(Color deathColor)
     {
         var newParticle = Instantiate(deathParticlePrefab, transform.position, Quaternion.identity);
-        var pd = newParticle.GetComponent<PlayerDeath>();
-        if (pd != null) pd.createColor = deathColor;
+        var playerDeathEffect = newParticle.GetComponent<PlayerDeath>();
+        playerDeathEffect.createColor = deathColor;
     }
 
     #region Colison & Visual

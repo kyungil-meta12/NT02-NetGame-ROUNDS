@@ -68,19 +68,33 @@ public class NetworkPacketManager : NetworkBehaviour
     #region Gun Packets (총기 관련)
     // [발사 요청] 클라이언트 -> 서버
     [Rpc(SendTo.Server)]
-    public void RequestFireServerRpc(NetworkObjectReference playerRef, float rotation, Vector2 pos, bool isLeft)
+    public void RequestCreateFireEffectServerRpc(NetworkObjectReference playerRef, Vector2 pos, float rotation, bool isLeft)
     {
         // 서버 검증 후 전파
-        FireEffectsRpc(playerRef, rotation, pos, isLeft);
+        FireEffectRpc(playerRef, pos, rotation, isLeft);
     }
 
     // [발사 연출] 서버 -> 모든 클라이언트
     [Rpc(SendTo.Everyone)]
-    public void FireEffectsRpc(NetworkObjectReference playerRef, float rotation, Vector2 pos, bool isLeft)
+    public void FireEffectRpc(NetworkObjectReference playerRef, Vector2 pos, float rotation, bool isLeft)
     {
         if(playerRef.TryGet(out NetworkObject netObj))
         {
-            netObj.GetComponentInChildren<GunController>().ExecuteFireEffects(rotation, pos, isLeft);
+            netObj.GetComponentInChildren<GunController>().ExecuteCreateFireEffects(pos, rotation, isLeft);
+        }
+    }
+
+    [Rpc(SendTo.Server)]
+    public void RequestCreateBulletServerRpc(NetworkObjectReference playerRef, Vector2 pos, float rotation, float ammoSpeed, int dmg)
+    {
+        CreateBulletRpc(playerRef, pos, rotation, ammoSpeed, dmg);
+    }
+
+    [Rpc(SendTo.Everyone)]
+    public void CreateBulletRpc(NetworkObjectReference playerRef, Vector2 pos, float rotation, float ammoSpeed, int dmg) { 
+        if(playerRef.TryGet(out NetworkObject netObj))
+        {
+            netObj.GetComponentInChildren<GunController>().ExecuteCreateBullets(pos, rotation, ammoSpeed, dmg);
         }
     }
     #endregion
