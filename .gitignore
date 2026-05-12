@@ -109,3 +109,4 @@ InitTestScene*.unity*
 # Private assets
 /[Aa]ssets/___PROJECT/5___Assets/___Private/**
 .idea
+Assets/___PROJECT/5___Assets/___Public/Fonts
