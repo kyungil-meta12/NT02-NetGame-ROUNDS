@@ -19,10 +19,6 @@ public class Player : NetworkBehaviour
     [Space(10)]
     public int totalHP = 100;
 
-    public NetworkVariable<int> currHP = new NetworkVariable<int>(100,
-        NetworkVariableReadPermission.Everyone,
-        NetworkVariableWritePermission.Server);
-
     [Space(10)]
     public HpBar hpBar;
 
@@ -82,31 +78,25 @@ public class Player : NetworkBehaviour
     private NetworkVariable<bool> netLookingLeft = new NetworkVariable<bool>(false, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Owner);
     private NetworkVariable<int> netFaceIndex = new NetworkVariable<int>(0, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Owner);
     private NetworkVariable<int> netBodyIndex = new NetworkVariable<int>(0, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Owner);
+    private NetworkVariable<int> netCurrHP = new NetworkVariable<int>(100, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
+
     #endregion
 
     void Awake()
     {
         rb = GetComponent<Rigidbody2D>();
-        //currHP = totalHP;
         faceTimer.SetRunningState(false);
+        netCurrHP = new NetworkVariable<int>(totalHP, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
     }
     
     // [변경] Start 대신 OnNetworkSpawn 사용 (네트워크 오브젝트가 활성화될 때 호출)
     public override void OnNetworkSpawn()
     {
         // HP 변경 이벤트 구독
-        currHP.OnValueChanged += OnHpChanged;
         netFaceIndex.OnValueChanged += OnFaceIndexChanged;
         netBodyIndex.OnValueChanged += OnBodyIndexChanged;
-
-        // 서버라면 초기 HP 설정
-        if (IsServer)
-        {
-            currHP.Value = totalHP;
-        }
-
-        // UI 초기화 (현재 HP 비율로)
-        UpdateHpUI(currHP.Value);
+        netCurrHP.OnValueChanged += OnHPChanged;
+        hpBar.SetTotalHp(totalHP);
 
         // [변경] 물리 및 권한 설정 (클라이언트 이동 보장)
         if (IsOwner)
@@ -130,46 +120,11 @@ public class Player : NetworkBehaviour
 
     public override void OnNetworkDespawn()
     {
-        // 3. [수정] 등록했던 기명 함수를 정확히 해제합니다.
         netFaceIndex.OnValueChanged -= OnFaceIndexChanged;
         netBodyIndex.OnValueChanged -= OnBodyIndexChanged;
-        currHP.OnValueChanged -= OnHpChanged;
+        netCurrHP.OnValueChanged -= OnHPChanged;
     }
 
-    // NetworkVariable의 값이 변경되었을 때 실행되는 콜백
-    private void OnHpChanged(int previousValue, int newValue)
-    {
-        if (hpBar == null)
-        {
-            return;
-        }
-
-        float currentRatio = (float)newValue / totalHP;
-
-        float damageDelta = hpBar.BarTarget - currentRatio;
-
-        if (damageDelta > 0)
-        {
-            // 데미지를 입었을 때만 TakeDamage 호출 (부드러운 감소 애니메이션)
-            hpBar.TakeDamage(damageDelta);
-        }
-        else
-        {
-            // 회복되었거나 값이 초기화된 경우 즉시 반영
-            hpBar.UpdateBar01(currentRatio);
-        }
-    }
-
-    // 실제 HpBar UI를 갱신하는 함수
-    private void UpdateHpUI(int health)
-    {
-        if (hpBar != null)
-        {
-            float ratio = (float)health / totalHP;
-            hpBar.UpdateBar01(ratio); // MMProgressBar의 기능 사용
-        }
-    }
-    // 4. [추가] 람다식 대신 사용할 콜백 메서드를 명시적으로 선언합니다.
     private void OnFaceIndexChanged(int oldValue, int newValue)
     {
         ApplyFaceSprite(newValue);
@@ -291,23 +246,26 @@ public class Player : NetworkBehaviour
 
     public void OnDamageCalculated(int dmg)
     {
-        if (!IsServer)
+        if(!IsServer)
         {
             return;
         }
 
-        currHP.Value -= dmg;
-        //currHP = Mathf.Clamp(currHP, 0, totalHP);
-
         // [변경] 피격 연출 명령을 PacketManager를 통해 전파
         NetworkPacketManager.Inst.PlayDamageEffectRpc(NetworkObject);
 
-        if(currHP.Value <= 0)
+        netCurrHP.Value -= dmg;
+        if(netCurrHP.Value <= 0)
         {
             // [변경] 사망 연출 명령 전파 후 서버에서 제거
             NetworkPacketManager.Inst.PerformDeathRpc(NetworkObject, deathParticleColor);
             GetComponent<NetworkObject>().Despawn();
         }
+    }
+
+    public void OnHPChanged(int prevValue, int newValue)
+    {
+        hpBar.SetCurrentHp(prevValue, newValue);
     }
 
     // [추가] PacketManager가 호출하는 연출 실행 함수들
@@ -422,4 +380,13 @@ public class Player : NetworkBehaviour
         return avgColor;
     }
     #endregion
+
+    private void OnApplicationQuit()
+    {
+        if (NetworkManager.Singleton != null)
+        {
+            NetworkManager.Singleton.Shutdown();
+            Debug.Log("Network Shutdown Complete");
+        }
+    }
 }

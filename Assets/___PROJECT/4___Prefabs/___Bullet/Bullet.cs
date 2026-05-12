@@ -5,6 +5,7 @@ public class Bullet : PoolObject
 {
     public PoolObject bulletHitPrefab;
     public PoolObject playerHitPrefab;
+    public bool isOwner;
 
     private Rigidbody2D rb;
     private Vector2 startPoint;
@@ -50,15 +51,18 @@ public class Bullet : PoolObject
         {
             // [수정] 직접 Player의 함수를 호출하는 대신, 매니저를 통해 서버에 데미지 계산을 요청함.
             // 이렇게 해야 서버에서 실제 HP를 깍고 모든 클라이언트에 동기화할 수 있음.
-            var targetNetworkObjec = c.collider.gameObject.GetComponent<NetworkObject>();
-            if(targetNetworkObjec != null)
-            {
-                // 서버 상에서 실제 대미지 입힘
-                NetworkPacketManager.Inst.RequestDamageServerRpc(targetNetworkObjec, damage);
-                // 피격 이펙트 생성
-                var newHit = MemoryPool.Inst.GetInstance<PlayerHit>(playerHitPrefab);
-                newHit.Init(c.contacts[0].point, 0f);
+            if(isOwner) {
+                var targetNetworkObject = c.collider.gameObject.GetComponent<NetworkObject>();
+                if(targetNetworkObject != null)
+                {
+                    // 서버 상에서 실제 대미지 입힘
+                    NetworkPacketManager.Inst.RequestDamageServerRpc(targetNetworkObject, damage);
+                    // 피격 이펙트 생성
+                }
             }
+
+            var newHit = MemoryPool.Inst.GetInstance<PlayerHit>(playerHitPrefab);
+            newHit.Init(c.contacts[0].point, 0f);
         }
 
         // 인스턴스 반환

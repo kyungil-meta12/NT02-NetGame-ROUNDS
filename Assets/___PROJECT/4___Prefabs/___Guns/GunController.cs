@@ -111,6 +111,7 @@ public class GunController : MonoBehaviour
     {
         var newBullet = MemoryPool.Inst.GetInstance<Bullet>(bulletPrefab);
         newBullet.Init(pos, rotation, ammoSpeed, dmg);
+        newBullet.isOwner = netObject.IsOwner;
     }
 
     void UpdateReload()
