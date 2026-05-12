@@ -337,23 +337,60 @@ MonoBehaviour:
     descriptionText: {fileID: 7465677150318635120}
   cards:
   - image: {fileID: -2613247888821195678, guid: 74deb0a3738e60c4da1d05220b0b1950, type: 3}
-    titleText: "1\uBC88 \uCE74\uB4DC \uD14C\uC2A4\uD2B8"
-    descriptionText: 11111
+    titleText: "\uD3ED\uBC1C \uD0C4\uD658"
+    descriptionText: "\uB9DE\uC73C\uBA74 \uD3ED\uBC1C\uD55C\uB2E4."
+  - image: {fileID: -32647617390296513, guid: 3e1722ed13a055c4d8ddb8f648711700, type: 3}
+    titleText: "\uD295\uAE30\uB294 \uD0C4\uD658"
+    descriptionText: "\uB9DE\uC73C\uBA74 \uD295\uAE34\uB2E4."
+  - image: {fileID: -586807851487928654, guid: a76cc66d839ecbb43ae54382f15fd9dd, type: 3}
+    titleText: "\uB354\uBE14 \uC810\uD504"
+    descriptionText: "\uACF5\uC911\uC5D0\uC11C \uD55C\uBC88 \uB354 \uC810\uD504\uD55C\uB2E4."
+  - image: {fileID: -7342888197859714306, guid: cdade202c89b4d64c9ad5ecefc433860, type: 3}
+    titleText: "\uB4DC\uB808\uC778"
+    descriptionText: "\uC0C1\uB300\uC5D0\uAC8C \uB9DE\uC73C\uBA74 \uD53C\uB97C \uD761\uC218\uD55C\uB2E4."
+  - image: {fileID: -24100650882214318, guid: de69ab667416c1d419435f6fbe5795ed, type: 3}
+    titleText: "\uC804\uB825 \uBC29\uCD9C"
+    descriptionText: "\uC8FC\uBCC0\uC5D0 \uC804\uAE30\uB97C \uBC29\uCD9C\uD55C\uB2E4."
+  - image: {fileID: 598551898483338459, guid: a4c5eee92df535f4487b9dce8328f0a3, type: 3}
+    titleText: "\uD0C4\uD658 \uCD94\uAC00"
+    descriptionText: "\uD0C4\uD658 \uCD5C\uB300\uCE58\uB97C \uCD94\uAC00\uD55C\uB2E4."
   - image: {fileID: 5702939079018767606, guid: 42d5c2f8fa9f94a4396d00ea23c286b1, type: 3}
-    titleText: "2\uBC88 \uCE74\uB4DC \uD14C\uC2A4\uD2B8"
-    descriptionText: 22222
+    titleText: "\uC18D\uB3C4 \uC5C5"
+    descriptionText: "\uC18D\uB3C4\uAC00 \uC99D\uAC00\uD55C\uB2E4."
+  - image: {fileID: -7042437971891203863, guid: 298e606617aeb124c9c4ee08281705dc, type: 3}
+    titleText: "\uD30C\uC774\uC5B4 \uC0F7"
+    descriptionText: "\uD0C4\uD658\uC5D0 \uBD88 \uC18D\uC131\uC744 \uBD80\uC5EC\uD55C\uB2E4."
+  - image: {fileID: 7507469104356688851, guid: 23b354460b5050940941d5c4be97e61b, type: 3}
+    titleText: "\uC720\uB839"
+    descriptionText: "\uC77C\uC815\uC2DC\uAC04\uB3D9\uC548 \uD22C\uBA85\uD574\uC9C4\uB2E4."
+  - image: {fileID: 2034547771773486921, guid: 8e210b542ab26db4aa580ce98169a4c3, type: 3}
+    titleText: "\uC720\uB3C4 \uD0C4\uD658"
+    descriptionText: "\uD0C4\uD658\uC774 \uC0C1\uB300\uBC29\uCABD\uC73C\uB85C \uC720\uB3C4\uB41C\uB2E4."
+  - image: {fileID: -1219256773698146634, guid: 1b8ace7ea104b9c45b72a98af98cf262, type: 3}
+    titleText: "\uAC70\uB300 \uD0C4\uD658"
+    descriptionText: "\uD0C4\uD658\uC774 \uCEE4\uC9C4\uB2E4."
+  - image: {fileID: 5853181419976155686, guid: 3bfaebb1502244b46926832c9717a3c0, type: 3}
+    titleText: "\uC544\uC774\uC2A4 \uC0F7"
+    descriptionText: "\uD0C4\uD658\uC5D0 \uC5BC\uC74C \uC18D\uC131\uC744 \uBD80\uC5EC\uD55C\uB2E4."
+  - image: {fileID: 2843675851291821527, guid: f4bd1f203abf7924aa43b66d8c3e9e16, type: 3}
+    titleText: "\uBA40\uD2F0 \uC0F7"
+    descriptionText: "\uD0C4\uD658\uC774 \uC5EC\uB7EC\uAC1C\uB85C \uBD84\uB9AC\uB41C\uB2E4."
+  - image: {fileID: -5824959857342159753, guid: f5a062c22f286204fb59cbbc720b4e38, type: 3}
+    titleText: "\uAD00\uD1B5 \uC0F7"
+    descriptionText: "\uD0C4\uD658\uC774 \uBCBD\uC744 \uAD00\uD1B5\uD55C\uB2E4."
+  - image: {fileID: -1144924851132978146, guid: 471b1d50e7f57484086a2e32571efc34, type: 3}
+    titleText: "\uB3C5 \uD0C4\uD658"
+    descriptionText: "\uD0C4\uD658\uC5D0 \uB3C5 \uC18D\uC131\uC744 \uBD80\uC5EC\uD55C\uB2E4."
+  - image: {fileID: 4832045231417606754, guid: 1c17dbe33bc8d5245abb603c83641860, type: 3}
+    titleText: "\uD30C\uC6CC \uC0F7"
+    descriptionText: "\uACF5\uACA9\uB825\uC774 \uC99D\uAC00\uD55C\uB2E4."
   - image: {fileID: 2389193319765324094, guid: 91065114a3adc55439b9df83f2dc24e0, type: 3}
-    titleText: "3\uBC88 \uCE74\uB4DC \uD14C\uC2A4\uD2B8"
-    descriptionText: 33333
-  - image: {fileID: 21300000, guid: 6c4748b96d947461b99d390bfc74a358, type: 3}
-    titleText: "4\uBC88 \uCE74\uB4DC \uD14C\uC2A4\uD2B8"
-    descriptionText: 44444
-  - image: {fileID: 21300000, guid: 8f0b1edf3a59b4facbfc4cfa29e3bc22, type: 3}
-    titleText: "5\uBC88 \uCE74\uB4DC \uD14C\uC2A4\uD2B8"
-    descriptionText: 55555
-  - image: {fileID: 21300000, guid: fe635417d973a42929c8f8783af6cc07, type: 3}
-    titleText: "6\uBC88 \uCE74\uB4DC \uD14C\uC2A4\uD2B8"
-    descriptionText: 66666
+    titleText: "\uBC29\uC5B4\uB9C9"
+    descriptionText: "\uC77C\uC815\uC2DC\uAC04\uB3D9\uC548 \uBC29\uC5B4\uB9C9\uC744
+      \uC0DD\uC131\uD55C\uB2E4."
+  - image: {fileID: 7074673420464186072, guid: afa6075eb1bdbb64baa456817760c06e, type: 3}
+    titleText: "\uC2A4\uD134 \uC0F7"
+    descriptionText: "\uB9DE\uC73C\uBA74 \uAE30\uC808\uD55C\uB2E4."
 --- !u!4 &215798211
 Transform:
   m_ObjectHideFlags: 0
@@ -1810,7 +1847,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 1, y: 1}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: -75, y: -75}
+  m_AnchoredPosition: {x: -1059.5, y: -160}
   m_SizeDelta: {x: 440.97144, y: 150.55396}
   m_Pivot: {x: 1, y: 1}
 --- !u!114 &1703243939
@@ -1826,15 +1863,15 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_Color: {r: 0.5990566, g: 0.6497546, b: 1, a: 1}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 1282028943509491997, guid: 72f7a32ac9c7676409eb438757bc6b4a, type: 3}
-  m_Type: 0
+  m_Sprite: {fileID: 21300000, guid: 9b75de00bdf9740988287b8df6afd5fb, type: 3}
+  m_Type: 1
   m_PreserveAspect: 0
   m_FillCenter: 1
   m_FillMethod: 4
@@ -49056,6 +49093,7 @@ GameObject:
   - component: {fileID: 446139488353004243}
   - component: {fileID: 229592798047972732}
   - component: {fileID: 8076264168690958791}
+  - component: {fileID: 8076264168690958792}
   m_Layer: 5
   m_Name: CardsUI_Card_4
   m_TagString: Untagged
@@ -49130,6 +49168,7 @@ GameObject:
   - component: {fileID: 446139488423330299}
   - component: {fileID: 229592798113973844}
   - component: {fileID: 8076264168627055343}
+  - component: {fileID: 8076264168627055344}
   m_Layer: 5
   m_Name: CardsUI_Card_3
   m_TagString: Untagged
@@ -49521,7 +49560,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 21300000, guid: d2adf4be30da08641a986dc1a035cbfe, type: 3}
+  m_Sprite: {fileID: 1059934417397043435, guid: a1b88b181b71b214c848aae081165e67, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -49664,6 +49703,7 @@ GameObject:
   - component: {fileID: 446139487670081893}
   - component: {fileID: 229592797667434186}
   - component: {fileID: 8076264168277013105}
+  - component: {fileID: 8076264168277013106}
   m_Layer: 5
   m_Name: CardsUI_Card_2
   m_TagString: Untagged
@@ -50511,7 +50551,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 21300000, guid: d2adf4be30da08641a986dc1a035cbfe, type: 3}
+  m_Sprite: {fileID: 1059934417397043435, guid: a1b88b181b71b214c848aae081165e67, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -50679,7 +50719,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 21300000, guid: d2adf4be30da08641a986dc1a035cbfe, type: 3}
+  m_Sprite: {fileID: 1059934417397043435, guid: a1b88b181b71b214c848aae081165e67, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -51222,6 +51262,7 @@ GameObject:
   - component: {fileID: 446139488640467149}
   - component: {fileID: 229592796218885986}
   - component: {fileID: 8076264168844749785}
+  - component: {fileID: 8076264168844749786}
   m_Layer: 5
   m_Name: CardsUI_Card_1
   m_TagString: Untagged
@@ -51458,7 +51499,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 21300000, guid: d2adf4be30da08641a986dc1a035cbfe, type: 3}
+  m_Sprite: {fileID: 1059934417397043435, guid: a1b88b181b71b214c848aae081165e67, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -51672,14 +51713,14 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 1, g: 1, b: 1, a: 0}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 0}
+  m_Sprite: {fileID: 21300000, guid: e15f73246d215fb418ab73bf265c21b1, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -51689,6 +51730,19 @@ MonoBehaviour:
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
   m_PixelsPerUnitMultiplier: 1
+--- !u!114 &8076264168277013106
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7465677150078165042}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 31a19414c41e5ae4aae2af33fee712f6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Mask
+  m_ShowMaskGraphic: 1
 --- !u!114 &8076264168627055343
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -51702,14 +51756,14 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 1, g: 1, b: 1, a: 0}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 0}
+  m_Sprite: {fileID: 21300000, guid: e15f73246d215fb418ab73bf265c21b1, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -51719,6 +51773,19 @@ MonoBehaviour:
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
   m_PixelsPerUnitMultiplier: 1
+--- !u!114 &8076264168627055344
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7465677149493409964}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 31a19414c41e5ae4aae2af33fee712f6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Mask
+  m_ShowMaskGraphic: 1
 --- !u!114 &8076264168690958791
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -51732,14 +51799,14 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 1, g: 1, b: 1, a: 0}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 0}
+  m_Sprite: {fileID: 21300000, guid: e15f73246d215fb418ab73bf265c21b1, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -51749,6 +51816,19 @@ MonoBehaviour:
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
   m_PixelsPerUnitMultiplier: 1
+--- !u!114 &8076264168690958792
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7465677149429519236}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 31a19414c41e5ae4aae2af33fee712f6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Mask
+  m_ShowMaskGraphic: 1
 --- !u!114 &8076264168844749785
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -51762,14 +51842,14 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 1, g: 1, b: 1, a: 0}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 0}
+  m_Sprite: {fileID: 21300000, guid: e15f73246d215fb418ab73bf265c21b1, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -51779,6 +51859,19 @@ MonoBehaviour:
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
   m_PixelsPerUnitMultiplier: 1
+--- !u!114 &8076264168844749786
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7465677151321323930}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 31a19414c41e5ae4aae2af33fee712f6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Mask
+  m_ShowMaskGraphic: 1
 --- !u!222 &8607773882824529207
 CanvasRenderer:
   m_ObjectHideFlags: 0
