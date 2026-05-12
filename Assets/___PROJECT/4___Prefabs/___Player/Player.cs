@@ -74,7 +74,6 @@ public class Player : NetworkBehaviour
 
     #endregion
 
-
     #region ETC
 
     private int groundLayer;
@@ -82,11 +81,12 @@ public class Player : NetworkBehaviour
     private Color deathParticleColor;
     private DeltaTimer faceTimer = new();
 
-    // [추가] 조준 각도를 동기화하기 위한 네트워크 변수
+    // [변경] 조준 각도는 즉각적인 반응을 위해 NetworkVariable 유지 (나머지 RPC는 매니저로 이동)
     private NetworkVariable<float> netGunRotaion = new NetworkVariable<float>(0, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Owner);
 
+    private NetworkVariable<int> netFaceIndex = new NetworkVariable<int>(0, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
+    private NetworkVariable<int> netBodyIndex = new NetworkVariable<int>(0, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
     #endregion
-
 
     void Awake()
     {
@@ -94,89 +94,146 @@ public class Player : NetworkBehaviour
         currHP = totalHP;
         faceTimer.SetRunningState(false);
     }
-
+    
     // [변경] Strat 대신 OnNetworkSpawn 사용 (네트워크 오브젝트가 활성화될 때 호출)
     public override void OnNetworkSpawn()
     {
-        // 외형 랜덤 지정
-        faceIndex = Random.Range(0, faces.Length);
-        faceRenderer.sprite = faces[faceIndex];
-        int colorIndex = Random.Range(0, hands.Length);
-        bodyRenderer.sprite = bodies[colorIndex];
-        foreach (var hr in handRenderer) { hr.sprite = hands[colorIndex]; }
-
-        // PlayerDeath 파티클에 사용할 색상 구하기 // 선택된 body 스프라이트를 샘플링하여 색상 구함
-        deathParticleColor = GetBodyColor(bodies[colorIndex]);
-
-        // 땅 레이어 저장
-        groundLayer = LayerMask.NameToLayer("Ground");
-
-        // 현재 들고있는 총의 스펙 값을 기반으로 값 지정
-        SetGun(currentGunType);
-
-        // [추가] 내가 아닌 캐릭터의 물리 연산 비활성화
-        // 소유자가 아닌 클라이언트에서 물리 시뮬레이션이 돌면 서버 위치와 충돌하여 캐릭터가 떨림.
-        if (!IsOwner)
+        // [변경] 외형 결정 시 PacketManager를 통해 모든 클라이언트에 알림
+        if (IsServer)
         {
-            rb.simulated = false;
+            int seed = (int)(System.DateTime.Now.Ticks % int.MaxValue) + (int)NetworkObjectId;
+            Random.InitState(seed);
+
+            int fIdx = Random.Range(0, faces.Length);
+            int cIdx = Random.Range(0, bodies.Length);
+            NetworkPacketManager.Inst.SyncPlayerAppearanceRpc(NetworkObject, fIdx, cIdx);
+        }
+
+        // 값이 변경될 떄 실행될 콜백 등록 (나중에 들어온 유저도 자동 실행됨)
+        netFaceIndex.OnValueChanged += (oldV, newV) => ApplyAppearance(newV, netBodyIndex.Value);
+        netBodyIndex.OnValueChanged += (oldV, newV) => ApplyAppearance(netFaceIndex.Value, newV);
+
+        // 초기 값 즉시 적용
+        ApplyAppearance(netFaceIndex.Value, netBodyIndex.Value);
+
+        // [변경] 물리 및 권한 설정 (클라이언트 이동 보장)
+        if (IsOwner)
+        {
+            rb.bodyType = RigidbodyType2D.Dynamic;
+            rb.simulated = true;
+        }
+        else
+        {
+            rb.bodyType = RigidbodyType2D.Kinematic;
+            rb.simulated = true;
+        }
+
+        groundLayer = LayerMask.NameToLayer("Ground");
+        SetGun(currentGunType);
+    }
+
+    // [추가] PacketManager 가 호출할 외형 적용 함수
+    public void ApplyAppearance(int fIdx, int cIdx)
+    {
+        faceIndex = fIdx;
+        if (faceIndex >= 0 && faceIndex < faces.Length)
+            faceRenderer.sprite = faces[faceIndex];
+
+        if(cIdx >= 0 && cIdx < bodies.Length)
+        {
+            bodyRenderer.sprite = bodies[cIdx];
+            foreach (var hr in handRenderer) hr.sprite = hands[cIdx];
+            deathParticleColor = GetBodyColor(bodies[cIdx]);
         }
     }
 
     void Update()
     {
-        if (IsOwner) // 자신이 조작하는 경우에만 입력 받음
+        if (IsOwner)
         {
             InputControl();
-            // 내 조준 각도를 네트워크 변수에 기록하여 다른 플레이어들에게 전송
             netGunRotaion.Value = gunAxisRotation;
         }
-        else // 아니라면 서버로부터 패킷을 받아 처리(위치, 손의 회전 각도 등)
+        else
         {
-            // [통합] InputPacket(); 대신 사용
-            // 타인의 경우 네트워크 변수로부터 각도를 받아와 동기화
             gunAxisRotation = netGunRotaion.Value;
-            // 각도에 따라 마우스 위치를 가상으로 설정하여 lookingLeft 로직 유지
-            mouseWorldPos = (gunAxisRotation > 90 || gunAxisRotation < -90) ?
-                (Vector2)transform.position + Vector2.left :
-                (Vector2)transform.position + Vector2.right;
+            // [수정] 타인 캐릭터 방향 판정 로직
+            lookingLeft = (gunAxisRotation > 90f || gunAxisRotation < -90f);
         }
 
+        // 시각적 업데이트는 공통 실행
         UpdateBody();
         UpdateGunAxis();
         UpdateGunHand();
         UpdateDamageFace();
     }
 
-    void FixedUpdate()
+    private void FixedUpdate()
     {
-        UpdateMove();
+        if (IsOwner) UpdateMove();
     }
 
     // isOwner == true일 때 입력 받기
     void InputControl()
     {
+        var kbd = Keyboard.current;
+        if (kbd == null) return;
+
         moveLeft = Keyboard.current.aKey.isPressed;
         moveRight = Keyboard.current.dKey.isPressed;
-        jumpInput = jumpAvailable && Keyboard.current.spaceKey.wasPressedThisFrame;
-        gunAxisRotation = Mathf.Rad2Deg * Mathf.Atan2(MouseManager.Inst.worldPos.y - body.position.y, MouseManager.Inst.worldPos.x - body.position.x);
+
+        // [변경] wasPressedThisFrame 입력을 FixedUpdate에서 유실하지 않도록 플래그로 저장
+        if (kbd.spaceKey.wasPressedThisFrame && jumpAvailable)
+        {
+            jumpInput = true;
+        }
 
         // 마우스 위치 얻기
         mouseWorldPos = MouseManager.Inst.worldPos;
+        gunAxisRotation = Mathf.Rad2Deg * Mathf.Atan2(mouseWorldPos.y - body.position.y, mouseWorldPos.x - body.position.x);
 
         // 뱡향 지정
         lookingLeft = mouseWorldPos.x < transform.position.x;
-        
-        // 총 방아쇠 당기기/놓기
-        gunController.PullTrigger(MouseManager.Inst.IsLeftPressing());
 
-        // 총 재장전하기
-        if(Keyboard.current.rKey.wasPressedThisFrame) 
+        // [수정] 총 컨트롤 (방아쇠 당기기/놓기, 재장전, 방향입력)
+        if (gunController != null)
         {
-            gunController.ReloadGun();
+            gunController.PullTrigger(MouseManager.Inst.IsLeftPressing());
+            gunController.InputDirection(lookingLeft);
+            if (kbd.rKey.wasPressedThisFrame) gunController.ReloadGun();
+        }
+    }
+
+    void UpdateMove()
+    {
+        // 좌우 이동
+        if (moveLeft != moveRight)
+        {
+            rb.AddForce(new Vector2(moveLeft ? -moveForce : moveForce, 0f), ForceMode2D.Force);
+            // [변경] linearVelocityX 대신 호환성을 위해 linearVelocity 사용
+            rb.linearVelocity = new Vector2(Mathf.Clamp(rb.linearVelocity.x, -moveSpeed, moveSpeed), rb.linearVelocity.y);
+        }
+        else
+        {
+            rb.linearVelocity = new Vector2(Mathf.Lerp(rb.linearVelocity.x, 0f, Time.fixedDeltaTime * 10f), rb.linearVelocity.y);
         }
 
-        // 방향 입력
-        gunController.InputDirection(lookingLeft);
+        // 점프 // 땅에 닿으면 점프 가능
+        if (jumpInput)
+        {
+            rb.AddForce(Vector2.up * jumpForce, ForceMode2D.Impulse);
+            jumpAvailable = false;
+            jumpInput = false; // 사용 후 즉시 리셋 (입력 중복 방지)
+        }
+    }
+
+    // 총 쥐는 손 업데이트
+    void UpdateGunHand()
+    {
+        // gripPoint나 gunHand가 할당되지 않았다면 함수를 실행하지 않고 나감
+        if (gripPoint == null || gunHand == null) return;
+        gunHand.position = gripPoint.position;
+        gunHand.rotation = gripPoint.rotation;
     }
 
     //// isOwner == false일 때 패킷 처리하기
@@ -185,69 +242,42 @@ public class Player : NetworkBehaviour
 
     //} [삭제] Update의 else 문으로 통합됨.
 
-    // --- [RPC 추가 : 데미지 및 사망 로직] ---
-    public void GiveDamage(int dmg)
+    // [변경] 기존 GiveDamage와 RequestDamageServerRpc를 PacketManager로 이전.
+    // 여기서는 서버가 계산 후 결과를 통보받는 로직만 남김.
+    public void OnDamageCalculated(int dmg)
     {
-        // 서버에게 데미지 계산을 요청
-        RequestDamageServerRpc(dmg);
-    }
-    [Rpc(SendTo.Server)] // 서버에서 실행
-    private void RequestDamageServerRpc(int dmg)
-    {
+        if (!IsServer) return;
         if (currHP <= 0) return;
 
         currHP -= dmg;
         currHP = Mathf.Clamp(currHP, 0, totalHP);
 
-        // 모든 클라이언트에게 피격 연출 명령
-        PlayDamageEffectRpc();
+        // [변경] 피격 연출 명령을 PacketManager를 통해 전파
+        NetworkPacketManager.Inst.PlayDamageEffectRpc(NetworkObject);
 
-        if(currHP == 0)
+        if(currHP <= 0)
         {
-            // 모든 클라이언트에게 사망 효과 명령 후 오브젝트 제거
-            PerformDeathRpc();
-            GetComponent<NetworkObject>().Despawn(); // 서버에서 오브젝트 제거 (모든 클라이언트 동기화)
+            // [변경] 사망 연출 명령 전파 후 서버에서 제거
+            NetworkPacketManager.Inst.PerformDeathRpc(NetworkObject, deathParticleColor);
+            GetComponent<NetworkObject>().Despawn();
         }
     }
 
-    [Rpc(SendTo.Everyone)] // 모든 클라이언트에서 실행
-    private void PlayDamageEffectRpc()
+    // [추가] PacketManager가 호출하는 연출 실행 함수들
+    public void ExecuteDamageEffect()
     {
         faceTimer.Reset();
         faceTimer.SetRunningState(true);
     }
 
-    [Rpc(SendTo.Everyone)]
-    private void PerformDeathRpc()
+    public void ExecuteDeathEffect(Color deathColor)
     {
         var newParticle = Instantiate(deathParticlePrefab, transform.position, Quaternion.identity);
-        newParticle.GetComponent<PlayerDeath>().createColor = deathParticleColor;
-        // [삭제] Destroy(gameObject) -> 서버의 Despawn()이 처리함
+        var pd = newParticle.GetComponent<PlayerDeath>();
+        if (pd != null) pd.createColor = deathColor;
     }
 
-    void UpdateMove()
-    {
-        // 좌우 이동
-        if(moveLeft != moveRight)
-        {
-            rb.AddForce(new Vector2(moveLeft ? -moveForce : moveForce, 0f), ForceMode2D.Force);
-            // 속도 제한
-            rb.linearVelocityX = Mathf.Clamp(rb.linearVelocityX, -moveSpeed, moveSpeed);
-        }
-        else
-        {
-            rb.linearVelocityX = Mathf.Lerp(rb.linearVelocityX, 0f, Time.fixedDeltaTime * 10f);
-        }
-
-        // 점프 // 땅에 닿으면 점프 가능
-        if(jumpInput)
-        {
-            rb.AddForce(Vector2.up * jumpForce, ForceMode2D.Impulse);
-            jumpAvailable = false;
-            jumpInput = false;
-        }
-    }
-
+    #region Colison & Visual
     void OnCollisionStay2D(Collision2D c)
     {
         // 땅 위에 있을 때 점프 가능
@@ -285,13 +315,6 @@ public class Player : NetworkBehaviour
     {
         gunAxis.position = body.position;
         gunAxis.rotation = Quaternion.Euler(lookingLeft ? 180f : 0f, 0f, lookingLeft ? -gunAxisRotation : gunAxisRotation);
-    }
-
-    // 총 쥐는 손 업데이트
-    void UpdateGunHand()
-    {
-        gunHand.position = gripPoint.position;
-        gunHand.rotation = gripPoint.rotation;
     }
 
     // 대미지를 받을 시 dmageFaceDuration 동안 대미지를 입는 표정을 짓는다
@@ -351,4 +374,5 @@ public class Player : NetworkBehaviour
 
         return avgColor;
     }
+    #endregion
 }

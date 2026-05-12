@@ -1,8 +1,9 @@
 using UnityEngine;
+using Unity.Netcode;
 using UnityEngine.InputSystem;
 
 [RequireComponent(typeof(GunSpec))]
-public class GunController : MonoBehaviour
+public class GunController : NetworkBehaviour
 {
     public PoolObject flashPrefab;
     public PoolObject bulletPrefab;
@@ -45,8 +46,12 @@ public class GunController : MonoBehaviour
 
     void Update()
     {
-       UpdateFire();
-       UpdateReload();
+        // [변경] 소유자(Owner)만 발사 로직을 계산하고 서버에 요청함
+        if (IsOwner)
+        {
+           UpdateFire();
+           UpdateReload();
+        }
        UpdateRecoilOffset();
     }
 
@@ -55,48 +60,49 @@ public class GunController : MonoBehaviour
     {
         // fireInterval 간격으로 발사
         currFireTime -= Time.deltaTime;
-        currFireTime = Mathf.Clamp(currFireTime, 0f, 10f);
-        if(triggerPulled && !reloadState && currFireTime <= 0f && currAmmo > 0)
+        if (triggerPulled && !reloadState && currFireTime <= 0f && currAmmo > 0)
         {
             var firePointRot = lookingLeft ? -firePoint.rotation.eulerAngles.z + 180f : firePoint.rotation.eulerAngles.z;
 
-            // 새로운 총구 화염 인스턴스를 메모리 풀로부터 생성
-            var muzzleFire = MemoryPool.Inst.GetInstance<MuzzleFire>(flashPrefab);
-            muzzleFire.Init(firePoint.position, firePointRot);
+            // [변경] 직접 생성하지 않고 서버에 발사 요청
+            NetworkPacketManager.Inst.RequestFireServerRpc(
+                transform.root.GetComponent<NetworkObject>(),
+                firePointRot, firePoint.position, lookingLeft);
 
-            // 새로운 총알 인스턴스를 메모리 풀로부터 생성
-            if(!isMultiShot)
-            {
-                CreateAmmo(firePointRot);
-            }
-            else // isMultiShot이 true일 경우 한 번에 multiShellCount개의 인스턴스를 생성
-            {
-                for(int i = 0; i < multiShellCount; i ++)
-                {
-                    CreateAmmo(Random.Range(firePointRot - multiShotSpread, firePointRot + multiShotSpread));
-                }
-            }
-
-            // 탄피 생성
-            var newShell = MemoryPool.Inst.GetInstance<Shell>(shellPrefab);
-            newShell.Init(shellPoint.position, lookingLeft);
-
-            // 반동 위치 오프셋 지정
-            transform.localPosition = new Vector2(-0.6f, 0f);
-
-            // 현재 장탄수를 인디케이터로 전달
+            // [변경] 로컬 클라이언트에서 즉시 처리할 내용 (장탄수 UI 등)
             currAmmo--;
             AmmoIndicator.Inst.InputAmmo(currAmmo);
+            currFireTime = fireInterval;
 
-            // 다음 발사 딜레이 추가
-            currFireTime += fireInterval;
+            // 로컬 반동 연출 (반응성을 위해 즉시 실행)
+            transform.localPosition = new Vector2(-0.6f, 0f);
         }
     }
 
-    // 재장전 업데이트
+    // [추가] 서버로부터 발사 승인을 받았을 때 모든 클라이언트에서 실행될 로직 (총알/이펙트 생성)
+    public void ExecuteFireEffects(float rotation, Vector2 pos, bool isLeft)
+    {
+        // 총구 화염 및 탄피 생성 (시간 효과)
+        var muzzleFire = MemoryPool.Inst.GetInstance<MuzzleFire>(flashPrefab);
+        muzzleFire.Init(pos, rotation);
+        var newShell = MemoryPool.Inst.GetInstance<Shell>(shellPrefab);
+        newShell.Init(shellPoint.position, isLeft);
+
+        // [변경] 실제 데미지를 주는 총알 생성을 여기서 처리 (동기화 보장)
+        if (!isMultiShot) CreateAmmo(rotation);
+        else
+        {
+            for (int i = 0; i < multiShellCount; i++)
+                CreateAmmo(Random.Range(rotation - multiShotSpread, rotation + multiShotSpread));
+        }
+
+        // 비소유자 화면에서도 반동이 보이도록 설정
+        transform.localPosition = new Vector2(-0.6f, 0f);
+    }
+
     void UpdateReload()
     {
-        if(reloadState)
+        if (reloadState)
         {
             currReloadTime += Time.deltaTime;
             if(currReloadTime >= reloadDuration)
@@ -110,57 +116,24 @@ public class GunController : MonoBehaviour
         }
     }
 
-    // 반동 오프셋 업데이트
-    void UpdateRecoilOffset()
-    {
-        transform.localPosition = Vector2.Lerp(transform.localPosition, Vector2.zero, Time.deltaTime * recoilRecoverySpeed);
-    }
-
-    // 방아쇠 당기기/놓기
-    public void PullTrigger(bool flag)
-    {
-        triggerPulled = flag;
-    }
-
-    public void ReloadGun()
-    {
-        if(!reloadState && currAmmo < totalAmmo)
-        {
-            reloadState = true;
-            triggerPulled = false;
-        }
-    }
-
-    // 방향 입력
-    public void InputDirection(bool isLeft)
-    {
-        lookingLeft = isLeft;
-    }
-
-    // 총기 값 설정
-    public void InputSpec(GunSpecValue spec, GunType type)
-    {
-        gunType = type;
-
-        totalAmmo = spec.maxAmmo;
-        currAmmo = spec.maxAmmo;
-        ammoSpeed = spec.ammoSpeed;
-        damage = spec.damage;
-        fireInterval = spec.fireInterval;
-        reloadDuration = spec.reloadTime;
-        recoilRecoverySpeed = spec.recoilRecoverySpeed;
-
-        isMultiShot = type == GunType.Shotgun;
-
-        firePoint = transform.Find("FirePoint");
-        shellPoint = transform.Find("ShellPoint");
-        AmmoIndicator.Inst.InitAmmo(currAmmo);
-        AmmoIndicator.Inst.InputGunType(type);
-    }
-
-    private void CreateAmmo(float rotation)
+    private void CreateAmmo(float rot)
     {
         var newBullet = MemoryPool.Inst.GetInstance<Bullet>(bulletPrefab);
-        newBullet.Init(firePoint.position, rotation, ammoSpeed, damage);
+        // [참고] Bullet 스크립트 내부에서 데미지 판정 시 PacketManager.Inst.RequestDamageServerRpc를 호출해야 함.
+        newBullet.Init(firePoint.position, rot, ammoSpeed, damage);
+    }
+
+    public void PullTrigger(bool flag) => triggerPulled = flag;
+    public void ReloadGun() { if (!reloadState && currAmmo < totalAmmo) { reloadState = true; triggerPulled = false; } }
+    public void InputDirection(bool isLeft) => lookingLeft = isLeft;
+    public void UpdateRecoilOffset() => transform.localPosition = Vector2.Lerp(transform.localPosition, Vector2.zero, Time.deltaTime * recoilRecoverySpeed);
+
+    public void InputSpec(GunSpecValue spec, GunType type)
+    {
+        gunType = type; totalAmmo = spec.maxAmmo; currAmmo = spec.maxAmmo;
+        ammoSpeed = spec.reloadTime; recoilRecoverySpeed = spec.recoilRecoverySpeed;
+        isMultiShot = type == GunType.Shotgun;
+        firePoint = transform.Find("FirePoint"); shellPoint = transform.Find("ShellPoint");
+        if(IsOwner) { AmmoIndicator.Inst.InitAmmo(currAmmo); AmmoIndicator.Inst.InputGunType(type); }
     }
 }

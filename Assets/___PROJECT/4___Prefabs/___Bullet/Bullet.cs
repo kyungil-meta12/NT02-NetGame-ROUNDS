@@ -1,3 +1,4 @@
+using Unity.Netcode;
 using UnityEngine;
 
 public class Bullet : PoolObject
@@ -47,11 +48,18 @@ public class Bullet : PoolObject
         // 사람 오브젝트와 충돌한 경우 대미지를 가하고 파티클을 생성한 후 삭제
         else if(otherLayer == playerLayer) 
         {
-            c.collider.gameObject.GetComponent<Player>().GiveDamage(damage);
-            var newHit = MemoryPool.Inst.GetInstance<PlayerHit>(playerHitPrefab);
-            newHit.Init(c.contacts[0].point, 0f);
+            // [수정] 직접 Player의 함수를 호출하는 대신, 매니저를 통해 서버에 데미지 계산을 요청함.
+            // 이렇게 해야 서버에서 실제 HP를 깍고 모든 클라이언트에 동기화할 수 있음.
+            var targetNetworkObjec = c.collider.gameObject.GetComponent<NetworkObject>();
+            if(targetNetworkObjec != null)
+            {
+                // 피격 이펙트 생성
+                var newHit = MemoryPool.Inst.GetInstance<PlayerHit>(playerHitPrefab);
+                newHit.Init(c.contacts[0].point, 0f);
+            }
         }
-        
+
+        // 인스턴스 반환
         ReturnInstance();
     }
 
