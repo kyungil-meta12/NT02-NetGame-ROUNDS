@@ -1,10 +1,12 @@
 using System;
 using UnityEngine;
+using Unity.Netcode;
 
 /// <summary>
 /// 각 플레이어가 가지는 스탯 데이터
+/// INetworkSerializble을 상속받아 RPC로 전송할 수 있게 만듭니다.
 /// </summary>
-public struct StatData
+public struct StatData : INetworkSerializable
 {
     // 예시
     // 추가 이동 속도, 추가 연사 딜레이 감소 등...
@@ -22,6 +24,22 @@ public struct StatData
     public float ammoSpeedMultiply;         //탄환 속도
     public int damagePlus;                  //탄환 데미지
     public float fireIntervalMultiply;      //연사 속도
+
+     public void NetworkSerialize<T>(BufferSerializer<T> serializer) where T : IReaderWriter
+    {
+        // 구조체 안에 있는 모든 변수들을 serializer.SerializeValue로 감사주기만 하면 됨.
+        serializer.SerializeValue(ref moveSpeedMultiply);
+        serializer.SerializeValue(ref jumpCountPlus);
+
+        serializer.SerializeValue(ref gunType);
+        serializer.SerializeValue(ref multiShotSpreadMultiply);
+        serializer.SerializeValue(ref multiShellCountPlus);
+        serializer.SerializeValue(ref isMultiShot);
+        serializer.SerializeValue(ref totalAmmoPlus);
+        serializer.SerializeValue(ref ammoSpeedMultiply);
+        serializer.SerializeValue(ref damagePlus);
+        serializer.SerializeValue(ref fireIntervalMultiply);
+    }
 }
 
 /// <summary>
