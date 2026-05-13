@@ -149,8 +149,8 @@ public class GunController : MonoBehaviour
         totalAmmo = ammoSize; 
         currAmmo = ammoSize;
         damage = spec.damage + (int)(spec.damage * 0.25f * PlayerManager.Inst.Stat.damageLevel);
-        ammoSpeed = spec.ammoSpeed + (int)(spec.ammoSpeed * 0.5f * PlayerManager.Inst.Stat.ammoSpeedLevel);
-        fireInterval = spec.fireInterval - (int)(spec.fireInterval * 0.25f * PlayerManager.Inst.Stat.fireSpeedLevel);
+        ammoSpeed = spec.ammoSpeed + (spec.ammoSpeed * 0.5f * PlayerManager.Inst.Stat.ammoSpeedLevel);
+        fireInterval = spec.fireInterval - (spec.fireInterval * 0.25f * PlayerManager.Inst.Stat.fireSpeedLevel);
         isMultiShot = type == GunType.Shotgun || PlayerManager.Inst.Stat.isMultiShot;
 
         reloadDuration = spec.reloadTime;
