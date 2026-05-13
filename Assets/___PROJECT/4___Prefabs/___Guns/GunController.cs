@@ -164,31 +164,4 @@ public class GunController : MonoBehaviour
             AmmoIndicator.Inst.InputGunType(type); 
         }
     }
-
-    public void ApplyExtraStats(StatData stat)
-    {
-        // 멀티샷 관련 설정
-        if (stat.isMultiShot)
-        {
-            this.isMultiShot = true;
-        }
-        this.multiShellCount += stat.multiShellCountPlus;
-        this.multiShotSpread += stat.multiShotSpreadMultiply;
-
-        // 공격력 및 탄속
-        this.damage += stat.damagePlus;
-        this.ammoSpeed += (this.ammoSpeed * stat.ammoSpeedMultiply);
-
-        // 장탄수 및 연사속도
-        this.totalAmmo += stat.totalAmmoPlus;
-        this.currAmmo = this.totalAmmo; // 최대 장탄수가 늘었으니 총알도 꽉 채워줌
-
-        this.fireInterval -= (this.fireInterval * stat.fireIntervalMultiply);
-
-        // 연사 딜레이가 0 이하로 떨어지면 버그가 발생하므로 최소치(예: 0.05초) 방어
-        if(this.fireInterval < 0.05f)
-        {
-            this.fireInterval = 0.05f;
-        }
-    }
 }
