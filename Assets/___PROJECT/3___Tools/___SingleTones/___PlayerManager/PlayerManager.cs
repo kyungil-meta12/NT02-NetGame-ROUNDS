@@ -57,15 +57,14 @@ public class PlayerManager : MonoBehaviour
         }
         Inst = this;
         DontDestroyOnLoad(gameObject);
-    }
 
-    private void Start()
-    {
+        // Awake에서 Player의 OnNetworkSpawn보다 확실하게 먼저 초기화되도록 한다
         Stat = new StatData
         {
             //플레이어 스탯
             moveSpeedMultiply = 1,
             jumpCountPlus = 0,
+            
             //총 스탯
             gunType = GunType.Pistol,
             multiShotSpreadMultiply = 0,

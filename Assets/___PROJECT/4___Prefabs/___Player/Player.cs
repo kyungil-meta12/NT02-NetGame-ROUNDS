@@ -23,7 +23,7 @@ public class Player : NetworkBehaviour
     public HpBar hpBar;
 
     [Space(10)]
-    public GunType currentGunType;
+   // public GunType currentGunType;
     public GameObject[] guns;
 
     [Space(10)]
@@ -79,6 +79,7 @@ public class Player : NetworkBehaviour
     private NetworkVariable<float> netGunRotaion = new NetworkVariable<float>(0, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Owner);
     private NetworkVariable<bool> netLookingLeft = new NetworkVariable<bool>(false, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Owner);
 
+    private NetworkVariable<GunType> netGunType = new NetworkVariable<GunType>(GunType.None, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Owner);
     private NetworkVariable<int> netCurrHP = new NetworkVariable<int>(100, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
     private NetworkVariable<int> netFaceIndex = new NetworkVariable<int>(0, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Owner);
     private NetworkVariable<int> netBodyIndex = new NetworkVariable<int>(0, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Owner);
@@ -100,6 +101,7 @@ public class Player : NetworkBehaviour
         netFaceIndex.OnValueChanged += OnFaceIndexChanged;
         netBodyIndex.OnValueChanged += OnBodyIndexChanged;
         netParticleColor.OnValueChanged += OnParticleColorChanged;
+        netGunType.OnValueChanged += OnGunTypeChanged;
         netCurrHP.OnValueChanged += OnHPChanged;
         hpBar.SetTotalHp(totalHP);
 
@@ -116,6 +118,9 @@ public class Player : NetworkBehaviour
             netBodyIndex.Value = PlayerManager.Inst.Appearance.bodyIndex;
             netFaceIndex.Value = PlayerManager.Inst.Appearance.faceIndex;
             netParticleColor.Value = PlayerManager.Inst.Appearance.particleColor;
+
+            // Stat으로부터 현재의 총 타입을 불러온다.
+            netGunType.Value = PlayerManager.Inst.Stat.gunType;
         }
         else
         {
@@ -127,7 +132,7 @@ public class Player : NetworkBehaviour
         }
 
         groundLayer = LayerMask.NameToLayer("Ground");
-        SetGun(currentGunType);
+       // SetGun(currentGunType);
     }
 
     public override void OnNetworkDespawn()
@@ -135,7 +140,13 @@ public class Player : NetworkBehaviour
         netFaceIndex.OnValueChanged -= OnFaceIndexChanged;
         netBodyIndex.OnValueChanged -= OnBodyIndexChanged;
         netParticleColor.OnValueChanged -= OnParticleColorChanged;
+        netGunType.OnValueChanged -= OnGunTypeChanged;
         netCurrHP.OnValueChanged -= OnHPChanged;
+    }
+
+    private void OnGunTypeChanged(GunType oldValue, GunType newValue)
+    {
+        SetGun(newValue);
     }
 
     private void OnFaceIndexChanged(int oldValue, int newValue)

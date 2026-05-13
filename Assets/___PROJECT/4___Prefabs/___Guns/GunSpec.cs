@@ -2,6 +2,7 @@ using UnityEngine;
 
 public enum GunType
 {
+    None = -1,
     Pistol = 0,
     Smg = 1,
     Shotgun = 2,
