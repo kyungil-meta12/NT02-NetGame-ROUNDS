@@ -35,7 +35,6 @@ public class Player : NetworkBehaviour
     public float moveForce;
     public float moveSpeed;
     public float jumpForce;
-    public int maxJumpCount;
 
     [Space(10)]
     public Sprite[] faces;
@@ -76,14 +75,14 @@ public class Player : NetworkBehaviour
     private DeltaTimer faceTimer = new();
 
     // [변경] 조준 각도는 즉각적인 반응을 위해 NetworkVariable 유지 (나머지 RPC는 매니저로 이동)
-    private NetworkVariable<float> netGunRotaion = new NetworkVariable<float>(0, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Owner);
-    private NetworkVariable<bool> netLookingLeft = new NetworkVariable<bool>(false, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Owner);
+    private NetworkVariable<float> netGunRotaion = new(0, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Owner);
+    private NetworkVariable<bool> netLookingLeft = new(false, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Owner);
 
-    private NetworkVariable<GunType> netGunType = new NetworkVariable<GunType>(GunType.None, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Owner);
-    private NetworkVariable<int> netCurrHP = new NetworkVariable<int>(100, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
-    private NetworkVariable<int> netFaceIndex = new NetworkVariable<int>(0, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Owner);
-    private NetworkVariable<int> netBodyIndex = new NetworkVariable<int>(0, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Owner);
-    private NetworkVariable<Color> netParticleColor = new NetworkVariable<Color>(Color.white, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Owner);
+    private NetworkVariable<int> netCurrHP;
+    private NetworkVariable<GunType> netGunType = new(GunType.None, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Owner);
+    private NetworkVariable<int> netFaceIndex = new(0, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Owner);
+    private NetworkVariable<int> netBodyIndex = new(0, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Owner);
+    private NetworkVariable<Color> netParticleColor = new(Color.white, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Owner);
 
     #endregion
 
@@ -91,7 +90,7 @@ public class Player : NetworkBehaviour
     {
         rb = GetComponent<Rigidbody2D>();
         faceTimer.SetRunningState(false);
-        netCurrHP = new NetworkVariable<int>(totalHP, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
+        netCurrHP = new(totalHP, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
     }
     
     // [변경] Start 대신 OnNetworkSpawn 사용 (네트워크 오브젝트가 활성화될 때 호출)
@@ -215,7 +214,7 @@ public class Player : NetworkBehaviour
         moveRight = Keyboard.current.dKey.isPressed;
 
         // [변경] wasPressedThisFrame 입력을 FixedUpdate에서 유실하지 않도록 플래그로 저장
-        if (Keyboard.current.spaceKey.wasPressedThisFrame && jumpCount < maxJumpCount)
+        if (Keyboard.current.spaceKey.wasPressedThisFrame && jumpCount < 1 + PlayerManager.Inst.Stat.jumpLevel)
         {
             jumpInput = true;
         }
@@ -244,9 +243,9 @@ public class Player : NetworkBehaviour
         // 좌우 이동
         if (moveLeft != moveRight)
         {
+            var speed = moveSpeed + (moveSpeed * 0.2f * PlayerManager.Inst.Stat.moveSpeedLevel);
             rb.AddForce(new Vector2(moveLeft ? -moveForce : moveForce, 0f), ForceMode2D.Force);
-            // [변경] linearVelocityX 대신 호환성을 위해 linearVelocity 사용
-            rb.linearVelocity = new Vector2(Mathf.Clamp(rb.linearVelocity.x, -moveSpeed, moveSpeed), rb.linearVelocity.y);
+            rb.linearVelocity = new Vector2(Mathf.Clamp(rb.linearVelocity.x, -speed, speed), rb.linearVelocity.y);
         }
         else
         {

@@ -10,9 +10,6 @@ public class GunController : MonoBehaviour
 
     public float multiShotSpread; // 여러발 발사 시 흩어지는 각도
     public int multiShellCount; // 한 번에 여러발을 발사할 때 발사되는 총알 개수
-    
-    [HideInInspector]
-    private GunType gunType; // 현재 사용 중인 총 타입
 
     [HideInInspector]
     public bool isMultiShot = false; // 샷건 등의 한 번에 여러발을 발사해야할 경우 활성화
@@ -73,9 +70,11 @@ public class GunController : MonoBehaviour
 
             if (isMultiShot)
             {
-                for (int i = 0; i < multiShellCount; i++)
+                var shellCount = multiShellCount + PlayerManager.Inst.Stat.multiShellCountLevel;
+                for (int i = 0; i < shellCount; i++)
                 {
-                    var randomRot = Random.Range(firePointRot - multiShotSpread, firePointRot + multiShotSpread);
+                    var spread = multiShotSpread + (multiShotSpread * 0.5f * PlayerManager.Inst.Stat.multiShotSpreadLevel);
+                    var randomRot = Random.Range(firePointRot - spread, firePointRot + spread);
                     NetworkPacketManager.Inst.RequestCreateBulletServerRpc(netObject, firePoint.position, randomRot, ammoSpeed, damage);
                 }
             }
@@ -146,17 +145,20 @@ public class GunController : MonoBehaviour
 
     public void InputSpec(GunSpecValue spec, GunType type)
     {
-        gunType = type; 
-        totalAmmo = spec.maxAmmo; 
-        currAmmo = spec.maxAmmo;
-        ammoSpeed = spec.ammoSpeed;
-        damage = spec.damage;
-        fireInterval = spec.fireInterval;
+        var ammoSize = spec.maxAmmo + (int)(spec.maxAmmo * 0.5f * PlayerManager.Inst.Stat.totalAmmoLevel);
+        totalAmmo = ammoSize; 
+        currAmmo = ammoSize;
+        damage = spec.damage + (int)(spec.damage * 0.25f * PlayerManager.Inst.Stat.damageLevel);
+        ammoSpeed = spec.ammoSpeed + (int)(spec.ammoSpeed * 0.5f * PlayerManager.Inst.Stat.ammoSpeedLevel);
+        fireInterval = spec.fireInterval - (int)(spec.fireInterval * 0.25f * PlayerManager.Inst.Stat.fireSpeedLevel);
+        isMultiShot = type == GunType.Shotgun || PlayerManager.Inst.Stat.isMultiShot;
+
         reloadDuration = spec.reloadTime;
         recoilRecoverySpeed = spec.recoilRecoverySpeed;
-        isMultiShot = type == GunType.Shotgun;
+
         firePoint = transform.Find("FirePoint"); 
         shellPoint = transform.Find("ShellPoint");
+
         if(netObject.IsOwner) { 
             AmmoIndicator.Inst.InitAmmo(currAmmo); 
             AmmoIndicator.Inst.InputGunType(type); 

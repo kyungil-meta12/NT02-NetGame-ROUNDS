@@ -35638,6 +35638,70 @@ PrefabInstance:
       propertyPath: m_Name
       value: PlayerManager
       objectReference: {fileID: 0}
+    - target: {fileID: 4058013427074364643, guid: 21d702e8c9934ff4798f38f1dd70cd8d, type: 3}
+      propertyPath: testMode
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4058013427074364643, guid: 21d702e8c9934ff4798f38f1dd70cd8d, type: 3}
+      propertyPath: TestStat.gunType
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4058013427074364643, guid: 21d702e8c9934ff4798f38f1dd70cd8d, type: 3}
+      propertyPath: TestStat.jumpLevel
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 4058013427074364643, guid: 21d702e8c9934ff4798f38f1dd70cd8d, type: 3}
+      propertyPath: TestStat.damageLevel
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 4058013427074364643, guid: 21d702e8c9934ff4798f38f1dd70cd8d, type: 3}
+      propertyPath: TestStat.isMultiShot
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4058013427074364643, guid: 21d702e8c9934ff4798f38f1dd70cd8d, type: 3}
+      propertyPath: TestStat.jumpCountPlus
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4058013427074364643, guid: 21d702e8c9934ff4798f38f1dd70cd8d, type: 3}
+      propertyPath: TestStat.totalAmmoPlus
+      value: 20
+      objectReference: {fileID: 0}
+    - target: {fileID: 4058013427074364643, guid: 21d702e8c9934ff4798f38f1dd70cd8d, type: 3}
+      propertyPath: TestStat.ammoSpeedLevel
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 4058013427074364643, guid: 21d702e8c9934ff4798f38f1dd70cd8d, type: 3}
+      propertyPath: TestStat.fireSpeedLevel
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 4058013427074364643, guid: 21d702e8c9934ff4798f38f1dd70cd8d, type: 3}
+      propertyPath: TestStat.moveSpeedLevel
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 4058013427074364643, guid: 21d702e8c9934ff4798f38f1dd70cd8d, type: 3}
+      propertyPath: TestStat.totalAmmoLevel
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 4058013427074364643, guid: 21d702e8c9934ff4798f38f1dd70cd8d, type: 3}
+      propertyPath: TestStat.ammoSpeedMultiply
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 4058013427074364643, guid: 21d702e8c9934ff4798f38f1dd70cd8d, type: 3}
+      propertyPath: TestStat.moveSpeedMultiply
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4058013427074364643, guid: 21d702e8c9934ff4798f38f1dd70cd8d, type: 3}
+      propertyPath: TestStat.fireIntervalMultiply
+      value: 0.25
+      objectReference: {fileID: 0}
+    - target: {fileID: 4058013427074364643, guid: 21d702e8c9934ff4798f38f1dd70cd8d, type: 3}
+      propertyPath: TestStat.multiShellCountLevel
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 4058013427074364643, guid: 21d702e8c9934ff4798f38f1dd70cd8d, type: 3}
+      propertyPath: TestStat.multiShotSpreadLevel
+      value: 3
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -35717,6 +35781,7 @@ SceneRoots:
   - {fileID: 8773308740963701643}
   - {fileID: 7578745915595687444}
   - {fileID: 9049203600372395012}
+  - {fileID: 1550084952}
   - {fileID: 1166441685}
   - {fileID: 1571445765}
   - {fileID: 1263409370}
@@ -35729,6 +35794,5 @@ SceneRoots:
   - {fileID: 757005480}
   - {fileID: 1130647173}
   - {fileID: 448437843}
-  - {fileID: 1550084952}
   - {fileID: 96031802}
   - {fileID: 622167727}

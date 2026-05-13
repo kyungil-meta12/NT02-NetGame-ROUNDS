@@ -124,8 +124,8 @@ MonoBehaviour:
   flashPrefab: {fileID: 448729192722140316, guid: 75770807953a61e45a4a074299a7fe33, type: 3}
   bulletPrefab: {fileID: -6592787178303699396, guid: e8101bcb54789db4bb77c1f36c2aad24, type: 3}
   shellPrefab: {fileID: -7961807998976773805, guid: 75799c81e68638e4aabd84fcd7f35f11, type: 3}
-  multiShotSpread: 0
-  multiShellCount: 0
+  multiShotSpread: 2.5
+  multiShellCount: 1
   isMultiShot: 0
 --- !u!1 &2489722115364675227
 GameObject:
