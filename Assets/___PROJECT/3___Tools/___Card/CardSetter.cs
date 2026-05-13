@@ -2,6 +2,7 @@ using System;
 using System.Linq;
 using TMPro;
 using UltimateClean;
+using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.UI;
 using Random = UnityEngine.Random;
@@ -60,6 +61,7 @@ public class CardSetter : MonoBehaviour
     public void ConfirmCard()
     {
         //카드 선택
+        if(selectedIndex == -1) return; // 카드 미선택 방지
         Debug.Log($"선택된 카드는 {cards[randomIndices[selectedIndex]].titleText}");
         //카드별 능력 적용
         switch (randomIndices[selectedIndex])
@@ -98,9 +100,31 @@ public class CardSetter : MonoBehaviour
                 PlayerManager.Inst.ReplaceTheGunToSniper();
                 break;
         }
-        //다음 게임 씬으로 연결
-        sceneRelay.SetNextScene(GameManager.Inst.currentRound + 1);
-        sceneTransition.PerformTransition();
+
+        // 다음 게임 씬 정보 가져오기
+        // GameManager의 currentRound를 증가시키고 SceneRelay에서 다음 씬 이름을 가져옴
+        int nextRound = GameManager.Inst.currentRound + 1;
+
+        // SceneRelay에서 다음 씬 이름을 미리 세팅하거나 가져옴.
+        if(nextRound < sceneRelay.sceneNames.Length)
+        {
+            string nextSceneName = sceneRelay.sceneNames[nextRound];
+
+            // [수정] 내가 서버(Host)라면 즉시 실행, 클라이언트라면 서버에 요청하는 로직이 필요하지만
+            // 현재 NetworkPacketManager에 ServerRpc가 없으므로 
+            // 일단 서버(Host)인 플레이어만 씬 전환 버튼을 누를 수 있도록 하거나, 
+            // NetworkPacketManager에 서버 전용 씬 전환 RPC를 추가해야 함.
+
+            if (NetworkManager.Singleton.IsServer)
+            {
+                NetworkPacketManager.Inst.TransitionToCardSelectRpc(nextSceneName);
+                GameManager.Inst.currentRound = nextRound;
+            }
+        }
+        else
+        {
+            Debug.Log($"다음 스테이지가 sceneName 배열에 없습니다!");
+        }
     }
 }
 
