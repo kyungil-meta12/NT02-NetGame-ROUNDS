@@ -1,3 +1,4 @@
+using Unity.Collections;
 using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -120,6 +121,12 @@ public class Player : NetworkBehaviour
 
             // Stat으로부터 현재의 총 타입을 불러온다.
             netGunType.Value = PlayerManager.Inst.Stat.gunType;
+
+            // [추가] 내 캐릭터가 생성될 때, 내 로컬(Playerkmanager)에 저장된 스탯을 서버로 보냄
+            if (IsOwner)
+            {
+                ApplyMyStatsServerRpc(PlayerManager.Inst.Stat);
+            }
         }
         else
         {
@@ -132,6 +139,33 @@ public class Player : NetworkBehaviour
 
         groundLayer = LayerMask.NameToLayer("Ground");
        // SetGun(currentGunType);
+    }
+
+    // [서버 RPC] 클라이언트의 스탯을 받아 서버에서 검증/처리 후 모두에게 전파
+    [Rpc(SendTo.Server)]
+    public void ApplyMyStatsServerRpc(StatData myStat)
+    {
+        // 체력 등 서버 권한이 필요한 스탯이 있다면 계산 후 NetworkVariable 업데이트
+        // 예 : totalHp += myStat.maxHpPlus; currHP.Value = totalHP;
+        ApplyMyStatsClientRpc(myStat);
+    }
+
+    // [클라이언트 RPC] 모든 클라이언트의 화면에서 해당 플레이어의 스탯과 외형을 동일하게 적용
+    [Rpc(SendTo.Everyone)]
+    public void ApplyMyStatsClientRpc(StatData myStat)
+    {
+        // 플레이어 본체 스탯 적용
+        moveSpeed += (moveSpeed * myStat.moveSpeedMultiply);
+        maxJumpCount += myStat.jumpCountPlus;
+
+        // 총기 교체 (Player.cs의 기존 함수 재활용)
+        SetGun(myStat.gunType);
+
+        // 교체된 총기에 세부 스탯(데미지, 멀티샷 등) 덮어씌우기
+        if (gunController != null)
+        {
+            gunController.ApplyExtraStats(myStat);
+        }
     }
 
     public override void OnNetworkDespawn()

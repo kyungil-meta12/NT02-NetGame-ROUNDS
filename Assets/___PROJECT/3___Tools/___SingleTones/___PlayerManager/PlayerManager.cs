@@ -1,8 +1,10 @@
 using System;
 using UnityEngine;
+using Unity.Netcode;
 
 /// <summary>
 /// 각 플레이어가 가지는 스탯 데이터
+/// INetworkSerializble을 상속받아 RPC로 전송할 수 있게 만듭니다.
 /// </summary>
 [Serializable]
 public struct StatData
