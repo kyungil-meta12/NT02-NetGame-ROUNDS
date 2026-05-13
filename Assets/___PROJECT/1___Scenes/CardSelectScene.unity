@@ -322,6 +322,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CardSetter
   selectedNumberText: {fileID: 1498939164}
+  sceneRelay: {fileID: 1163452989}
   cardUI:
   - image: {fileID: 5711967458404339753}
     titleText: {fileID: 7465677149381962328}
@@ -338,38 +339,41 @@ MonoBehaviour:
   cards:
   - image: {fileID: -586807851487928654, guid: a76cc66d839ecbb43ae54382f15fd9dd, type: 3}
     titleText: "\uB354\uBE14 \uC810\uD504"
-    descriptionText: "\uACF5\uC911\uC5D0\uC11C \uD55C\uBC88 \uB354 \uC810\uD504\uD55C\uB2E4."
+    descriptionText: "\uC810\uD504 +1<br><br>\uACF5\uC911\uC5D0\uC11C \uD55C\uBC88
+      \uB354 \uC810\uD504\uD55C\uB2E4."
   - image: {fileID: 598551898483338459, guid: a4c5eee92df535f4487b9dce8328f0a3, type: 3}
     titleText: "\uD0C4\uD658 \uCD94\uAC00"
-    descriptionText: "\uD0C4\uD658 \uCD5C\uB300\uCE58\uB97C \uCD94\uAC00\uD55C\uB2E4."
+    descriptionText: "\uD0C4\uD658 \uCD5C\uB300\uCE58 +10<br><br>\uD0C4\uD658 \uCD5C\uB300\uCE58\uB97C
+      \uCD94\uAC00\uD55C\uB2E4."
   - image: {fileID: 5702939079018767606, guid: 42d5c2f8fa9f94a4396d00ea23c286b1, type: 3}
     titleText: "\uC18D\uB3C4 \uC5C5"
-    descriptionText: "\uC18D\uB3C4\uAC00 \uC99D\uAC00\uD55C\uB2E4."
-  - image: {fileID: -1219256773698146634, guid: 1b8ace7ea104b9c45b72a98af98cf262, type: 3}
-    titleText: "\uAC70\uB300 \uD0C4\uD658"
-    descriptionText: "\uD0C4\uD658\uC774 \uCEE4\uC9C4\uB2E4."
+    descriptionText: "\uD50C\uB808\uC774\uC5B4 \uC18D\uB3C4 +20%<br><br>\uC18D\uB3C4\uAC00
+      \uC99D\uAC00\uD55C\uB2E4."
   - image: {fileID: 4832045231417606754, guid: 1c17dbe33bc8d5245abb603c83641860, type: 3}
     titleText: "\uD30C\uC6CC \uC0F7"
-    descriptionText: "\uACF5\uACA9\uB825\uC774 \uC99D\uAC00\uD55C\uB2E4."
+    descriptionText: "\uB370\uBBF8\uC9C0 +10<br><br>\uACF5\uACA9\uB825\uC774 \uC99D\uAC00\uD55C\uB2E4."
   - image: {fileID: -7144642614502659479, guid: f50e8b06abd458d42a22fa9d80396fcc, type: 3}
     titleText: "\uD328\uC2A4\uD2B8 \uC0F7"
-    descriptionText: "\uD0C4\uD658\uC758 \uC18D\uB3C4\uAC00 \uC99D\uAC00\uD55C\uB2E4."
+    descriptionText: "\uD0C4\uD658 \uC18D\uB3C4 +20%<br><br>\uD0C4\uD658\uC758 \uC18D\uB3C4\uAC00
+      \uC99D\uAC00\uD55C\uB2E4."
   - image: {fileID: -6068046880505212259, guid: d8f226234ab01ca40aee45cde1a957a1, type: 3}
     titleText: "\uC5F0\uC0AC \uC18D\uB3C4"
-    descriptionText: "\uD0C4\uD658\uC758 \uC5F0\uC0AC \uC18D\uB3C4\uAC00 \uC99D\uAC00\uD55C\uB2E4."
+    descriptionText: "\uC5F0\uC0AC \uC18D\uB3C4 +20%<br><br>\uD0C4\uD658\uC758 \uC5F0\uC0AC
+      \uC18D\uB3C4\uAC00 \uC99D\uAC00\uD55C\uB2E4."
   - image: {fileID: 2843675851291821527, guid: f4bd1f203abf7924aa43b66d8c3e9e16, type: 3}
     titleText: "\uBA40\uD2F0 \uC0F7"
-    descriptionText: "\uD0C4\uD658\uC758 \uAC1C\uC218\uAC00 \uB298\uC5B4\uB09C\uB2E4."
-  - image: {fileID: 2843675851291821527, guid: f4bd1f203abf7924aa43b66d8c3e9e16, type: 3}
+    descriptionText: "\uBA40\uD2F0 \uC0F7 +1<br><br>\uD0C4\uD658\uC758 \uAC1C\uC218\uAC00
+      \uB298\uC5B4\uB09C\uB2E4."
+  - image: {fileID: 876618001444212155, guid: dd4abf91ee15f6c43ac4aa4b45b55c2d, type: 3}
     titleText: "\uC0F7\uAC74"
     descriptionText: "\uCD1D\uC744 \uC0F7\uAC74\uC73C\uB85C \uAD50\uCCB4\uD55C\uB2E4."
-  - image: {fileID: 2843675851291821527, guid: f4bd1f203abf7924aa43b66d8c3e9e16, type: 3}
-    titleText: "AR\uAC74"
+  - image: {fileID: 8311834746389097198, guid: 1f5aaabc7a6546e48a1093ea9efb8af1, type: 3}
+    titleText: "\uC790\uB3D9\uC18C\uCD1D"
     descriptionText: "\uCD1D\uC744 AR\uAC74\uC73C\uB85C \uAD50\uCCB4\uD55C\uB2E4."
-  - image: {fileID: 2843675851291821527, guid: f4bd1f203abf7924aa43b66d8c3e9e16, type: 3}
+  - image: {fileID: -1518990609848816936, guid: ca89142466585e0488ffd4bb534a73e0, type: 3}
     titleText: SMG
     descriptionText: "\uCD1D\uC744 SMG\uB85C \uAD50\uCCB4\uD55C\uB2E4."
-  - image: {fileID: 2843675851291821527, guid: f4bd1f203abf7924aa43b66d8c3e9e16, type: 3}
+  - image: {fileID: 381862995586490532, guid: 61ea67447548a3347816f34d76d76e03, type: 3}
     titleText: "\uC2A4\uB098\uC774\uD37C"
     descriptionText: "\uCD1D\uC744 \uC2A4\uB098\uC774\uD37C\uB85C \uAD50\uCCB4\uD55C\uB2E4."
 --- !u!4 &215798211
@@ -1567,6 +1571,17 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1044802375}
   m_CullTransparentMesh: 0
+--- !u!114 &1163452989 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 729403480395688675, guid: a89df20b8a9f6054aa1f4d2fb76cdfe3, type: 3}
+  m_PrefabInstance: {fileID: 5677742330105699237}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 357c6ed0a76bbb94483f079b8cbf27b7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::SceneRelay
 --- !u!1 &1498939162
 GameObject:
   m_ObjectHideFlags: 0
