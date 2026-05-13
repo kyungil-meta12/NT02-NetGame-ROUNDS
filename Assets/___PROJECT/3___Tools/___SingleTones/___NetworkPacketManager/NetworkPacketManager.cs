@@ -1,5 +1,6 @@
 using Unity.Netcode;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 /// <summary>
 ///  NetCode Rpc를 관리하는 싱글톤 모듈 // 씬 전환 시 인스턴스 유지됨
@@ -27,6 +28,22 @@ public class NetworkPacketManager : NetworkBehaviour
         Inst = null;
         Destroy(gameObject);
     }
+
+    #region Scene Management (씬 관리)
+
+    // [씬 전환] 서버가 모든 클라이언트를 특정 씬으로 이동시킴
+    [Rpc(SendTo.Everyone)]
+    public void TransitionToCardSelectRpc(string sceneName)
+    {
+        // Netcode for GameObjects에서는 서버가 SceneManager를 통해 씬을 로드하면
+        // 연결된 모든 클라이언트가 자동으로 해당 씬을 함께 로드합니다.
+        if (IsServer)
+        {
+            NetworkManager.Singleton.SceneManager.LoadScene(sceneName, LoadSceneMode.Single);
+        }
+    }
+
+    #endregion
 
     #region Player Packets (플레이어 관련)
 

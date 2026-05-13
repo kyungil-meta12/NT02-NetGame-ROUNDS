@@ -272,22 +272,41 @@ public class Player : NetworkBehaviour
         gunHand.rotation = gripPoint.rotation;
     }
 
+    // 서버에서 데미지 계산 및 사망/승리 판정 수행
     public void OnDamageCalculated(int dmg)
     {
-        if(!IsServer)
-        {
-            return;
-        }
+        if (!IsServer) return;
 
-        // [변경] 피격 연출 명령을 PacketManager를 통해 전파
         NetworkPacketManager.Inst.PlayDamageEffectRpc(NetworkObject);
 
         netCurrHP.Value -= dmg;
-        if(netCurrHP.Value <= 0)
+        if (netCurrHP.Value <= 0)
         {
-            // [변경] 사망 연출 명령 전파 후 서버에서 제거
+            // 사망 연출 전파
             NetworkPacketManager.Inst.PerformDeathRpc(NetworkObject, deathParticleColor);
+
+            // [추가] 승리 조건 체크: 이 플레이어가 죽은 뒤 남은 인원을 확인
+            CheckWinCondition();
+
+            // 네트워크 오브젝트 제거
             GetComponent<NetworkObject>().Despawn();
+        }
+    }
+
+    // 서버 전용: 남은 플레이어를 확인하여 다음 씬 이동 명령
+    private void CheckWinCondition()
+    {
+        if (!IsServer) return;
+
+        // 현재 씬의 모든 플레이어 검색
+        Player[] allPlayers = FindObjectsOfType<Player>();
+
+        // 방금 죽은 '나'를 제외하고 살아있는 사람이 1명 이하인지 확인
+        // (보통 1vs1 상황이라면, 나(1명)가 죽을 때 전체가 2명이었으므로 남은 인원은 1명이 됨)
+        if (allPlayers.Length <= 2)
+        {
+            Debug.Log("승리자 발생! 씬 전환을 시작합니다.");
+            NetworkPacketManager.Inst.TransitionToCardSelectRpc("CardSelectScene");
         }
     }
 
