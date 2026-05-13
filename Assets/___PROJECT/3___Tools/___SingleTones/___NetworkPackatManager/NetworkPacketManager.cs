@@ -1,21 +1,31 @@
 using Unity.Netcode;
 using UnityEngine;
 
+/// <summary>
+///  NetCode Rpc를 관리하는 싱글톤 모듈 // 씬 전환 시 인스턴스 유지됨
+/// </summary>
 public class NetworkPacketManager : NetworkBehaviour
 {
-    // [싱글톤] 어디서든 NetworkPacketManager.Inst 로 접근 가능
     public static NetworkPacketManager Inst { get; private set; }
 
     void Awake()
     {
-        // 싱글톤 중복 생성 방지 로직
-        if (Inst != null && Inst != this)
+        if (Inst && Inst != this)
         {
-            Destroy(gameObject);
+            DestroyImmediate(this);
             return;
         }
         Inst = this;
         DontDestroyOnLoad(gameObject);
+    }
+    
+    /// <summary>
+    /// 네트워크 패킷 매니저 객체 및 인스턴스 삭제
+    /// </summary>
+    public void Destroy()
+    {
+        Inst = null;
+        Destroy(gameObject);
     }
 
     #region Player Packets (플레이어 관련)

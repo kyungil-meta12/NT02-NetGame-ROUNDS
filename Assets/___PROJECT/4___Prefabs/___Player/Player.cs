@@ -75,10 +75,10 @@ public class Player : NetworkBehaviour
 
     // [변경] 조준 각도는 즉각적인 반응을 위해 NetworkVariable 유지 (나머지 RPC는 매니저로 이동)
     private NetworkVariable<float> netGunRotaion = new NetworkVariable<float>(0, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Owner);
+    private NetworkVariable<int> netCurrHP = new NetworkVariable<int>(100, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
     private NetworkVariable<bool> netLookingLeft = new NetworkVariable<bool>(false, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Owner);
     private NetworkVariable<int> netFaceIndex = new NetworkVariable<int>(0, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Owner);
     private NetworkVariable<int> netBodyIndex = new NetworkVariable<int>(0, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Owner);
-    private NetworkVariable<int> netCurrHP = new NetworkVariable<int>(100, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
 
     #endregion
 
@@ -103,8 +103,11 @@ public class Player : NetworkBehaviour
         {
             rb.bodyType = RigidbodyType2D.Dynamic;
             rb.simulated = true;
-            netFaceIndex.Value = Random.Range(0, faces.Length);
-            netBodyIndex.Value = Random.Range(0, bodies.Length);
+            // PlayerManager에 외모 데이터를 저장한 후 ThisAppearance로부터 인덱스 정보를 불러온다.
+            // 초기 한 번만 결정되고 이후에는 Appearance의 데이터가 변경되지 않는다.
+            PlayerManager.Inst.SaveAppearance(Random.Range(0, bodies.Length), Random.Range(0, faces.Length));
+            netFaceIndex.Value = PlayerManager.Inst.Appearance.bodyIndex;
+            netBodyIndex.Value = PlayerManager.Inst.Appearance.faceIndex;
         }
         else
         {
@@ -358,8 +361,9 @@ public class Player : NetworkBehaviour
         gunController.InputSpec(spec, type);
         gripPoint = guns[gunIndex].transform.Find("Body").transform.Find("GripPoint").transform;
     }
+    #endregion
 
-    Color GetBodyColor(Sprite sprite)
+    private Color GetBodyColor(Sprite sprite)
     {
         var texture = sprite.texture;
         int x = (texture.width / 2) - 5;
@@ -378,15 +382,5 @@ public class Player : NetworkBehaviour
         Color avgColor = sumColor / totalPixels;
 
         return avgColor;
-    }
-    #endregion
-
-    private void OnApplicationQuit()
-    {
-        if (NetworkManager.Singleton != null)
-        {
-            NetworkManager.Singleton.Shutdown();
-            Debug.Log("Network Shutdown Complete");
-        }
     }
 }

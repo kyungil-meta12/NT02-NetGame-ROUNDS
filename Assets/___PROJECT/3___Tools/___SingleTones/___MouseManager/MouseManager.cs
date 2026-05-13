@@ -2,7 +2,7 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 
 /// <summary>
-/// 마우스 동작을 제어하는 싱글톤 모듈
+/// 마우스 동작을 제어하는 싱글톤 모듈 // 씬 전환 시 인스턴스 유지 됨
 /// </summary>
 public class MouseManager : MonoBehaviour
 {
@@ -23,9 +23,8 @@ public class MouseManager : MonoBehaviour
             DestroyImmediate(this);
             return;
         }
-
         Inst = this;
-        DontDestroyOnLoad(this);
+        DontDestroyOnLoad(gameObject);
     }
 
     void Update()

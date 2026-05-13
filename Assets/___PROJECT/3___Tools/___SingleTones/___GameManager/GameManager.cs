@@ -1,7 +1,8 @@
+using Unity.Netcode;
 using UnityEngine;
 
 /// <summary>
-/// 게임 매니저 싱글톤 오브젝트 // 씬 전환 시 인스턴스 삭제됨
+/// 게임 매니저 싱글톤 오브젝트 // 씬 전환 시 인스턴스 유지됨
 /// </summary>
 public class GameManager : MonoBehaviour
 {
@@ -14,8 +15,24 @@ public class GameManager : MonoBehaviour
     [HideInInspector]
     public int currentRound = 1; // 1부터 시작
 
-    void Awake(){ if(Inst && Inst != this) { DestroyImmediate(this); return; } Inst = this; }
-    void OnDestroy() { Inst = null; }
+    void Awake(){ 
+        if(Inst && Inst != this) 
+        { 
+            DestroyImmediate(this); 
+            return; 
+        } 
+        Inst = this; 
+        DontDestroyOnLoad(gameObject);
+    }
+
+    /// <summary>
+    /// 게임매니저 객체 및 인스턴스 삭제
+    /// </summary>
+    public void Destroy()
+    {
+        Inst = null;
+        Destroy(gameObject);
+    }
 
     /// <summary>
     /// 일시정지 상태 활성화 / 비활성화
@@ -27,7 +44,7 @@ public class GameManager : MonoBehaviour
     }
 
     /// <summary>
-    /// 게임 종료 상태 활성화
+    /// 게임 종료 상태를 활성화
     /// </summary>
     public void SetGameEnd()
     {
@@ -55,6 +72,18 @@ public class GameManager : MonoBehaviour
 #else
         // 빌드용
         Application.Quit();
+#endif
+    }
+
+    // 에디터에서 게임 모드 종료 시 네트워크 매니저를 확실하게 종료하도록 한다
+    void OnApplicationQuit()
+    {
+#if UNITY_EDITOR
+        if (NetworkManager.Singleton)
+        {
+            NetworkManager.Singleton.Shutdown();
+            Debug.Log("Network Shutdown Complete");
+        }
 #endif
     }
 }
