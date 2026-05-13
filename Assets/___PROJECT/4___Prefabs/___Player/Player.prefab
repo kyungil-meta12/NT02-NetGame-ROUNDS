@@ -2760,6 +2760,7 @@ MonoBehaviour:
   moveForce: 30
   moveSpeed: 15
   jumpForce: 3.5
+  maxJumpCount: 1
   faces:
   - {fileID: 21300000, guid: a6d7e7b70dbf5de45ba9e98192a739a9, type: 3}
   - {fileID: 21300000, guid: 571e09e3ae2de854387de1143e490802, type: 3}
