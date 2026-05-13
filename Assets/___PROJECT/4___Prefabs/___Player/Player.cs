@@ -35,6 +35,7 @@ public class Player : NetworkBehaviour
     public float moveForce;
     public float moveSpeed;
     public float jumpForce;
+    public int maxJumpCount;
 
     [Space(10)]
     public Sprite[] faces;
@@ -59,8 +60,9 @@ public class Player : NetworkBehaviour
     #region INPUTS
 
     private bool moveLeft = false, moveRight = false;
-    private bool jumpAvailable = false;
+   // private bool jumpAvailable = false;
     private bool jumpInput = false;
+    private int jumpCount = 0;
     private Vector2 mouseWorldPos;
 
     #endregion
@@ -111,16 +113,16 @@ public class Player : NetworkBehaviour
             var bodyIndex = Random.Range(0, bodies.Length);
             var faceIndex = Random.Range(0, faces.Length);
             PlayerManager.Inst.SaveAppearance(bodyIndex, faceIndex, bodies[bodyIndex]);
-            netFaceIndex.Value = PlayerManager.Inst.Appearance.bodyIndex;
-            netBodyIndex.Value = PlayerManager.Inst.Appearance.faceIndex;
+            netBodyIndex.Value = PlayerManager.Inst.Appearance.bodyIndex;
+            netFaceIndex.Value = PlayerManager.Inst.Appearance.faceIndex;
             netParticleColor.Value = PlayerManager.Inst.Appearance.particleColor;
         }
         else
         {
             rb.bodyType = RigidbodyType2D.Kinematic;
             rb.simulated = true;
-            ApplyFaceSprite(netFaceIndex.Value);
             ApplyBodySprite(netBodyIndex.Value);
+            ApplyFaceSprite(netFaceIndex.Value);
             deathParticleColor = netParticleColor.Value;
         }
 
@@ -202,7 +204,7 @@ public class Player : NetworkBehaviour
         moveRight = Keyboard.current.dKey.isPressed;
 
         // [변경] wasPressedThisFrame 입력을 FixedUpdate에서 유실하지 않도록 플래그로 저장
-        if (Keyboard.current.spaceKey.wasPressedThisFrame && jumpAvailable)
+        if (Keyboard.current.spaceKey.wasPressedThisFrame && jumpCount < maxJumpCount)
         {
             jumpInput = true;
         }
@@ -243,8 +245,9 @@ public class Player : NetworkBehaviour
         // 점프 // 땅에 닿으면 점프 가능
         if (jumpInput)
         {
+            rb.linearVelocityY = 0f;
             rb.AddForce(Vector2.up * jumpForce, ForceMode2D.Impulse);
-            jumpAvailable = false;
+            jumpCount++; // 점프 카운트 증가
             jumpInput = false; // 사용 후 즉시 리셋 (입력 중복 방지)
         }
     }
@@ -297,28 +300,20 @@ public class Player : NetworkBehaviour
     }
 
     #region Colison & Visual
-    void OnCollisionStay2D(Collision2D c)
+
+    void OnCollisionEnter2D(Collision2D c)
     {
         // 땅 위에 있을 때 점프 가능
-        if (c.collider.gameObject.layer == groundLayer) 
+        if (c.collider.gameObject.layer == groundLayer)
         {
             foreach (var contact in c.contacts)
             {
                 if (contact.normal.y > 0.5f)
                 {
-                    jumpAvailable = true;
+                    jumpCount = 0;
                     return;
                 }
             }
-        }
-    }
-
-    void OnCollisionExit2D(Collision2D c)
-    {
-        // 땅에서 떨어지면 점프 불가능
-        if (c.collider.gameObject.layer == groundLayer)
-        {
-            jumpAvailable = false;
         }
     }
 
