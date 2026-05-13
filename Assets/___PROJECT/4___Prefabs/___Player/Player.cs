@@ -75,10 +75,12 @@ public class Player : NetworkBehaviour
 
     // [변경] 조준 각도는 즉각적인 반응을 위해 NetworkVariable 유지 (나머지 RPC는 매니저로 이동)
     private NetworkVariable<float> netGunRotaion = new NetworkVariable<float>(0, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Owner);
-    private NetworkVariable<int> netCurrHP = new NetworkVariable<int>(100, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
     private NetworkVariable<bool> netLookingLeft = new NetworkVariable<bool>(false, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Owner);
+
+    private NetworkVariable<int> netCurrHP = new NetworkVariable<int>(100, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
     private NetworkVariable<int> netFaceIndex = new NetworkVariable<int>(0, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Owner);
     private NetworkVariable<int> netBodyIndex = new NetworkVariable<int>(0, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Owner);
+    private NetworkVariable<Color> netParticleColor = new NetworkVariable<Color>(Color.white, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Owner);
 
     #endregion
 
@@ -92,9 +94,10 @@ public class Player : NetworkBehaviour
     // [변경] Start 대신 OnNetworkSpawn 사용 (네트워크 오브젝트가 활성화될 때 호출)
     public override void OnNetworkSpawn()
     {
-        // HP 변경 이벤트 구독
+        // NetworkVariable 변경 이벤트 구독
         netFaceIndex.OnValueChanged += OnFaceIndexChanged;
         netBodyIndex.OnValueChanged += OnBodyIndexChanged;
+        netParticleColor.OnValueChanged += OnParticleColorChanged;
         netCurrHP.OnValueChanged += OnHPChanged;
         hpBar.SetTotalHp(totalHP);
 
@@ -105,9 +108,12 @@ public class Player : NetworkBehaviour
             rb.simulated = true;
             // PlayerManager에 외모 데이터를 저장한 후 ThisAppearance로부터 인덱스 정보를 불러온다.
             // 초기 한 번만 결정되고 이후에는 Appearance의 데이터가 변경되지 않는다.
-            PlayerManager.Inst.SaveAppearance(Random.Range(0, bodies.Length), Random.Range(0, faces.Length));
+            var bodyIndex = Random.Range(0, bodies.Length);
+            var faceIndex = Random.Range(0, faces.Length);
+            PlayerManager.Inst.SaveAppearance(bodyIndex, faceIndex, bodies[bodyIndex]);
             netFaceIndex.Value = PlayerManager.Inst.Appearance.bodyIndex;
             netBodyIndex.Value = PlayerManager.Inst.Appearance.faceIndex;
+            netParticleColor.Value = PlayerManager.Inst.Appearance.particleColor;
         }
         else
         {
@@ -115,6 +121,7 @@ public class Player : NetworkBehaviour
             rb.simulated = true;
             ApplyFaceSprite(netFaceIndex.Value);
             ApplyBodySprite(netBodyIndex.Value);
+            deathParticleColor = netParticleColor.Value;
         }
 
         groundLayer = LayerMask.NameToLayer("Ground");
@@ -125,6 +132,7 @@ public class Player : NetworkBehaviour
     {
         netFaceIndex.OnValueChanged -= OnFaceIndexChanged;
         netBodyIndex.OnValueChanged -= OnBodyIndexChanged;
+        netParticleColor.OnValueChanged -= OnParticleColorChanged;
         netCurrHP.OnValueChanged -= OnHPChanged;
     }
 
@@ -136,6 +144,10 @@ public class Player : NetworkBehaviour
     private void OnBodyIndexChanged(int oldValue, int newValue)
     {
         ApplyBodySprite(newValue);
+    }
+
+    private void OnParticleColorChanged(Color oldValue, Color newValue) {
+        deathParticleColor = newValue;
     }
 
     public void ApplyFaceSprite(int index)
@@ -152,7 +164,6 @@ public class Player : NetworkBehaviour
         {
             hr.sprite = hands[bodyIndex];
         }
-        deathParticleColor = GetBodyColor(bodies[bodyIndex]);
     }
 
     void Update()
@@ -362,25 +373,4 @@ public class Player : NetworkBehaviour
         gripPoint = guns[gunIndex].transform.Find("Body").transform.Find("GripPoint").transform;
     }
     #endregion
-
-    private Color GetBodyColor(Sprite sprite)
-    {
-        var texture = sprite.texture;
-        int x = (texture.width / 2) - 5;
-        int y = (texture.height / 2) - 5;
-
-        // 중앙 10 x 10 픽셀을 샘플링하여 PlayerDeath 파티클 생성 시 해당 색상으로 설정
-        Color[] pixels = sprite.texture.GetPixels(x, y, 10, 10);
-        Color sumColor = new Color(0, 0, 0, 0);
-
-        foreach (Color pixel in pixels)
-        {
-            sumColor += pixel;
-        }
-
-        float totalPixels = pixels.Length;
-        Color avgColor = sumColor / totalPixels;
-
-        return avgColor;
-    }
 }

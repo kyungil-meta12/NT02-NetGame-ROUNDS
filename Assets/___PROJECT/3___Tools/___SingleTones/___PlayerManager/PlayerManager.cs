@@ -31,6 +31,7 @@ public struct AppearanceData
 {
     public int bodyIndex;
     public int faceIndex;
+    public Color particleColor;
 }
 
 /// <summary>
@@ -39,13 +40,13 @@ public struct AppearanceData
 public class PlayerManager : MonoBehaviour
 {
     public static PlayerManager Inst;
-    private bool appearanceCreated;
 
     /// <summary>
     /// 나의 스탯
     /// </summary>
     public StatData Stat;
-    public AppearanceData Appearance;
+    public AppearanceData Appearance = new();
+    private bool appearanceCreated = false;
 
     void Awake()
     {
@@ -92,7 +93,7 @@ public class PlayerManager : MonoBehaviour
     /// </summary>
     /// <param name="bodyIndex"></param>
     /// <param name="faceIndex"></param>
-    public void SaveAppearance(int bodyIndex, int faceIndex)
+    public void SaveAppearance(int bodyIndex, int faceIndex, Sprite bodySprite)
     {
         if(appearanceCreated)
         {
@@ -100,7 +101,29 @@ public class PlayerManager : MonoBehaviour
         }
         Appearance.bodyIndex = bodyIndex;
         Appearance.faceIndex = faceIndex;
+        Appearance.particleColor = GetBodyColor(bodySprite);
         appearanceCreated = true;
+    }
+
+    private Color GetBodyColor(Sprite sprite)
+    {
+        var texture = sprite.texture;
+        int x = (texture.width / 2) - 5;
+        int y = (texture.height / 2) - 5;
+
+        // 중앙 10 x 10 픽셀을 샘플링하여 PlayerDeath 파티클 생성 시 해당 색상으로 설정
+        Color[] pixels = sprite.texture.GetPixels(x, y, 10, 10);
+        Color sumColor = new Color(0, 0, 0, 0);
+
+        foreach (Color pixel in pixels)
+        {
+            sumColor += pixel;
+        }
+
+        float totalPixels = pixels.Length;
+        Color avgColor = sumColor / totalPixels;
+
+        return avgColor;
     }
 
     //이동 속도 0.2 퍼센트 증가
