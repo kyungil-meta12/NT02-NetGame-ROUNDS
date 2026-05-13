@@ -1567,17 +1567,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1044802375}
   m_CullTransparentMesh: 0
---- !u!114 &1163452988 stripped
-MonoBehaviour:
-  m_CorrespondingSourceObject: {fileID: 5720815552293809927, guid: a89df20b8a9f6054aa1f4d2fb76cdfe3, type: 3}
-  m_PrefabInstance: {fileID: 5677742330105699237}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: dcdf959eea5b24c87ab626c662c26994, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::UltimateClean.SceneTransition
 --- !u!1 &1498939162
 GameObject:
   m_ObjectHideFlags: 0
@@ -1928,18 +1917,6 @@ MonoBehaviour:
       - m_Target: {fileID: 215798210}
         m_TargetAssemblyTypeName: CardSetter, Assembly-CSharp
         m_MethodName: ConfirmCard
-        m_Mode: 1
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
-      - m_Target: {fileID: 1163452988}
-        m_TargetAssemblyTypeName: UltimateClean.SceneTransition, Assembly-CSharp
-        m_MethodName: PerformTransition
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}

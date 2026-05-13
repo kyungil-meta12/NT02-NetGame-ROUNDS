@@ -1,6 +1,7 @@
 using System;
 using System.Linq;
 using TMPro;
+using UltimateClean;
 using UnityEngine;
 using UnityEngine.UI;
 using Random = UnityEngine.Random;
@@ -9,6 +10,8 @@ using Random = UnityEngine.Random;
 public class CardSetter : MonoBehaviour
 {
     public TextMeshProUGUI selectedNumberText;
+    public SceneRelay sceneRelay;
+    private SceneTransition sceneTransition;
     
     [Tooltip("4장의 카드 UI 세팅 필요")]
     public CardUI[] cardUI;
@@ -29,6 +32,8 @@ public class CardSetter : MonoBehaviour
     /// </summary>
     public void Start()
     {
+        sceneTransition = sceneRelay.GetComponent<SceneTransition>();
+        
         if (cards == null || cards.Length < 4) return;
         
         randomIndices = Enumerable.Range(0, cards.Length)
@@ -56,8 +61,46 @@ public class CardSetter : MonoBehaviour
     {
         //카드 선택
         Debug.Log($"선택된 카드는 {cards[randomIndices[selectedIndex]].titleText}");
-        //todo 카드별 능력 적용필요
-        //todo 다음 게임 씬으로 연결 필요
+        //카드별 능력 적용
+        switch (randomIndices[selectedIndex])
+        {
+            case 0:
+                PlayerManager.Inst.IncreaseJumpCount();
+                break;
+            case 1:
+                PlayerManager.Inst.IncreaseTotalAmmo();
+                break;
+            case 2:
+                PlayerManager.Inst.IncreaseMoveSpeed();
+                break;
+            case 3:
+                PlayerManager.Inst.IncreaseDamage();
+                break;
+            case 4:
+                PlayerManager.Inst.IncreaseAmmoSpeed();
+                break;
+            case 5:
+                PlayerManager.Inst.DecreaseFireInterval();
+                break;
+            case 6:
+                PlayerManager.Inst.IncreaseMultiShellCount();
+                break;
+            case 7:
+                PlayerManager.Inst.ReplaceTheGunToShotgun();
+                break;
+            case 8:
+                PlayerManager.Inst.ReplaceTheGunToAR();
+                break;
+            case 9:
+                PlayerManager.Inst.ReplaceTheGunToSMG();
+                break;
+            case 10:
+                PlayerManager.Inst.ReplaceTheGunToSniper();
+                break;
+        }
+        //다음 게임 씬으로 연결
+        sceneRelay.SetNextScene(GameManager.Inst.currentRound + 1);
+        sceneTransition.PerformTransition();
     }
 }
 
