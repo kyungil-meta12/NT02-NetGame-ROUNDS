@@ -80,33 +80,33 @@ public class NetworkPacketManager : NetworkBehaviour
     #region Gun Packets (총기 관련)
     // [발사 요청] 클라이언트 -> 서버
     [Rpc(SendTo.Server)]
-    public void RequestCreateFireEffectServerRpc(NetworkObjectReference playerRef, Vector2 pos, float rotation, bool isLeft)
+    public void RequestCreateFireEffectServerRpc(NetworkObjectReference playerRef, Vector2 firePos, Vector2 shellPos, float rotation, bool isLeft)
     {
         // 서버 검증 후 전파
-        FireEffectRpc(playerRef, pos, rotation, isLeft);
+        FireEffectRpc(playerRef, firePos, shellPos, rotation, isLeft);
     }
 
     // [발사 연출] 서버 -> 모든 클라이언트
     [Rpc(SendTo.Everyone)]
-    public void FireEffectRpc(NetworkObjectReference playerRef, Vector2 pos, float rotation, bool isLeft)
+    public void FireEffectRpc(NetworkObjectReference playerRef, Vector2 firePos, Vector2 shellPos, float rotation, bool isLeft)
     {
         if(playerRef.TryGet(out NetworkObject netObj))
         {
-            netObj.GetComponentInChildren<GunController>().ExecuteCreateFireEffects(pos, rotation, isLeft);
+            netObj.GetComponentInChildren<GunController>().ExecuteCreateFireEffects(firePos, shellPos, rotation, isLeft);
         }
     }
 
     [Rpc(SendTo.Server)]
-    public void RequestCreateBulletServerRpc(NetworkObjectReference playerRef, Vector2 pos, float rotation, float ammoSpeed, int dmg)
+    public void RequestCreateBulletServerRpc(NetworkObjectReference playerRef, Vector2 firePos, float rotation, float ammoSpeed, int dmg)
     {
-        CreateBulletRpc(playerRef, pos, rotation, ammoSpeed, dmg);
+        CreateBulletRpc(playerRef, firePos, rotation, ammoSpeed, dmg);
     }
 
     [Rpc(SendTo.Everyone)]
-    public void CreateBulletRpc(NetworkObjectReference playerRef, Vector2 pos, float rotation, float ammoSpeed, int dmg) { 
+    public void CreateBulletRpc(NetworkObjectReference playerRef, Vector2 firePos, float rotation, float ammoSpeed, int dmg) { 
         if(playerRef.TryGet(out NetworkObject netObj))
         {
-            netObj.GetComponentInChildren<GunController>().ExecuteCreateBullets(pos, rotation, ammoSpeed, dmg);
+            netObj.GetComponentInChildren<GunController>().ExecuteCreateBullets(firePos, rotation, ammoSpeed, dmg);
         }
     }
     #endregion
