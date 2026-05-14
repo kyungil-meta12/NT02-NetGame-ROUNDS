@@ -1,6 +1,8 @@
+using Unity.Cinemachine;
 using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.SceneManagement;
 
 public class Player : NetworkBehaviour
 {
@@ -8,7 +10,6 @@ public class Player : NetworkBehaviour
 
     // 플레이어 자신이 조작하는 오브젝트인지?
     // [삭제] public bool isOwner = true; 내장 속성인 IsOwner 를 사용하여 네트워크 권한을 판별.
-
     public Transform body;
     public Transform gunHand;
     public Transform gunAxis;
@@ -53,6 +54,7 @@ public class Player : NetworkBehaviour
     private float gunAxisRotation;
     private int gunIndex = -1;
     private bool lookingLeft;
+    private bool isDespawning = false;
 
     #endregion
 
@@ -63,6 +65,9 @@ public class Player : NetworkBehaviour
     private bool jumpInput = false;
     private int jumpCount = 0;
     private Vector2 mouseWorldPos;
+
+    // CardSelectScene에서는 비활성화함
+    private bool controllable = true;
 
     #endregion
 
@@ -94,6 +99,9 @@ public class Player : NetworkBehaviour
     // [변경] Start 대신 OnNetworkSpawn 사용 (네트워크 오브젝트가 활성화될 때 호출)
     public override void OnNetworkSpawn()
     {
+        // 씬 전환 이벤트 구독
+        SceneManager.sceneLoaded += OnSceneLoaded;
+
         // NetworkVariable 변경 이벤트 구독
         netFaceIndex.OnValueChanged += OnFaceIndexChanged;
         netBodyIndex.OnValueChanged += OnBodyIndexChanged;
@@ -136,8 +144,17 @@ public class Player : NetworkBehaviour
                 OnGunTypeChanged(GunType.None, netGunType.Value);
             }
         }
-        
+
+        // 땅 레이어 저장
         groundLayer = LayerMask.NameToLayer("Ground");
+
+        // 플레이어 상태 세팅
+        SetPlayerState();
+    }
+
+    void OnSceneLoaded(Scene scene, LoadSceneMode mode)
+    {
+        SetPlayerState();
     }
 
     public override void OnNetworkDespawn()
@@ -146,6 +163,35 @@ public class Player : NetworkBehaviour
         netBodyIndex.OnValueChanged -= OnBodyIndexChanged;
         netGunType.OnValueChanged -= OnGunTypeChanged;
         netCurrHP.OnValueChanged -= OnHPChanged;
+        SceneManager.sceneLoaded -= OnSceneLoaded;
+    }
+
+    private void SetPlayerState()
+    {
+        // 플레이어가 필요없는 씬일 경우 컨트롤 입력 비활성화
+        controllable = SceneManager.GetActiveScene().name != "CardSelectScene";
+
+        // 스폰포인트로 이동
+        var spawnPoint = GameObject.FindWithTag("SpawnPoint").transform.position;
+        transform.position = spawnPoint;
+        rb.position = spawnPoint;
+
+        // 시네머신 그룹에 추가
+        if (IsOwner && controllable)
+        {
+            var targetGroup = GameObject.Find("Target Group").GetComponent<CinemachineTargetGroup>();
+            targetGroup.AddMember(transform, 1f, 1f);
+        }
+
+        // 플레이어 체력 초기화
+        if(IsServer)
+        {
+            netCurrHP.Value = totalHP;
+        }
+
+        // 플레이어 얼굴 초기화
+        faceTimer.SetRunningState(false);
+        faceTimer.Reset();
     }
 
     private void OnGunTypeChanged(GunType oldValue, GunType newValue)
@@ -160,7 +206,8 @@ public class Player : NetworkBehaviour
     {
         if(newValue != -1)
         {
-            ApplyFaceSprite(newValue);
+            faceIndex = newValue;
+            faceRenderer.sprite = faces[faceIndex];
         }
     }
 
@@ -168,29 +215,52 @@ public class Player : NetworkBehaviour
     {
         if(newValue != -1)
         {
-            ApplyBodySprite(newValue);
+            bodyIndex = newValue;
+            bodyRenderer.sprite = bodies[bodyIndex];
+            foreach (var hr in handRenderer)
+            {
+                hr.sprite = hands[bodyIndex];
+            }
+            deathParticleColor = GetBodyColor(bodies[bodyIndex]);
         }
     }
 
-    public void ApplyFaceSprite(int index)
+    // 서버에서 데미지 계산 및 사망/승리 판정 수행
+    public void OnDamageCalculated(int dmg)
     {
-        faceIndex = index;
-        faceRenderer.sprite = faces[faceIndex];
-    }
-
-    public void ApplyBodySprite(int index)
-    {
-        bodyIndex = index;
-        bodyRenderer.sprite = bodies[bodyIndex];
-        foreach (var hr in handRenderer)
+        if (!IsServer || isDespawning)
         {
-            hr.sprite = hands[bodyIndex];
+            return;
         }
-        deathParticleColor = GetBodyColor(bodies[bodyIndex]);
+
+        NetworkPacketManager.Inst.PlayDamageEffectRpc(NetworkObject);
+
+        netCurrHP.Value -= dmg;
+        if (netCurrHP.Value <= 0)
+        {
+            isDespawning = true;
+
+            // 사망 연출 전파
+            NetworkPacketManager.Inst.PerformDeathRpc(NetworkObject, deathParticleColor);
+
+            // 사망 시 카드 선택 씬으로 전환
+            Debug.Log("승리자 발생! 씬 전환을 시작합니다.");
+            NetworkPacketManager.Inst.TransitionToCardSelectRpc("CardSelectScene");
+        }
+    }
+
+    public void OnHPChanged(int prevValue, int newValue)
+    {
+        hpBar.SetCurrentHp(prevValue, newValue);
     }
 
     void Update()
     {
+        if (!controllable) // Player가 필요없는 씬에서는 업데이트를 하지 않음
+        {
+            return;
+        }
+
         if (IsOwner)
         {
             InputControl();
@@ -280,33 +350,6 @@ public class Player : NetworkBehaviour
         if (gripPoint == null || gunHand == null) return;
         gunHand.position = gripPoint.position;
         gunHand.rotation = gripPoint.rotation;
-    }
-
-    // 서버에서 데미지 계산 및 사망/승리 판정 수행
-    public void OnDamageCalculated(int dmg)
-    {
-        if (!IsServer) return;
-
-        NetworkPacketManager.Inst.PlayDamageEffectRpc(NetworkObject);
-
-        netCurrHP.Value -= dmg;
-        if (netCurrHP.Value <= 0)
-        {
-            // 사망 연출 전파
-            NetworkPacketManager.Inst.PerformDeathRpc(NetworkObject, deathParticleColor);
-
-            // 사망 시 카드 선택 씬으로 전환
-            Debug.Log("승리자 발생! 씬 전환을 시작합니다.");
-            NetworkPacketManager.Inst.TransitionToCardSelectRpc("CardSelectScene");
-
-            // 네트워크 오브젝트 제거
-            GetComponent<NetworkObject>().Despawn();
-        }
-    }
-
-    public void OnHPChanged(int prevValue, int newValue)
-    {
-        hpBar.SetCurrentHp(prevValue, newValue);
     }
 
     // [추가] PacketManager가 호출하는 연출 실행 함수들

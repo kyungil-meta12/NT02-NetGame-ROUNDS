@@ -35,6 +35,8 @@ public class GunController : MonoBehaviour
     private bool triggerPulled;
     private bool lookingLeft;
 
+    public bool isDespwaning;
+
     private NetworkObject netObject;
 
     void Awake()

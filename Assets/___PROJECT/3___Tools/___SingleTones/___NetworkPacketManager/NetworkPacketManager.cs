@@ -93,8 +93,12 @@ public class NetworkPacketManager : NetworkBehaviour
     [Rpc(SendTo.Server)]
     public void RequestCreateFireEffectServerRpc(NetworkObjectReference playerRef, Vector2 firePos, Vector2 shellPos, float rotation, bool isLeft)
     {
-        // 서버 검증 후 전파
-        FireEffectRpc(playerRef, firePos, shellPos, rotation, isLeft);
+        if (playerRef.TryGet(out NetworkObject netObj))
+        {
+            if (netObj.IsSpawned) {
+                FireEffectRpc(playerRef, firePos, shellPos, rotation, isLeft);
+            }
+        }
     }
 
     // [발사 연출] 서버 -> 모든 클라이언트
@@ -113,7 +117,12 @@ public class NetworkPacketManager : NetworkBehaviour
     [Rpc(SendTo.Server)]
     public void RequestCreateBulletServerRpc(NetworkObjectReference playerRef, Vector2 firePos, float rotation, float ammoSpeed, int dmg)
     {
-        CreateBulletRpc(playerRef, firePos, rotation, ammoSpeed, dmg);
+        if (playerRef.TryGet(out NetworkObject netObj))
+        {
+            if (netObj.IsSpawned) {
+                CreateBulletRpc(playerRef, firePos, rotation, ammoSpeed, dmg);
+            }
+        }
     }
 
     [Rpc(SendTo.Everyone)]

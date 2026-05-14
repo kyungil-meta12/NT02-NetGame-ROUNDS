@@ -109,7 +109,7 @@ public class GameManager : MonoBehaviour
 
         if (Keyboard.current.f1Key.wasPressedThisFrame)
         {
-            NetworkManager.Singleton.StartServer();
+            NetworkManager.Singleton.StartHost();
             serverRunning = true;
         }
         else if (Keyboard.current.f2Key.wasPressedThisFrame)
