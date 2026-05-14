@@ -2745,7 +2745,6 @@ MonoBehaviour:
   deathParticlePrefab: {fileID: 8885057346391128513, guid: 7ec5935a6ff43cd41845c47d81958b64, type: 3}
   totalHP: 100
   hpBar: {fileID: 9069687857219384829}
-  currentGunType: 2
   guns:
   - {fileID: 1977947850721096023}
   - {fileID: 1755660240718329603}
@@ -2760,7 +2759,6 @@ MonoBehaviour:
   moveForce: 30
   moveSpeed: 15
   jumpForce: 3.5
-  maxJumpCount: 1
   faces:
   - {fileID: 21300000, guid: a6d7e7b70dbf5de45ba9e98192a739a9, type: 3}
   - {fileID: 21300000, guid: 571e09e3ae2de854387de1143e490802, type: 3}

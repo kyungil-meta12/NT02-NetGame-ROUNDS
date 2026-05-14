@@ -53,8 +53,11 @@ public class NetworkPacketManager : NetworkBehaviour
     {
         if(targetRef.TryGet(out NetworkObject netObj))
         {
-            // 서버에서 실제 체력 계산 후 결과 전파 (핵 방지를 위해 서버에서 처리)
-            netObj.GetComponent<Player>().OnDamageCalculated(dmg);
+            if (netObj.IsSpawned)
+            {
+                // 서버에서 실제 체력 계산 후 결과 전파 (핵 방지를 위해 서버에서 처리)
+                netObj.GetComponent<Player>().OnDamageCalculated(dmg);
+            }
         }
     }
 
@@ -63,7 +66,12 @@ public class NetworkPacketManager : NetworkBehaviour
     public void PlayDamageEffectRpc(NetworkObjectReference playerRef)
     {
         if (playerRef.TryGet(out NetworkObject netObj))
-            netObj.GetComponent<Player>().ExecuteDamageEffect();
+        {
+            if (netObj.IsSpawned)
+            {
+                netObj.GetComponent<Player>().ExecuteDamageEffect();
+            }
+        }
     }
 
     // [사망 효과] 서버 -> 모든 클라이언트
@@ -72,7 +80,10 @@ public class NetworkPacketManager : NetworkBehaviour
     {
         if(playerRef.TryGet(out NetworkObject netObj))
         {
-            netObj.GetComponent<Player>().ExecuteDeathEffect(deathColor);
+            if (netObj.IsSpawned)
+            {
+                netObj.GetComponent<Player>().ExecuteDeathEffect(deathColor);
+            }
         }
     }
     #endregion
@@ -92,7 +103,10 @@ public class NetworkPacketManager : NetworkBehaviour
     {
         if(playerRef.TryGet(out NetworkObject netObj))
         {
-            netObj.GetComponentInChildren<GunController>().ExecuteCreateFireEffects(firePos, shellPos, rotation, isLeft);
+            if (netObj.IsSpawned)
+            {
+                netObj.GetComponentInChildren<GunController>().ExecuteCreateFireEffects(firePos, shellPos, rotation, isLeft);
+            }
         }
     }
 
@@ -106,7 +120,10 @@ public class NetworkPacketManager : NetworkBehaviour
     public void CreateBulletRpc(NetworkObjectReference playerRef, Vector2 firePos, float rotation, float ammoSpeed, int dmg) { 
         if(playerRef.TryGet(out NetworkObject netObj))
         {
-            netObj.GetComponentInChildren<GunController>().ExecuteCreateBullets(firePos, rotation, ammoSpeed, dmg);
+            if(netObj.IsSpawned)
+            {
+                netObj.GetComponentInChildren<GunController>().ExecuteCreateBullets(firePos, rotation, ammoSpeed, dmg);
+            }
         }
     }
     #endregion

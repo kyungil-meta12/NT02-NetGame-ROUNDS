@@ -35644,7 +35644,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4058013427074364643, guid: 21d702e8c9934ff4798f38f1dd70cd8d, type: 3}
       propertyPath: TestStat.gunType
-      value: 1
+      value: 2
       objectReference: {fileID: 0}
     - target: {fileID: 4058013427074364643, guid: 21d702e8c9934ff4798f38f1dd70cd8d, type: 3}
       propertyPath: TestStat.jumpLevel

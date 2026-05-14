@@ -35,7 +35,6 @@ public struct AppearanceData
 {
     public int bodyIndex;
     public int faceIndex;
-    public Color particleColor;
 }
 
 /// <summary>
@@ -118,29 +117,7 @@ public class PlayerManager : MonoBehaviour
         }
         Appearance.bodyIndex = bodyIndex;
         Appearance.faceIndex = faceIndex;
-        Appearance.particleColor = GetBodyColor(bodySprite);
         appearanceCreated = true;
-    }
-
-    private Color GetBodyColor(Sprite sprite)
-    {
-        var texture = sprite.texture;
-        int x = (texture.width / 2) - 5;
-        int y = (texture.height / 2) - 5;
-
-        // 중앙 10 x 10 픽셀을 샘플링하여 PlayerDeath 파티클 생성 시 해당 색상으로 설정
-        Color[] pixels = sprite.texture.GetPixels(x, y, 10, 10);
-        Color sumColor = new Color(0, 0, 0, 0);
-
-        foreach (Color pixel in pixels)
-        {
-            sumColor += pixel;
-        }
-
-        float totalPixels = pixels.Length;
-        Color avgColor = sumColor / totalPixels;
-
-        return avgColor;
     }
 
     //이동 속도 20퍼센트 증가

@@ -1,4 +1,3 @@
-using Unity.Collections;
 using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -18,7 +17,7 @@ public class Player : NetworkBehaviour
     public GameObject deathParticlePrefab;
 
     [Space(10)]
-    public int totalHP = 100;
+    public int totalHP;
 
     [Space(10)]
     public HpBar hpBar;
@@ -76,14 +75,12 @@ public class Player : NetworkBehaviour
     private DeltaTimer faceTimer = new();
 
     // [변경] 조준 각도는 즉각적인 반응을 위해 NetworkVariable 유지 (나머지 RPC는 매니저로 이동)
-    private NetworkVariable<float> netGunRotaion = new(0, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Owner);
+    private NetworkVariable<float> netGunRotaion = new(0f, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Owner);
     private NetworkVariable<bool> netLookingLeft = new(false, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Owner);
-
     private NetworkVariable<int> netCurrHP;
     private NetworkVariable<GunType> netGunType = new(GunType.None, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Owner);
-    private NetworkVariable<int> netFaceIndex = new(0, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Owner);
-    private NetworkVariable<int> netBodyIndex = new(0, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Owner);
-    private NetworkVariable<Color> netParticleColor = new(Color.white, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Owner);
+    private NetworkVariable<int> netFaceIndex = new(-1, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Owner);
+    private NetworkVariable<int> netBodyIndex = new(-1, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Owner);
 
     #endregion
 
@@ -100,9 +97,9 @@ public class Player : NetworkBehaviour
         // NetworkVariable 변경 이벤트 구독
         netFaceIndex.OnValueChanged += OnFaceIndexChanged;
         netBodyIndex.OnValueChanged += OnBodyIndexChanged;
-        netParticleColor.OnValueChanged += OnParticleColorChanged;
         netGunType.OnValueChanged += OnGunTypeChanged;
         netCurrHP.OnValueChanged += OnHPChanged;
+
         hpBar.SetTotalHp(totalHP);
 
         // [변경] 물리 및 권한 설정 (클라이언트 이동 보장)
@@ -117,7 +114,6 @@ public class Player : NetworkBehaviour
             PlayerManager.Inst.SaveAppearance(bodyIndex, faceIndex, bodies[bodyIndex]);
             netBodyIndex.Value = PlayerManager.Inst.Appearance.bodyIndex;
             netFaceIndex.Value = PlayerManager.Inst.Appearance.faceIndex;
-            netParticleColor.Value = PlayerManager.Inst.Appearance.particleColor;
 
             // Stat으로부터 현재의 총 타입을 불러온다.
             netGunType.Value = PlayerManager.Inst.Stat.gunType;
@@ -126,41 +122,54 @@ public class Player : NetworkBehaviour
         {
             rb.bodyType = RigidbodyType2D.Kinematic;
             rb.simulated = true;
-            ApplyBodySprite(netBodyIndex.Value);
-            ApplyFaceSprite(netFaceIndex.Value);
-            deathParticleColor = netParticleColor.Value;
-        }
 
+            if(netBodyIndex.Value != -1)
+            {
+                OnBodyIndexChanged(-1, netBodyIndex.Value);
+            }
+            if(netFaceIndex.Value != -1)
+            {
+                OnFaceIndexChanged(-1, netFaceIndex.Value);
+            }
+            if(netGunType.Value != GunType.None)
+            {
+                OnGunTypeChanged(GunType.None, netGunType.Value);
+            }
+        }
+        
         groundLayer = LayerMask.NameToLayer("Ground");
-       // SetGun(currentGunType);
     }
 
     public override void OnNetworkDespawn()
     {
         netFaceIndex.OnValueChanged -= OnFaceIndexChanged;
         netBodyIndex.OnValueChanged -= OnBodyIndexChanged;
-        netParticleColor.OnValueChanged -= OnParticleColorChanged;
         netGunType.OnValueChanged -= OnGunTypeChanged;
         netCurrHP.OnValueChanged -= OnHPChanged;
     }
 
     private void OnGunTypeChanged(GunType oldValue, GunType newValue)
     {
-        SetGun(newValue);
+        if(newValue != GunType.None)
+        {
+            SetGun(newValue);
+        }
     }
 
     private void OnFaceIndexChanged(int oldValue, int newValue)
     {
-        ApplyFaceSprite(newValue);
+        if(newValue != -1)
+        {
+            ApplyFaceSprite(newValue);
+        }
     }
 
     private void OnBodyIndexChanged(int oldValue, int newValue)
     {
-        ApplyBodySprite(newValue);
-    }
-
-    private void OnParticleColorChanged(Color oldValue, Color newValue) {
-        deathParticleColor = newValue;
+        if(newValue != -1)
+        {
+            ApplyBodySprite(newValue);
+        }
     }
 
     public void ApplyFaceSprite(int index)
@@ -177,6 +186,7 @@ public class Player : NetworkBehaviour
         {
             hr.sprite = hands[bodyIndex];
         }
+        deathParticleColor = GetBodyColor(bodies[bodyIndex]);
     }
 
     void Update()
@@ -382,4 +392,25 @@ public class Player : NetworkBehaviour
         gripPoint = guns[gunIndex].transform.Find("Body").transform.Find("GripPoint").transform;
     }
     #endregion
+
+    private Color GetBodyColor(Sprite sprite)
+    {
+        var texture = sprite.texture;
+        int x = (texture.width / 2) - 2;
+        int y = (texture.height / 2) - 2;
+
+        // 중앙 4 x 4 픽셀을 샘플링하여 PlayerDeath 파티클 생성 시 해당 색상으로 설정
+        Color[] pixels = sprite.texture.GetPixels(x, y, 4, 4);
+        Color sumColor = new Color(0, 0, 0, 0);
+
+        foreach (Color pixel in pixels)
+        {
+            sumColor += pixel;
+        }
+
+        float totalPixels = pixels.Length;
+        Color avgColor = sumColor / totalPixels;
+
+        return avgColor;
+    }
 }
