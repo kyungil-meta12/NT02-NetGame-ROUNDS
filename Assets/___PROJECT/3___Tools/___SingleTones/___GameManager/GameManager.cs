@@ -1,5 +1,6 @@
 using Unity.Netcode;
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 /// <summary>
 /// 게임 매니저 싱글톤 오브젝트 // 씬 전환 시 인스턴스 유지됨
@@ -14,6 +15,7 @@ public class GameManager : MonoBehaviour
     public bool isGameEnd = false;
     [HideInInspector]
     public int currentRound = 1; // 1부터 시작
+
 
     void Awake(){ 
         if(Inst && Inst != this) 
@@ -86,4 +88,35 @@ public class GameManager : MonoBehaviour
         }
 #endif
     }
+
+#if UNITY_EDITOR
+    private bool serverRunning = false;
+
+    void Update()
+    {
+        // 에디터에서만 실행하는 키
+        // F1: 서버로 시작
+        // F2: 클라이언트로 시작
+        InputNetworkKey();
+    }
+
+    void InputNetworkKey()
+    {
+        if (serverRunning)
+        {
+            return;
+        }
+
+        if (Keyboard.current.f1Key.wasPressedThisFrame)
+        {
+            NetworkManager.Singleton.StartServer();
+            serverRunning = true;
+        }
+        else if (Keyboard.current.f2Key.wasPressedThisFrame)
+        {
+            NetworkManager.Singleton.StartClient();
+            serverRunning = true;
+        }
+    }
+#endif
 }
