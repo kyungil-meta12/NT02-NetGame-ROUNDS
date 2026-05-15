@@ -6,10 +6,6 @@ using UnityEngine.SceneManagement;
 
 public class Player : NetworkBehaviour
 {
-    #region VALUES
-
-    // 플레이어 자신이 조작하는 오브젝트인지?
-    // [삭제] public bool isOwner = true; 내장 속성인 IsOwner 를 사용하여 네트워크 권한을 판별.
     public Transform body;
     public Transform gunHand;
     public Transform gunAxis;
@@ -24,7 +20,6 @@ public class Player : NetworkBehaviour
     public HpBar hpBar;
 
     [Space(10)]
-   // public GunType currentGunType;
     public GameObject[] guns;
 
     [Space(10)]
@@ -56,28 +51,22 @@ public class Player : NetworkBehaviour
     private bool lookingLeft;
     private bool isDespawning = false;
 
-    #endregion
 
-    #region INPUTS
-
-    private bool moveLeft = false, moveRight = false;
-   // private bool jumpAvailable = false;
+    private bool moveLeft = false;
+    private bool moveRight = false;
     private bool jumpInput = false;
     private int jumpCount = 0;
     private Vector2 mouseWorldPos;
-
     // CardSelectScene에서는 비활성화함
     private bool controllable = true;
 
-    #endregion
-
-    #region ETC
 
     private int groundLayer;
     private int faceIndex;
     private int bodyIndex;
     private Color deathParticleColor;
     private DeltaTimer faceTimer = new();
+
 
     // [변경] 조준 각도는 즉각적인 반응을 위해 NetworkVariable 유지 (나머지 RPC는 매니저로 이동)
     private NetworkVariable<float> netGunRotaion = new(0f, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Owner);
@@ -87,7 +76,6 @@ public class Player : NetworkBehaviour
     private NetworkVariable<int> netFaceIndex = new(-1, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Owner);
     private NetworkVariable<int> netBodyIndex = new(-1, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Owner);
 
-    #endregion
 
     void Awake()
     {
@@ -96,7 +84,6 @@ public class Player : NetworkBehaviour
         netCurrHP = new(totalHP, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
     }
     
-    // [변경] Start 대신 OnNetworkSpawn 사용 (네트워크 오브젝트가 활성화될 때 호출)
     public override void OnNetworkSpawn()
     {
         // 씬 전환 이벤트 구독
@@ -130,19 +117,9 @@ public class Player : NetworkBehaviour
         {
             rb.bodyType = RigidbodyType2D.Kinematic;
             rb.simulated = true;
-
-            if(netBodyIndex.Value != -1)
-            {
-                OnBodyIndexChanged(-1, netBodyIndex.Value);
-            }
-            if(netFaceIndex.Value != -1)
-            {
-                OnFaceIndexChanged(-1, netFaceIndex.Value);
-            }
-            if(netGunType.Value != GunType.None)
-            {
-                OnGunTypeChanged(GunType.None, netGunType.Value);
-            }
+            OnBodyIndexChanged(-1, netBodyIndex.Value);
+            OnFaceIndexChanged(-1, netFaceIndex.Value);
+            OnGunTypeChanged(GunType.None, netGunType.Value);
         }
 
         // 땅 레이어 저장
@@ -152,11 +129,7 @@ public class Player : NetworkBehaviour
         SetPlayerState();
     }
 
-    void OnSceneLoaded(Scene scene, LoadSceneMode mode)
-    {
-        SetPlayerState();
-    }
-
+    // 네트워크 디스폰
     public override void OnNetworkDespawn()
     {
         netFaceIndex.OnValueChanged -= OnFaceIndexChanged;
@@ -164,96 +137,6 @@ public class Player : NetworkBehaviour
         netGunType.OnValueChanged -= OnGunTypeChanged;
         netCurrHP.OnValueChanged -= OnHPChanged;
         SceneManager.sceneLoaded -= OnSceneLoaded;
-    }
-
-    private void SetPlayerState()
-    {
-        // 플레이어가 필요없는 씬일 경우 컨트롤 입력 비활성화
-        controllable = SceneManager.GetActiveScene().name != "CardSelectScene";
-
-        // 스폰포인트로 이동
-        var spawnPoint = GameObject.FindWithTag("SpawnPoint").transform.position;
-        transform.position = spawnPoint;
-        rb.position = spawnPoint;
-
-        // 시네머신 그룹에 추가
-        if (IsOwner && controllable)
-        {
-            var targetGroup = GameObject.Find("Target Group").GetComponent<CinemachineTargetGroup>();
-            targetGroup.AddMember(transform, 1f, 1f);
-        }
-
-        // 플레이어 체력 초기화
-        if(IsServer)
-        {
-            netCurrHP.Value = totalHP;
-        }
-
-        // 플레이어 얼굴 초기화
-        faceTimer.SetRunningState(false);
-        faceTimer.Reset();
-    }
-
-    private void OnGunTypeChanged(GunType oldValue, GunType newValue)
-    {
-        if(newValue != GunType.None)
-        {
-            SetGun(newValue);
-        }
-    }
-
-    private void OnFaceIndexChanged(int oldValue, int newValue)
-    {
-        if(newValue != -1)
-        {
-            faceIndex = newValue;
-            faceRenderer.sprite = faces[faceIndex];
-        }
-    }
-
-    private void OnBodyIndexChanged(int oldValue, int newValue)
-    {
-        if(newValue != -1)
-        {
-            bodyIndex = newValue;
-            bodyRenderer.sprite = bodies[bodyIndex];
-            foreach (var hr in handRenderer)
-            {
-                hr.sprite = hands[bodyIndex];
-            }
-            deathParticleColor = GetBodyColor(bodies[bodyIndex]);
-        }
-    }
-
-    // 서버에서 데미지 계산 및 사망/승리 판정 수행
-    public void OnDamageCalculated(int dmg)
-    {
-        if (!IsServer || isDespawning)
-        {
-            return;
-        }
-
-        NetworkPacketManager.Inst.PlayDamageEffectRpc(NetworkObject);
-
-        netCurrHP.Value -= dmg;
-
-        if (netCurrHP.Value <= 0)
-        {
-            isDespawning = true;
-
-            // 사망 연출 전파
-            GameManager.Inst.loserClientId.Value = OwnerClientId;
-            GameManager.Inst.SetGameEnd(true);
-            NetworkPacketManager.Inst.PerformDeathRpc(NetworkObject, deathParticleColor);
-
-            // 사망 시 카드 선택 씬으로 전환
-            Debug.Log("승리자 발생! 씬 전환을 시작합니다.");
-        }
-    }
-
-    public void OnHPChanged(int prevValue, int newValue)
-    {
-        hpBar.SetCurrentHp(prevValue, newValue);
     }
 
     void Update()
@@ -290,6 +173,139 @@ public class Player : NetworkBehaviour
         }
     }
 
+    void OnCollisionEnter2D(Collision2D c)
+    {
+        // 땅 위에 있을 때 점프 가능
+        if (c.collider.gameObject.layer == groundLayer)
+        {
+            foreach (var contact in c.contacts)
+            {
+                if (contact.normal.y > 0.5f)
+                {
+                    jumpCount = 0;
+                    return;
+                }
+            }
+        }
+    }
+
+    // Player는 씬 전환 시 삭제되지 않고 현재의 인스턴스가 그대로 다음 씬으로 이동하기 때문에, 
+    // 씬 전환 이벤트를 통해 플레이어의 상태를 초기화한다.
+    void OnSceneLoaded(Scene scene, LoadSceneMode mode)
+    {
+        SetPlayerState();
+    }
+
+    // 플레이어 상태 설정
+    private void SetPlayerState()
+    {
+        // 플레이어가 필요없는 씬일 경우 컨트롤 입력 비활성화
+        controllable = SceneManager.GetActiveScene().name != "CardSelectScene";
+
+        // 스폰포인트로 이동
+        var spawnPoint = GameObject.FindWithTag("SpawnPoint").transform.position;
+        transform.position = spawnPoint;
+        rb.position = spawnPoint;
+
+        // 시네머신 그룹에 추가
+        if (IsOwner && controllable)
+        {
+            var targetGroup = GameObject.Find("Target Group").GetComponent<CinemachineTargetGroup>();
+            targetGroup.AddMember(transform, 1f, 1f);
+        }
+
+        // 플레이어 체력 초기화
+        if(IsServer)
+        {
+            netCurrHP.Value = totalHP;
+        }
+
+        // 플레이어 얼굴 초기화
+        faceTimer.SetRunningState(false);
+        faceTimer.Reset();
+    }
+
+    // 총 타입 변경 이벤트
+    private void OnGunTypeChanged(GunType oldValue, GunType newValue)
+    {
+        if(newValue != GunType.None)
+        {
+            SetGun(newValue);
+        }
+    }
+
+    // 얼굴 인덱스 변경 이벤트
+    private void OnFaceIndexChanged(int oldValue, int newValue)
+    {
+        if(newValue != -1)
+        {
+            faceIndex = newValue;
+            faceRenderer.sprite = faces[faceIndex];
+        }
+    }
+
+    // 몸 인덱스 변경 이벤트
+    private void OnBodyIndexChanged(int oldValue, int newValue)
+    {
+        if(newValue != -1)
+        {
+            bodyIndex = newValue;
+            bodyRenderer.sprite = bodies[bodyIndex];
+            foreach (var hr in handRenderer)
+            {
+                hr.sprite = hands[bodyIndex];
+            }
+            deathParticleColor = GetBodyColor(bodies[bodyIndex]);
+        }
+    }
+
+    // 대미지 발생 이벤트 // 서버에서 대미지 계산 및 사망/승리 판정 수행
+    public void OnDamageCalculated(int dmg)
+    {
+        if (!IsServer || isDespawning)
+        {
+            return;
+        }
+
+        NetworkPacketManager.Inst.PlayDamageEffectRpc(NetworkObject);
+
+        netCurrHP.Value -= dmg;
+
+        if (netCurrHP.Value <= 0)
+        {
+            isDespawning = true;
+
+            // 사망 연출 전파
+            GameManager.Inst.loserClientId.Value = OwnerClientId;
+            GameManager.Inst.SetGameEnd(true);
+            NetworkPacketManager.Inst.PerformDeathRpc(NetworkObject, deathParticleColor);
+
+            // 사망 시 카드 선택 씬으로 전환
+            Debug.Log("승리자 발생! 씬 전환을 시작합니다.");
+        }
+    }
+
+    // HP 변경 이벤트
+    public void OnHPChanged(int prevValue, int newValue)
+    {
+        hpBar.SetCurrentHp(prevValue, newValue);
+    }
+
+    // 대미지를 받으면 얼굴 표정이 바뀐다.
+    public void ExecuteDamageEffect()
+    {
+        faceTimer.Reset();
+        faceTimer.SetRunningState(true);
+    }
+
+    // 죽으면 파티클을 생성한다
+    public void ExecuteDeathEffect(Color deathColor)
+    {
+        var newParticle = Instantiate(deathParticlePrefab, transform.position, Quaternion.identity);
+        var playerDeathEffect = newParticle.GetComponent<PlayerDeath>();
+        playerDeathEffect.createColor = deathColor;
+    }
+
     // isOwner == true일 때 입력 받기
     void InputControl()
     {
@@ -321,6 +337,7 @@ public class Player : NetworkBehaviour
         }
     }
 
+    // 움직임 업데이트
     void UpdateMove()
     {
         // 좌우 이동
@@ -354,38 +371,6 @@ public class Player : NetworkBehaviour
         gunHand.rotation = gripPoint.rotation;
     }
 
-    // [추가] PacketManager가 호출하는 연출 실행 함수들
-    public void ExecuteDamageEffect()
-    {
-        faceTimer.Reset();
-        faceTimer.SetRunningState(true);
-    }
-
-    public void ExecuteDeathEffect(Color deathColor)
-    {
-        var newParticle = Instantiate(deathParticlePrefab, transform.position, Quaternion.identity);
-        var playerDeathEffect = newParticle.GetComponent<PlayerDeath>();
-        playerDeathEffect.createColor = deathColor;
-    }
-
-    #region Colison & Visual
-
-    void OnCollisionEnter2D(Collision2D c)
-    {
-        // 땅 위에 있을 때 점프 가능
-        if (c.collider.gameObject.layer == groundLayer)
-        {
-            foreach (var contact in c.contacts)
-            {
-                if (contact.normal.y > 0.5f)
-                {
-                    jumpCount = 0;
-                    return;
-                }
-            }
-        }
-    }
-
     // 몸통 업데이트
     void UpdateBody()
     {
@@ -393,7 +378,7 @@ public class Player : NetworkBehaviour
         body.rotation = Quaternion.Euler(new Vector3(0f, bodyRotation, 0f));
     }
 
-    // 총  업데이트
+    // 총 회전축 업데이트
     void UpdateGunAxis()
     {
         gunAxis.position = body.position;
@@ -436,8 +421,8 @@ public class Player : NetworkBehaviour
         gunController.InputSpec(spec, type);
         gripPoint = guns[gunIndex].transform.Find("Body").transform.Find("GripPoint").transform;
     }
-    #endregion
 
+    // 몸 색상 스프라이트 샘플링하여 색상 얻기
     private Color GetBodyColor(Sprite sprite)
     {
         var texture = sprite.texture;

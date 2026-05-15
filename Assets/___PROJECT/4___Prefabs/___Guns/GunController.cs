@@ -131,7 +131,11 @@ public class GunController : MonoBehaviour
         }
     }
 
-    public void PullTrigger(bool flag) => triggerPulled = flag;
+    public void PullTrigger(bool flag)
+    {
+        triggerPulled = flag;
+    }
+        
 
     public void ReloadGun() { 
         if (!reloadState && currAmmo < totalAmmo) 
@@ -141,9 +145,15 @@ public class GunController : MonoBehaviour
         } 
     }
 
-    public void InputDirection(bool isLeft) => lookingLeft = isLeft;
+    public void InputDirection(bool isLeft)
+    {
+        lookingLeft = isLeft;
+    }
 
-    public void UpdateRecoilOffset() => transform.localPosition = Vector2.Lerp(transform.localPosition, Vector2.zero, Time.deltaTime * recoilRecoverySpeed);
+    public void UpdateRecoilOffset()
+    {
+        transform.localPosition = Vector2.Lerp(transform.localPosition, Vector2.zero, Time.deltaTime * recoilRecoverySpeed);
+    }
 
     public void InputSpec(GunSpecValue spec, GunType type)
     {
