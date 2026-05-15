@@ -9,8 +9,20 @@ public class MemoryPool : MonoBehaviour
     public static MemoryPool Inst;
     private Dictionary<PoolObject, Stack<PoolObject>> memDict = new();
 
-    void Awake(){ if(Inst && Inst != this){ DestroyImmediate(this); return; } Inst = this; }
-    void OnDestroy(){ Inst = null; }
+    void Awake()
+    { 
+        if(Inst && Inst != this)
+        { 
+            DestroyImmediate(this); 
+            return; 
+        } 
+        Inst = this; 
+    }
+
+    void OnDestroy()
+    { 
+        Inst = null; 
+    }
 
     /// <summary>
     /// <para>인스턴스의 Ty_ 타입의 컴포넌트를 리턴한다. 인스턴스가 없을 경우 새로 생성한다.</para>
