@@ -378,6 +378,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 26df6971f7681a2408cf2669538bb5f8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CardSetter
+  cardUIPanel: {fileID: 2084567608}
   selectedNumberText: {fileID: 1498939164}
   sceneRelay: {fileID: 1163452989}
   cardUI:

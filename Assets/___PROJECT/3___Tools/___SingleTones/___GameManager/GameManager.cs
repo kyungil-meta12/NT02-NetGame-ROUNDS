@@ -5,7 +5,7 @@ using UnityEngine.InputSystem;
 /// <summary>
 /// 게임 매니저 싱글톤 오브젝트 // 씬 전환 시 인스턴스 유지됨
 /// </summary>
-public class GameManager : MonoBehaviour
+public class GameManager : NetworkBehaviour
 {
     public static GameManager Inst;
 
@@ -16,6 +16,10 @@ public class GameManager : MonoBehaviour
     [HideInInspector]
     public int currentRound = 1; // 1부터 시작
 
+    // 패배한 플레이어의 CliendId를 저장 (기본값 999)
+    // Server만 작성 가능, Evryone 읽기가능
+    public NetworkVariable<ulong> loserClientId = new NetworkVariable<ulong>(999,
+        NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
 
     void Awake(){ 
         if(Inst && Inst != this) 
@@ -48,9 +52,9 @@ public class GameManager : MonoBehaviour
     /// <summary>
     /// 게임 종료 상태를 활성화
     /// </summary>
-    public void SetGameEnd()
+    public void SetGameEnd(bool flag)
     {
-        isGameEnd = true;
+        isGameEnd = flag;
     }
 
     /// <summary>
@@ -60,7 +64,16 @@ public class GameManager : MonoBehaviour
     {
         currentRound++;
     }
-    
+
+    public void ResetGameStatus()
+    {
+        isGameEnd = false;
+        if (IsServer)
+        {
+            loserClientId.Value = 999;
+        }
+    }
+
     /// <summary>
     /// 게임을 완전히 종료
     /// </summary>

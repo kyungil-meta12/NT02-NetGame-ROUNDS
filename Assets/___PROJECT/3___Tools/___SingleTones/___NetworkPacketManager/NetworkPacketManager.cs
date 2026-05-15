@@ -1,3 +1,4 @@
+using UltimateClean;
 using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -19,7 +20,7 @@ public class NetworkPacketManager : NetworkBehaviour
         Inst = this;
         DontDestroyOnLoad(gameObject);
     }
-    
+
     /// <summary>
     /// 네트워크 패킷 매니저 객체 및 인스턴스 삭제
     /// </summary>
@@ -30,6 +31,15 @@ public class NetworkPacketManager : NetworkBehaviour
     }
 
     #region Scene Management (씬 관리)
+
+    // [추가] 클라이언트(패배자)가 서버에게 다음 스테이지 시작을 요청
+    [Rpc(SendTo.Server)]
+    public void RequestNextStageServerRpc(string sceneName)
+    {
+        // 서버에서 라운드를 증가시키고 모든 인원을 이동시킴
+        GameManager.Inst.currentRound++;
+        TransitionToCardSelectRpc(sceneName);
+    }
 
     // [씬 전환] 서버가 모든 클라이언트를 특정 씬으로 이동시킴
     [Rpc(SendTo.Everyone)]
@@ -51,7 +61,7 @@ public class NetworkPacketManager : NetworkBehaviour
     [Rpc(SendTo.Server)]
     public void RequestDamageServerRpc(NetworkObjectReference targetRef, int dmg)
     {
-        if(targetRef.TryGet(out NetworkObject netObj))
+        if (targetRef.TryGet(out NetworkObject netObj))
         {
             if (netObj.IsSpawned)
             {
@@ -78,11 +88,19 @@ public class NetworkPacketManager : NetworkBehaviour
     [Rpc(SendTo.Everyone)]
     public void PerformDeathRpc(NetworkObjectReference playerRef, Color deathColor)
     {
-        if(playerRef.TryGet(out NetworkObject netObj))
+        if (playerRef.TryGet(out NetworkObject netObj))
         {
-            if (netObj.IsSpawned)
+            if (IsServer)
             {
-                netObj.GetComponent<Player>().ExecuteDeathEffect(deathColor);
+                GameManager.Inst.loserClientId.Value = netObj.OwnerClientId;
+                GameManager.Inst.SetGameEnd(true);
+            }
+
+            netObj.GetComponent<Player>().ExecuteDeathEffect(deathColor);
+
+            if (IsServer)
+            {
+                TransitionToCardSelectRpc("CardSelectScene");
             }
         }
     }
@@ -105,7 +123,7 @@ public class NetworkPacketManager : NetworkBehaviour
     [Rpc(SendTo.Everyone)]
     public void FireEffectRpc(NetworkObjectReference playerRef, Vector2 firePos, Vector2 shellPos, float rotation, bool isLeft)
     {
-        if(playerRef.TryGet(out NetworkObject netObj))
+        if (playerRef.TryGet(out NetworkObject netObj))
         {
             if (netObj.IsSpawned)
             {
@@ -126,14 +144,15 @@ public class NetworkPacketManager : NetworkBehaviour
     }
 
     [Rpc(SendTo.Everyone)]
-    public void CreateBulletRpc(NetworkObjectReference playerRef, Vector2 firePos, float rotation, float ammoSpeed, int dmg) { 
-        if(playerRef.TryGet(out NetworkObject netObj))
+    public void CreateBulletRpc(NetworkObjectReference playerRef, Vector2 firePos, float rotation, float ammoSpeed, int dmg) {
+        if (playerRef.TryGet(out NetworkObject netObj))
         {
-            if(netObj.IsSpawned)
+            if (netObj.IsSpawned)
             {
                 netObj.GetComponentInChildren<GunController>().ExecuteCreateBullets(firePos, rotation, ammoSpeed, dmg);
             }
         }
     }
     #endregion
+
 }

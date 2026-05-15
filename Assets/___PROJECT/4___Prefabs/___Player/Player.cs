@@ -236,16 +236,18 @@ public class Player : NetworkBehaviour
         NetworkPacketManager.Inst.PlayDamageEffectRpc(NetworkObject);
 
         netCurrHP.Value -= dmg;
+
         if (netCurrHP.Value <= 0)
         {
             isDespawning = true;
 
             // 사망 연출 전파
+            GameManager.Inst.loserClientId.Value = OwnerClientId;
+            GameManager.Inst.SetGameEnd(true);
             NetworkPacketManager.Inst.PerformDeathRpc(NetworkObject, deathParticleColor);
 
             // 사망 시 카드 선택 씬으로 전환
             Debug.Log("승리자 발생! 씬 전환을 시작합니다.");
-            NetworkPacketManager.Inst.TransitionToCardSelectRpc("CardSelectScene");
         }
     }
 

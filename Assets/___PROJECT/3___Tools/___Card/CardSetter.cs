@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Linq;
 using TMPro;
 using UltimateClean;
@@ -10,8 +11,11 @@ using Random = UnityEngine.Random;
 //카드셀렉트씬 카드 배치용 클래스
 public class CardSetter : MonoBehaviour
 {
+    [Header("UI Reference")]
+    public GameObject cardUIPanel;
     public TextMeshProUGUI selectedNumberText;
     public SceneRelay sceneRelay;
+
     private SceneTransition sceneTransition;
     
     [Tooltip("4장의 카드 UI 세팅 필요")]
@@ -26,27 +30,80 @@ public class CardSetter : MonoBehaviour
     private void Awake()
     {
         randomIndices = new int[cardUI.Length];
+
+        if(sceneRelay != null)
+        {
+            sceneTransition = sceneRelay.GetComponent<SceneTransition>();
+        }
     }
 
     /// <summary>
     /// 카드 배열에서 4개를 선택해서 랜덤배치
     /// </summary>
-    public void Start()
+    public IEnumerator Start()
     {
-        sceneTransition = sceneRelay.GetComponent<SceneTransition>();
-        
-        if (cards == null || cards.Length < 4) return;
-        
+        Debug.Log("카드 세터 시작됨");
+        // 시작 시 UI 초기화
+        //if (cardUIPanel != null)
+        //{
+        //    cardUIPanel.SetActive(false);
+        //}
+
+        Debug.Log($"대기 시작... 현재 패배자 ID: {GameManager.Inst.loserClientId.Value}");
+        // 패배자 ID 동기화 대기
+        while (GameManager.Inst.loserClientId.Value == 999)
+        {
+            yield return null; // 값이 바뀔 때까지 프레임 대기
+        }
+
+        Debug.Log($"대기 종료! 확정된 패배자 ID: {GameManager.Inst.loserClientId.Value}");
+
+        bool isLoser = (GameManager.Inst.loserClientId.Value == NetworkManager.Singleton.LocalClientId);
+
+        // 권한에 따른 화면 구성
+        if (isLoser)
+        {
+            // [패배자] 카드 선택 UI를 활성화
+            if (cardUIPanel != null) cardUIPanel.SetActive(true);
+            if (selectedNumberText != null) selectedNumberText.text = "카드를 선택하세요!";
+            InitCards(); // 카드 랜덤 배치 함수 (기존 로직)
+        }
+        else
+        {
+            // [승리자] "상대가 카드를 선택 중입니다" 문구 표시
+            if (selectedNumberText != null)
+                selectedNumberText.text = "상대가 카드를 선택 중입니다...";
+        }
+    }
+
+    private void InitCards()
+    {
+        if (cards == null || cards.Length < 4)
+        {
+            Debug.LogError("Card Info 데이터가 부족합니다!");
+            return;
+        }
+
+        // 랜덤 인덱스 추출
         randomIndices = Enumerable.Range(0, cards.Length)
             .OrderBy(x => Random.value)
             .Take(4)
             .ToArray();
-        
+
         for (int i = 0; i < randomIndices.Length; i++)
         {
-            cardUI[i].image.sprite = cards[randomIndices[i]].image;
-            cardUI[i].titleText.text = cards[randomIndices[i]].titleText;
-            cardUI[i].descriptionText.text = cards[randomIndices[i]].descriptionText;
+            int dataIdx = randomIndices[i];
+
+            // 데이터 할당
+            cardUI[i].image.sprite = cards[dataIdx].image;
+            cardUI[i].titleText.text = cards[dataIdx].titleText;
+            cardUI[i].descriptionText.text = cards[dataIdx].descriptionText;
+
+            // [확인] 개별 카드 오브젝트가 꺼져 있을 수 있으므로 명시적으로 켬
+            // cardUI[i].image가 속한 게임 오브젝트 자체를 활성화
+            cardUI[i].image.gameObject.SetActive(true);
+            // 만약 카드 전체를 담은 부모가 따로 있다면 그 부모를 켜야 합니다.
+            cardUI[i].image.transform.parent.gameObject.SetActive(true);
         }
     }
 
