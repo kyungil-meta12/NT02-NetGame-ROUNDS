@@ -1,4 +1,7 @@
+using System.Net;
+using System.Net.Sockets;
 using Unity.Netcode;
+using Unity.Netcode.Transports.UTP;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -11,12 +14,18 @@ public class GameManager : NetworkBehaviour
 
     [HideInInspector]
     public bool isPaused = false;
+
     [HideInInspector]
     public bool isGameEnd = false;
+
     [HideInInspector]
     public int currentRound = 1; // 1부터 시작
+
     [HideInInspector]
     public bool serverRunning = false; // 서버 동작 여부
+
+    [HideInInspector]
+    public string localIP;
 
     // 패배한 플레이어의 CliendId를 저장 (기본값 999)
     // Server만 작성 가능, Evryone 읽기가능
@@ -77,6 +86,54 @@ public class GameManager : NetworkBehaviour
     }
 
     /// <summary>
+    /// 서버 호스팅 시작
+    /// </summary>
+    public void StartServerHost()
+    {
+        if(serverRunning)
+        {
+            return;
+        }
+
+        localIP = GetLocalIPAddress();
+        var transport = NetworkManager.Singleton.GetComponent<UnityTransport>();
+        transport.SetConnectionData(localIP, 7777);
+        if (NetworkManager.Singleton.StartHost())
+        {
+            print($"Host started on IP: {localIP}");
+            serverRunning = true;
+        }
+        else
+        {
+            Debug.LogError("Host failed to start.");
+        }
+    }
+
+    /// <summary>
+    /// 서버 접속
+    /// </summary>
+    /// <param name="serverIP"></param>
+    public void ConnectServer(string serverIP)
+    {
+        if(serverRunning)
+        {
+            return;
+        }
+
+        var transport = NetworkManager.Singleton.GetComponent<UnityTransport>();
+        transport.SetConnectionData(serverIP, 7777);
+        if(NetworkManager.Singleton.StartClient())
+        {
+            print($"Connecting to {serverIP}:{7777}.");
+            serverRunning = true;
+        }
+        else
+        {
+            Debug.LogError($"Failed to connect to {serverIP}:{7777}.");
+        }
+    }
+
+    /// <summary>
     /// 게임을 완전히 종료
     /// </summary>
     public void QuitGame()
@@ -132,4 +189,18 @@ public class GameManager : NetworkBehaviour
         }
     }
 #endif
+
+    // 현재 PC의 로컬 IP 얻기
+    private string GetLocalIPAddress()
+    {
+        var host = Dns.GetHostEntry(Dns.GetHostName());
+        foreach (var ip in host.AddressList)
+        {
+            if (ip.AddressFamily == AddressFamily.InterNetwork)
+            {
+                return ip.ToString();
+            }
+        }
+        return "127.0.0.1";
+    }
 }
