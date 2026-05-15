@@ -15,6 +15,8 @@ public class GameManager : NetworkBehaviour
     public bool isGameEnd = false;
     [HideInInspector]
     public int currentRound = 1; // 1부터 시작
+    [HideInInspector]
+    public bool serverRunning = false; // 서버 동작 여부
 
     // 패배한 플레이어의 CliendId를 저장 (기본값 999)
     // Server만 작성 가능, Evryone 읽기가능
@@ -103,8 +105,6 @@ public class GameManager : NetworkBehaviour
     }
 
 #if UNITY_EDITOR
-    private bool serverRunning = false;
-
     void Update()
     {
         // 에디터에서만 실행하는 키
