@@ -201,9 +201,12 @@ public class Player : NetworkBehaviour
     {
         if(sceneEvent.SceneEventType == SceneEventType.LoadComplete)
         {
-            lastSceneName = sceneEvent.SceneName;
-            print($"Scene load completed | Scene: {sceneEvent.SceneName}");
-            SetPlayerState();
+            if (sceneEvent.ClientId == NetworkManager.Singleton.LocalClientId)
+            {
+                lastSceneName = sceneEvent.SceneName;
+                print($"Scene load completed | Scene: {sceneEvent.SceneName}");
+                SetPlayerState();
+            }
         }
     }
 
@@ -242,6 +245,7 @@ public class Player : NetworkBehaviour
         {
             netCurrHP.Value = totalHP;
         }
+
     }
 
     // 총 타입 변경 이벤트
