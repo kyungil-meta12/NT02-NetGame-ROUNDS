@@ -176,4 +176,19 @@ public class GunController : MonoBehaviour
             AmmoIndicator.Inst.InputGunType(type); 
         }
     }
+
+    // 현재 상태 초기화
+    public void ResetGun()
+    {
+        currAmmo = totalAmmo;
+        currFireTime = 0f;
+        reloadState = false;
+        currReloadTime = 0f;
+
+        if (netObject.IsOwner)
+        {
+            AmmoIndicator.Inst.InitAmmo(totalAmmo);
+            AmmoIndicator.Inst.InputReloadTime(currReloadTime, reloadDuration);
+        }
+    }
 }

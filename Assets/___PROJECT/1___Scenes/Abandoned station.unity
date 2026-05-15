@@ -35343,6 +35343,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 4195097755433061374, guid: 49d7eacf9ecd87e4e9f2e04f2b6d088b, type: 3}
+      propertyPath: GlobalObjectIdHash
+      value: 4125399060
+      objectReference: {fileID: 0}
     - target: {fileID: 4516522474376658980, guid: 49d7eacf9ecd87e4e9f2e04f2b6d088b, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0

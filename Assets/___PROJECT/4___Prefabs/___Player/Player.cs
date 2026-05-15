@@ -49,7 +49,6 @@ public class Player : NetworkBehaviour
     private float gunAxisRotation;
     private int gunIndex = -1;
     private bool lookingLeft;
-    private bool isDespawning = false;
 
 
     private bool moveLeft = false;
@@ -76,6 +75,7 @@ public class Player : NetworkBehaviour
     private NetworkVariable<int> netFaceIndex = new(-1, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Owner);
     private NetworkVariable<int> netBodyIndex = new(-1, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Owner);
 
+    private string lastSceneName;
 
     void Awake()
     {
@@ -86,9 +86,6 @@ public class Player : NetworkBehaviour
     
     public override void OnNetworkSpawn()
     {
-        // 씬 전환 이벤트 구독
-        SceneManager.sceneLoaded += OnSceneLoaded;
-
         // NetworkVariable 변경 이벤트 구독
         netFaceIndex.OnValueChanged += OnFaceIndexChanged;
         netBodyIndex.OnValueChanged += OnBodyIndexChanged;
@@ -100,6 +97,9 @@ public class Player : NetworkBehaviour
         // [변경] 물리 및 권한 설정 (클라이언트 이동 보장)
         if (IsOwner)
         {
+            // 씬 전환 이벤트 구독
+            NetworkManager.Singleton.SceneManager.OnSceneEvent += OnSceneLoaded;
+
             rb.bodyType = RigidbodyType2D.Dynamic;
             rb.simulated = true;
             // PlayerManager에 외모 데이터를 저장한 후 ThisAppearance로부터 인덱스 정보를 불러온다.
@@ -112,6 +112,10 @@ public class Player : NetworkBehaviour
 
             // Stat으로부터 현재의 총 타입을 불러온다.
             netGunType.Value = PlayerManager.Inst.Stat.gunType;
+            print($"This Player network spwaned: id: {NetworkObject.OwnerClientId}");
+
+            // 플레이어 상태 세팅
+            SetPlayerState();
         }
         else
         {
@@ -120,13 +124,11 @@ public class Player : NetworkBehaviour
             OnBodyIndexChanged(-1, netBodyIndex.Value);
             OnFaceIndexChanged(-1, netFaceIndex.Value);
             OnGunTypeChanged(GunType.None, netGunType.Value);
+            print($"Other Player network spwaned: id: {NetworkObject.OwnerClientId}");
         }
 
         // 땅 레이어 저장
         groundLayer = LayerMask.NameToLayer("Ground");
-
-        // 플레이어 상태 세팅
-        SetPlayerState();
     }
 
     // 네트워크 디스폰
@@ -136,7 +138,11 @@ public class Player : NetworkBehaviour
         netBodyIndex.OnValueChanged -= OnBodyIndexChanged;
         netGunType.OnValueChanged -= OnGunTypeChanged;
         netCurrHP.OnValueChanged -= OnHPChanged;
-        SceneManager.sceneLoaded -= OnSceneLoaded;
+
+        if(IsOwner)
+        {
+            NetworkManager.Singleton.SceneManager.OnSceneEvent -= OnSceneLoaded;
+        }
     }
 
     void Update()
@@ -191,27 +197,44 @@ public class Player : NetworkBehaviour
 
     // Player는 씬 전환 시 삭제되지 않고 현재의 인스턴스가 그대로 다음 씬으로 이동하기 때문에, 
     // 씬 전환 이벤트를 통해 플레이어의 상태를 초기화한다.
-    void OnSceneLoaded(Scene scene, LoadSceneMode mode)
+    void OnSceneLoaded(SceneEvent sceneEvent)
     {
-        SetPlayerState();
+        if(sceneEvent.SceneEventType == SceneEventType.LoadComplete)
+        {
+            lastSceneName = sceneEvent.SceneName;
+            print($"Scene load completed | Scene: {sceneEvent.SceneName}");
+            SetPlayerState();
+        }
     }
 
     // 플레이어 상태 설정
     private void SetPlayerState()
     {
-        // 플레이어가 필요없는 씬일 경우 컨트롤 입력 비활성화
-        controllable = SceneManager.GetActiveScene().name != "CardSelectScene";
-
         // 스폰포인트로 이동
         var spawnPoint = GameObject.FindWithTag("SpawnPoint").transform.position;
         transform.position = spawnPoint;
         rb.position = spawnPoint;
 
-        // 시네머신 그룹에 추가
-        if (IsOwner && controllable)
+        // 현재 상태 초기화
+        rb.linearVelocity = Vector2.zero;
+        jumpCount = 0;
+        jumpInput = false;
+
+        // 플레이어가 필요없는 씬일 경우 컨트롤 입력 비활성화
+        controllable = lastSceneName != "CardSelectScene";
+
+        if (controllable)
         {
+            // 시네머신 그룹에 추가
             var targetGroup = GameObject.Find("Target Group").GetComponent<CinemachineTargetGroup>();
             targetGroup.AddMember(transform, 1f, 1f);
+
+            // 총 상태 초기화
+            gunController.ResetGun();
+
+            // 플레이어 얼굴 초기화
+            faceTimer.SetRunningState(false);
+            faceTimer.Reset();
         }
 
         // 플레이어 체력 초기화
@@ -219,10 +242,6 @@ public class Player : NetworkBehaviour
         {
             netCurrHP.Value = totalHP;
         }
-
-        // 플레이어 얼굴 초기화
-        faceTimer.SetRunningState(false);
-        faceTimer.Reset();
     }
 
     // 총 타입 변경 이벤트
@@ -262,19 +281,21 @@ public class Player : NetworkBehaviour
     // 대미지 발생 이벤트 // 서버에서 대미지 계산 및 사망/승리 판정 수행
     public void OnDamageCalculated(int dmg)
     {
-        if (!IsServer || isDespawning)
+        if (!IsServer)
         {
             return;
         }
 
         NetworkPacketManager.Inst.PlayDamageEffectRpc(NetworkObject);
 
-        netCurrHP.Value -= dmg;
+        if(netCurrHP.Value <= 0)
+        {
+            return;
+        }
 
+        netCurrHP.Value -= dmg;
         if (netCurrHP.Value <= 0)
         {
-            isDespawning = true;
-
             // 사망 연출 전파
             GameManager.Inst.loserClientId.Value = OwnerClientId;
             GameManager.Inst.SetGameEnd(true);

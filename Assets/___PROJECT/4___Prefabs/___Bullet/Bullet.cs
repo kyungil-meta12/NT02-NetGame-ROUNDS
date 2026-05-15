@@ -59,6 +59,10 @@ public class Bullet : PoolObject
                         // 서버 상에서 실제 대미지 입힘
                         NetworkPacketManager.Inst.RequestDamageServerRpc(netObj, damage);
                     }
+                    else
+                    {
+                        print("Object is not spawned.");
+                    }
                 }
             }
 

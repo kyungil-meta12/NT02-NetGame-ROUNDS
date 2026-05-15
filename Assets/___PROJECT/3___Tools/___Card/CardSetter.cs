@@ -43,11 +43,6 @@ public class CardSetter : MonoBehaviour
     public IEnumerator Start()
     {
         Debug.Log("카드 세터 시작됨");
-        // 시작 시 UI 초기화
-        //if (cardUIPanel != null)
-        //{
-        //    cardUIPanel.SetActive(false);
-        //}
 
         Debug.Log($"대기 시작... 현재 패배자 ID: {GameManager.Inst.loserClientId.Value}");
         // 패배자 ID 동기화 대기
@@ -64,12 +59,16 @@ public class CardSetter : MonoBehaviour
         if (isLoser)
         {
             // [패배자] 카드 선택 UI를 활성화
-            if (cardUIPanel != null) cardUIPanel.SetActive(true);
+            //if (cardUIPanel != null) cardUIPanel.SetActive(true);
             if (selectedNumberText != null) selectedNumberText.text = "카드를 선택하세요!";
             InitCards(); // 카드 랜덤 배치 함수 (기존 로직)
         }
         else
-        {
+        { // [승리자] 카드 선택 UI를 비활성화
+            if (cardUIPanel != null)
+            {
+                cardUIPanel.SetActive(false);
+            }
             // [승리자] "상대가 카드를 선택 중입니다" 문구 표시
             if (selectedNumberText != null)
                 selectedNumberText.text = "상대가 카드를 선택 중입니다...";
