@@ -204,7 +204,10 @@ public class Player : NetworkBehaviour
             if (sceneEvent.ClientId == NetworkManager.Singleton.LocalClientId)
             {
                 // 결과창이라면 설정을 건너뜀
-                if (sceneEvent.SceneName == "ResultScene") return;
+                if (sceneEvent.SceneName == "ResultScene") 
+                {
+                    return;
+                }
                 lastSceneName = sceneEvent.SceneName;
                 print($"Scene load completed | Scene: {sceneEvent.SceneName}");
                 SetPlayerState();
