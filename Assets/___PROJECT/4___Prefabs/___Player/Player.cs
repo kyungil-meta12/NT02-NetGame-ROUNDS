@@ -1,3 +1,4 @@
+using System.Collections;
 using Unity.Cinemachine;
 using Unity.Netcode;
 using UnityEngine;
@@ -199,54 +200,114 @@ public class Player : NetworkBehaviour
     // 씬 전환 이벤트를 통해 플레이어의 상태를 초기화한다.
     void OnSceneLoaded(SceneEvent sceneEvent)
     {
-        if(sceneEvent.SceneEventType == SceneEventType.LoadComplete)
+        if (sceneEvent.SceneEventType == SceneEventType.LoadComplete)
         {
             if (sceneEvent.ClientId == NetworkManager.Singleton.LocalClientId)
             {
-                // 결과창이라면 설정을 건너뜀
-                if (sceneEvent.SceneName == "ResultScene") return;
-                lastSceneName = sceneEvent.SceneName;
-                print($"Scene load completed | Scene: {sceneEvent.SceneName}");
-                SetPlayerState();
+                // [수정] 즉시 호출 대신 코루틴으로 호출하여 객체 로드 시간을 벌어줌
+                StartCoroutine(SafeSetPlayerState(sceneEvent.SceneName));
             }
         }
+    }
+
+    // [추가] 안전한 설정을 위한 코루틴
+    private IEnumerator SafeSetPlayerState(string sceneName)
+    {
+        // 씬이 "GameStart"나 "ResultScene"이면 설정하지 않음
+        if (sceneName == "GameStart" || sceneName == "ResultScene") yield break;
+
+        // 한 프레임 대기 (모든 Find 명령이 성공할 수 있도록)
+        yield return null;
+
+        lastSceneName = sceneName;
+        SetPlayerState();
     }
 
     // 플레이어 상태 설정
     private void SetPlayerState()
     {
-        // 스폰포인트로 이동
-        var spawnPoint = GameObject.FindWithTag("SpawnPoint").transform.position;
-        transform.position = spawnPoint;
-        rb.position = spawnPoint;
-
-        // 현재 상태 초기화
-        rb.linearVelocity = Vector2.zero;
-        jumpCount = 0;
-        jumpInput = false;
-
-        // 플레이어가 필요없는 씬일 경우 컨트롤 입력 비활성화
-        controllable = lastSceneName != "CardSelectScene";
-
-        if (controllable)
+        // 기초 보안 체크 (PlayerManager가 없으면 중단)
+        if(PlayerManager.Inst == null)
         {
-            // 시네머신 그룹에 추가
-            var targetGroup = GameObject.Find("Target Group").GetComponent<CinemachineTargetGroup>();
-            targetGroup.AddMember(transform, 1f, 1f);
-
-            // 총 상태 초기화
-            gunController.ResetGun();
-
-            // 플레이어 얼굴 초기화
-            faceTimer.SetRunningState(false);
-            faceTimer.Reset();
+            Debug.Log($"PlayerManager를 찾을 수 없어 설정을 중단합니다.");
+            return;
         }
 
-        // 플레이어 체력 초기화
-        if(IsServer)
+        // 스폰 위치로 이동
+        // 씬마다 "SpawnPoind" 태그가 달린 오브젝트가 있어야함.
+        GameObject spawnObj = GameObject.FindWithTag("SpawnPoint");
+        if(spawnObj != null)
         {
-            netCurrHP.Value = totalHP;
+            Vector2 spawnPos = spawnObj.transform.position;
+            transform.position = spawnPos;
+            if(rb != null)
+            {
+                rb.position = spawnPos;
+                rb.linearVelocity = Vector2.zero;
+            }
+
+            // 물리 및 입력 초기화
+            jumpCount = 0;
+            jumpInput = false;
+
+            // 현재 씬이 카드 선택 씬이 아닐 때만 조작 가능하도록 설정
+            string currentScene = SceneManager.GetActiveScene().name;
+            controllable = currentScene != "CardSelectScene";
+
+            // 조작 가능한 플레이 씬(스테이지)일 경우 처리
+            if (controllable)
+            {
+                // 시네머신 타겟 그룹에 나를 추가 (카메라가 추적하도록)
+                GameObject tragetGroundObj = GameObject.Find("Target Group");
+                if(tragetGroundObj != null)
+                {
+                    var targetGroup = tragetGroundObj.GetComponent<CinemachineTargetGroup>();
+                    if (targetGroup != null)
+                    {
+                        // 이미 추가되어 있는지 확인 후 추가 (중복 방지)
+                        if(targetGroup.FindMember(transform) < 0)
+                        {
+                            targetGroup.AddMember(transform, 1f, 1f);
+                            Debug.Log("시네머신 타겟 그룹에 플레이어 추가 완료");
+                        }
+                    }
+                }
+                // 총기 상태 초기화 (총기 컨트롤러가 있을 때만0
+                if(gunController != null)
+                {
+                    gunController.ResetGun();
+                }
+
+                // 얼굴 타이머 초기화 (변수가 있을 때만)
+                if(faceTimer != null)
+                {
+                    faceTimer.SetRunningState(false);
+                    faceTimer.Reset();
+                }
+            }
+
+            // 플레이어 체력 및 스탯 초기화
+            if (IsServer)
+            {
+                netCurrHP.Value = totalHP;
+            }
+
+            // PlayerManager 데이터 기반으로 외형/총기 최종 적용
+            ApplyPlayerManagerData();
         }
+    }
+
+    // 가독성을 위해 데이터 적용 부분만 분리
+    private void ApplyPlayerManagerData()
+    {
+        var stat = PlayerManager.Inst.Stat;
+        var apperarance = PlayerManager.Inst.Appearance;
+
+        if (bodies != null && apperarance.bodyIndex < bodies.Length)
+            bodyRenderer.sprite = bodies[apperarance.bodyIndex];
+
+        if (guns != null && guns.Length > 0)
+            SetGun(stat.gunType);
     }
 
     // 총 타입 변경 이벤트

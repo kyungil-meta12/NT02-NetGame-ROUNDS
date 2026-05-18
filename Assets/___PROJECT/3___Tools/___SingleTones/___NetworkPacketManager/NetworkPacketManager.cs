@@ -59,21 +59,28 @@ public class NetworkPacketManager : NetworkBehaviour
 
     #region Scene Management (씬 관리)
 
-    // [추가] 클라이언트(패배자)가 서버에게 다음 스테이지 시작을 요청
+    // [수정] 서버가 모든 클라이언트를 데리고 특정 씬으로 이동하게 만드는 RPC
     [Rpc(SendTo.Server)]
     public void RequestNextStageServerRpc(string sceneName)
     {
-        // 현재 라운드가 마지막 라운드(3)라면 카드 선택 없이 바로 결과창으로!
-        if (GameManager.Inst.currentRound >= GameManager.Inst.maxRound)
+        // 1. 만약 목적지가 결과창이라면 바로 이동
+        if (sceneName == "ResultScene")
         {
-            Debug.Log($"마지막 스테이지 종료. 결과창으로 즉시 이동합니다.");
+            Debug.Log("모든 스테이지 종료. 결과창으로 이동합니다.");
             NetworkManager.Singleton.SceneManager.LoadScene("ResultScene", LoadSceneMode.Single);
+            return;
+        }
+
+        // 2. 카드 선택 완료 후 다음 스테이지로 가는 경우
+        // 클라이언트가 보낸 sceneName(예: Stage2)으로 이동합니다.
+        if (!string.IsNullOrEmpty(sceneName))
+        {
+            Debug.Log($"서버가 다음 씬으로 이동을 승인함: {sceneName}");
+            NetworkManager.Singleton.SceneManager.LoadScene(sceneName, LoadSceneMode.Single);
         }
         else
         {
-            // 아직 스테이지가 남았다면 라운드를 올리고 카드 선택 씬으로 이동.
-            GameManager.Inst.currentRound++;
-            TransitionToCardSelectRpc("CardSelectScene");
+            Debug.LogError("전달된 씬 이름이 비어있습니다!");
         }
     }
 

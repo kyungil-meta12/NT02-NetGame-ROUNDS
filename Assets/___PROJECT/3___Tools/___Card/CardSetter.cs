@@ -118,9 +118,32 @@ public class CardSetter : MonoBehaviour
     //카드 확정
     public void ConfirmCard()
     {
-        //카드 선택
-        if (selectedIndex == -1) return; // 카드 미선택 방지
-        Debug.Log($"선택된 카드는 {cards[randomIndices[selectedIndex]].titleText}");
+        if (selectedIndex == -1) return;
+
+        // 1. 카드 효과 적용 (로컬에서 즉시 적용)
+        ApplyEffect(randomIndices[selectedIndex]);
+
+        // 2. 다음으로 이동할 씬 이름 결정 (SceneRelay에 설정된 이름 가져오기)
+        string nextSceneName = sceneRelay.GetComponent<UltimateClean.SceneTransition>().scene;
+
+        // [중요] 서버와 클라이언트 구분 처리
+        if (NetworkManager.Singleton.IsServer)
+        {
+            // 내가 호스트라면 직접 로드
+            Debug.Log($"호스트가 다음 스테이지({nextSceneName})를 직접 로드합니다.");
+            NetworkManager.Singleton.SceneManager.LoadScene(nextSceneName, LoadSceneMode.Single);
+        }
+        else
+        {
+            // 내가 클라이언트(패배자)라면 서버에게 씬 전환을 요청 (RPC 호출)
+            Debug.Log($"클라이언트가 서버에게 {nextSceneName} 로드를 요청합니다.");
+            NetworkPacketManager.Inst.RequestNextStageServerRpc(nextSceneName);
+        }
+    }
+
+    // 효과 적용 부분만 따로 관리
+    private void ApplyEffect(int cardIndex)
+    {
         //카드별 능력 적용
         switch (randomIndices[selectedIndex])
         {
@@ -157,14 +180,6 @@ public class CardSetter : MonoBehaviour
             case 10:
                 PlayerManager.Inst.ReplaceTheGunToSniper();
                 break;
-        }
-
-        // 이미 SceneRelay가 Start에서 다음 스테이지 이름을 결정해두었습니다.
-        if (NetworkManager.Singleton.IsServer)
-        {
-            // SceneRelay에 설정된 transition.scene(다음 스테이지 이름)으로 이동
-            string nextScene = sceneRelay.GetComponent<UltimateClean.SceneTransition>().scene;
-            NetworkManager.Singleton.SceneManager.LoadScene(nextScene, LoadSceneMode.Single);
         }
     }
 

@@ -48312,6 +48312,26 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 729403480395688675, guid: a89df20b8a9f6054aa1f4d2fb76cdfe3, type: 3}
+      propertyPath: sceneNames.Array.size
+      value: 4
+      objectReference: {fileID: 0}
+    - target: {fileID: 729403480395688675, guid: a89df20b8a9f6054aa1f4d2fb76cdfe3, type: 3}
+      propertyPath: 'sceneNames.Array.data[0]'
+      value: Abandoned station
+      objectReference: {fileID: 0}
+    - target: {fileID: 729403480395688675, guid: a89df20b8a9f6054aa1f4d2fb76cdfe3, type: 3}
+      propertyPath: 'sceneNames.Array.data[1]'
+      value: Island pack
+      objectReference: {fileID: 0}
+    - target: {fileID: 729403480395688675, guid: a89df20b8a9f6054aa1f4d2fb76cdfe3, type: 3}
+      propertyPath: 'sceneNames.Array.data[2]'
+      value: Mounts
+      objectReference: {fileID: 0}
+    - target: {fileID: 729403480395688675, guid: a89df20b8a9f6054aa1f4d2fb76cdfe3, type: 3}
+      propertyPath: 'sceneNames.Array.data[3]'
+      value: ResultScene
+      objectReference: {fileID: 0}
     - target: {fileID: 5368442715030903794, guid: a89df20b8a9f6054aa1f4d2fb76cdfe3, type: 3}
       propertyPath: m_LocalPosition.x
       value: -129.33679
