@@ -63,13 +63,18 @@ public class NetworkPacketManager : NetworkBehaviour
     [Rpc(SendTo.Server)]
     public void RequestNextStageServerRpc(string sceneName)
     {
-        if(sceneSwitching)
+        // 현재 라운드가 마지막 라운드(3)라면 카드 선택 없이 바로 결과창으로!
+        if (GameManager.Inst.currentRound >= GameManager.Inst.maxRound)
         {
-            return;
+            Debug.Log($"마지막 스테이지 종료. 결과창으로 즉시 이동합니다.");
+            NetworkManager.Singleton.SceneManager.LoadScene("ResultScene", LoadSceneMode.Single);
         }
-        // 서버에서 라운드를 증가시키고 모든 인원을 이동시킴
-        GameManager.Inst.currentRound++;
-        TransitionToCardSelectRpc(sceneName);
+        else
+        {
+            // 아직 스테이지가 남았다면 라운드를 올리고 카드 선택 씬으로 이동.
+            GameManager.Inst.currentRound++;
+            TransitionToCardSelectRpc("CardSelectScene");
+        }
     }
 
     // [씬 전환] 서버가 모든 클라이언트를 특정 씬으로 이동시킴

@@ -20,6 +20,7 @@ public class GameManager : NetworkBehaviour
 
     [HideInInspector]
     public int currentRound = 1; // 1부터 시작
+    public int maxRound = 3;
 
     [HideInInspector]
     public bool serverRunning = false; // 서버 동작 여부
