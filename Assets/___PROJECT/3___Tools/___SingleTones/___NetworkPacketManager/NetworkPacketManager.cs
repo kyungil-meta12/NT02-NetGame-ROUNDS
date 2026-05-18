@@ -189,7 +189,15 @@ public class NetworkPacketManager : NetworkBehaviour
            
             if (IsServer)
             {
-                TransitionToCardSelectRpc("CardSelectScene");
+                // 마지막 라운드가 끝났다면 결과 씬으로 바로 이동
+                if (GameManager.Inst.currentRound.Value == GameManager.Inst.maxRound)
+                {
+                    NetworkManager.Singleton.SceneManager.LoadScene("ResultScene", LoadSceneMode.Single);
+                }
+                else
+                {
+                    TransitionToCardSelectRpc("CardSelectScene");
+                }
             }
         }
     }

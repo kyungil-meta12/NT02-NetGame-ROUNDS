@@ -60,7 +60,7 @@ public class CardSetter : MonoBehaviour
 
         Debug.Log($"대기 종료! 확정된 패배자 ID: {GameManager.Inst.loserClientId.Value}");
 
-        bool isLoser = (GameManager.Inst.loserClientId.Value == NetworkManager.Singleton.LocalClientId);
+        bool isLoser = GameManager.Inst.loserClientId.Value == NetworkManager.Singleton.LocalClientId;
 
         // 권한에 따른 화면 구성
         if (isLoser)
@@ -131,12 +131,8 @@ public class CardSetter : MonoBehaviour
         // 1. 카드 효과 적용 (로컬에서 즉시 적용)
         ApplyEffect(randomIndices[selectedIndex]);
 
-        // 마지막 스테이지가 끝났는지?
-        bool isEnd = GameManager.Inst.currentRound.Value > GameManager.Inst.maxRound;
-
         // 2. 다음으로 이동할 씬 이름 결정 (SceneRelay에 설정된 이름 가져오기)
-        string nextSceneName = isEnd ? "ResultScene" : sceneRelay.sceneNames[GameManager.Inst.currentRound.Value - 1];
-
+        string nextSceneName = sceneRelay.sceneNames[GameManager.Inst.currentRound.Value - 1];
         Debug.Log($"클라이언트가 서버에게 {nextSceneName} 로드를 요청합니다.");
         NetworkPacketManager.Inst.RequestNextStageServerRpc(nextSceneName);
         

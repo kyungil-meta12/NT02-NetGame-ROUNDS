@@ -272,12 +272,6 @@ public class Player : NetworkBehaviour
                 }
             }
 
-            // // 플레이어 체력 및 스탯 초기화
-            // if (IsServer)
-            // {
-            //     netCurrHP.Value = totalHP;
-            // }
-
             // PlayerManager 데이터 기반으로 외형/총기 최종 적용
             ApplyPlayerManagerData();
         }
