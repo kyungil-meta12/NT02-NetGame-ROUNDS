@@ -39,7 +39,8 @@ public class GameManager : NetworkBehaviour
 
     public TMPro.TMP_InputField ipInputField;
 
-    void Awake(){ 
+    void Awake()
+    { 
         if(Inst && Inst != this) 
         { 
             DestroyImmediate(this); 
@@ -47,6 +48,30 @@ public class GameManager : NetworkBehaviour
         } 
         Inst = this; 
         DontDestroyOnLoad(gameObject);
+    }
+
+    public void SetupResultUI(GameObject victoryUI, GameObject defeatUI)
+    {
+        if (NetworkManager.Singleton == null) return;
+
+        ulong myId = NetworkManager.Singleton.LocalClientId;
+        ulong loserId = loserClientId.Value;
+
+        // 패널 초기화 (둘 다 끄기)
+        victoryUI.SetActive(false);
+        defeatUI.SetActive(false);
+
+        // 승패 판정 후 해당 패널만 활성화
+        if (myId == loserId)
+        {
+            defeatUI.SetActive(true);
+            Debug.Log($"결과 화면 : 패배 패널 활성화");
+        }
+        else
+        {
+            victoryUI.SetActive(true);
+            Debug.Log("결과 화면 : 승리 패널 활성화");
+        }
     }
 
     /// <summary>
