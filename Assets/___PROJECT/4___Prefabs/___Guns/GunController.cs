@@ -47,6 +47,11 @@ public class GunController : MonoBehaviour
 
     void Update()
     {
+        if (NetworkPacketManager.Inst.sceneSwitching)
+        {
+            return;
+        }
+
         // [변경] 소유자(Owner)만 발사 로직을 계산하고 서버에 요청함
         if (netObject.IsOwner)
         {
@@ -87,7 +92,10 @@ public class GunController : MonoBehaviour
 
             // [변경] 로컬 클라이언트에서 즉시 처리할 내용 (장탄수 UI 등)
             currAmmo--;
-            AmmoIndicator.Inst.InputAmmo(currAmmo);
+            if(AmmoIndicator.Inst)
+            {
+                AmmoIndicator.Inst.InputAmmo(currAmmo);
+            }
             currFireTime = fireInterval;
 
             // 로컬 반동 연출 (반응성을 위해 즉시 실행)
@@ -98,6 +106,11 @@ public class GunController : MonoBehaviour
     // [추가] 서버로부터 발사 승인을 받았을 때 모든 클라이언트에서 실행될 로직 (총알/이펙트 생성)
     public void ExecuteCreateFireEffects(Vector2 firePos, Vector2 shellPos, float rotation, bool isLeft)
     {
+        if (!MemoryPool.Inst)
+        {
+            return;
+        }
+
         // 총구 화염 및 탄피 생성 (시간 효과)
         var muzzleFire = MemoryPool.Inst.GetInstance<MuzzleFire>(flashPrefab);
         muzzleFire.Init(firePos, rotation);
@@ -110,6 +123,10 @@ public class GunController : MonoBehaviour
 
     public void ExecuteCreateBullets(Vector2 pos, float rotation, float ammoSpeed, int dmg)
     {
+        if(!MemoryPool.Inst)
+        {
+            return;
+        }
         var newBullet = MemoryPool.Inst.GetInstance<Bullet>(bulletPrefab);
         newBullet.Init(pos, rotation, ammoSpeed, dmg);
         newBullet.isOwner = netObject.IsOwner;
@@ -124,10 +141,16 @@ public class GunController : MonoBehaviour
             {
                 currReloadTime = 0f;
                 currAmmo = totalAmmo;
-                AmmoIndicator.Inst.InputAmmo(currAmmo);
+                if (AmmoIndicator.Inst)
+                {
+                    AmmoIndicator.Inst.InputAmmo(currAmmo);
+                }
                 reloadState = false;
             }
-            AmmoIndicator.Inst.InputReloadTime(currReloadTime, reloadDuration);
+            if (AmmoIndicator.Inst)
+            {
+                AmmoIndicator.Inst.InputReloadTime(currReloadTime, reloadDuration);
+            }
         }
     }
 
@@ -171,9 +194,12 @@ public class GunController : MonoBehaviour
         firePoint = transform.Find("FirePoint"); 
         shellPoint = transform.Find("ShellPoint");
 
-        if(netObject.IsOwner) { 
-            AmmoIndicator.Inst.InitAmmo(currAmmo); 
-            AmmoIndicator.Inst.InputGunType(type); 
+        if(netObject.IsOwner) {
+            if (AmmoIndicator.Inst)
+            {
+                AmmoIndicator.Inst.InitAmmo(currAmmo); 
+                AmmoIndicator.Inst.InputGunType(type); 
+            }
         }
     }
 
@@ -187,8 +213,11 @@ public class GunController : MonoBehaviour
 
         if (netObject.IsOwner)
         {
-            AmmoIndicator.Inst.InitAmmo(totalAmmo);
-            AmmoIndicator.Inst.InputReloadTime(currReloadTime, reloadDuration);
+            if (AmmoIndicator.Inst)
+            {
+                AmmoIndicator.Inst.InitAmmo(totalAmmo);
+                AmmoIndicator.Inst.InputReloadTime(currReloadTime, reloadDuration);
+            }
         }
     }
 }

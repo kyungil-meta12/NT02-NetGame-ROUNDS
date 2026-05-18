@@ -147,7 +147,7 @@ public class Player : NetworkBehaviour
 
     void Update()
     {
-        if (!controllable) // Player가 필요없는 씬에서는 업데이트를 하지 않음
+        if (!controllable || NetworkPacketManager.Inst.sceneSwitching) // Player가 필요없는 씬에서는 업데이트를 하지 않음
         {
             return;
         }

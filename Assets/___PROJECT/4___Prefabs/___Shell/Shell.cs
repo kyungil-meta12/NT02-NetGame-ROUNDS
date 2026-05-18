@@ -16,6 +16,11 @@ public class Shell : PoolObject
     // 탄피가 튕기다가 멈춘 이후 1초가 지나면 타이머를 리셋함과 동시에 인스턴스를 풀로 반환
     void FixedUpdate()
     {
+        if (NetworkPacketManager.Inst.sceneSwitching)
+        {
+            return;
+        }
+        
         var linVel = rb.linearVelocity;
         var angVel = rb.angularVelocity;
         if(linVel.magnitude <= 0.1f && Mathf.Abs(angVel) <= 0.1f)

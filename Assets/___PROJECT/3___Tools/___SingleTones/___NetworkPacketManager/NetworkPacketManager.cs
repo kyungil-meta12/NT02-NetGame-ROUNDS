@@ -10,6 +10,11 @@ public class NetworkPacketManager : NetworkBehaviour
 {
     public static NetworkPacketManager Inst { get; private set; }
 
+    /// <summary>
+    /// 네트워크 매니저가 씬을 전환중인지 확인하는 플래그
+    /// </summary>
+    public bool sceneSwitching{ get; private set; } = false;
+
     void Awake()
     {
         if (Inst && Inst != this)
@@ -30,12 +35,38 @@ public class NetworkPacketManager : NetworkBehaviour
         Destroy(gameObject);
     }
 
+    public override void OnNetworkSpawn()
+    {
+        NetworkManager.Singleton.SceneManager.OnSceneEvent += HandleSceneEvent;
+    }
+
+    public override void OnNetworkDespawn()
+    {
+        NetworkManager.Singleton.SceneManager.OnSceneEvent -= HandleSceneEvent;
+    }
+
+    private void HandleSceneEvent(SceneEvent sceneEvent)
+    {
+        if (sceneEvent.SceneEventType == SceneEventType.Load || sceneEvent.SceneEventType == SceneEventType.Unload)
+        {
+            sceneSwitching = true;
+        }
+        else if (sceneEvent.SceneEventType == SceneEventType.LoadComplete)
+        {
+            sceneSwitching = false;
+        }
+    }
+
     #region Scene Management (씬 관리)
 
     // [추가] 클라이언트(패배자)가 서버에게 다음 스테이지 시작을 요청
     [Rpc(SendTo.Server)]
     public void RequestNextStageServerRpc(string sceneName)
     {
+        if(sceneSwitching)
+        {
+            return;
+        }
         // 서버에서 라운드를 증가시키고 모든 인원을 이동시킴
         GameManager.Inst.currentRound++;
         TransitionToCardSelectRpc(sceneName);
@@ -45,11 +76,16 @@ public class NetworkPacketManager : NetworkBehaviour
     [Rpc(SendTo.Everyone)]
     public void TransitionToCardSelectRpc(string sceneName)
     {
+        if (sceneSwitching)
+        {
+            return;
+        }
         // Netcode for GameObjects에서는 서버가 SceneManager를 통해 씬을 로드하면
         // 연결된 모든 클라이언트가 자동으로 해당 씬을 함께 로드합니다.
         if (IsServer)
         {
             NetworkManager.Singleton.SceneManager.LoadScene(sceneName, LoadSceneMode.Single);
+            sceneSwitching = true;
         }
     }
 
@@ -61,6 +97,10 @@ public class NetworkPacketManager : NetworkBehaviour
     [Rpc(SendTo.Server)]
     public void RequestDamageServerRpc(NetworkObjectReference targetRef, int dmg)
     {
+        if (sceneSwitching)
+        {
+            return;
+        }
         if (targetRef.TryGet(out NetworkObject netObj))
         {
             if (netObj.IsSpawned)
@@ -75,6 +115,10 @@ public class NetworkPacketManager : NetworkBehaviour
     [Rpc(SendTo.Everyone)]
     public void PlayDamageEffectRpc(NetworkObjectReference playerRef)
     {
+        if (sceneSwitching)
+        {
+            return;
+        }
         if (playerRef.TryGet(out NetworkObject netObj))
         {
             if (netObj.IsSpawned)
@@ -88,6 +132,10 @@ public class NetworkPacketManager : NetworkBehaviour
     [Rpc(SendTo.Everyone)]
     public void PerformDeathRpc(NetworkObjectReference playerRef, Color deathColor)
     {
+        if (sceneSwitching)
+        {
+            return;
+        }
         if (playerRef.TryGet(out NetworkObject netObj))
         {
             if (IsServer)
@@ -111,6 +159,10 @@ public class NetworkPacketManager : NetworkBehaviour
     [Rpc(SendTo.Server)]
     public void RequestCreateFireEffectServerRpc(NetworkObjectReference playerRef, Vector2 firePos, Vector2 shellPos, float rotation, bool isLeft)
     {
+        if (sceneSwitching)
+        {
+            return;
+        }
         if (playerRef.TryGet(out NetworkObject netObj))
         {
             if (netObj.IsSpawned) {
@@ -123,6 +175,10 @@ public class NetworkPacketManager : NetworkBehaviour
     [Rpc(SendTo.Everyone)]
     public void FireEffectRpc(NetworkObjectReference playerRef, Vector2 firePos, Vector2 shellPos, float rotation, bool isLeft)
     {
+        if (sceneSwitching)
+        {
+            return;
+        }
         if (playerRef.TryGet(out NetworkObject netObj))
         {
             if (netObj.IsSpawned)
@@ -135,6 +191,10 @@ public class NetworkPacketManager : NetworkBehaviour
     [Rpc(SendTo.Server)]
     public void RequestCreateBulletServerRpc(NetworkObjectReference playerRef, Vector2 firePos, float rotation, float ammoSpeed, int dmg)
     {
+        if (sceneSwitching)
+        {
+            return;
+        }
         if (playerRef.TryGet(out NetworkObject netObj))
         {
             if (netObj.IsSpawned) {
@@ -144,7 +204,12 @@ public class NetworkPacketManager : NetworkBehaviour
     }
 
     [Rpc(SendTo.Everyone)]
-    public void CreateBulletRpc(NetworkObjectReference playerRef, Vector2 firePos, float rotation, float ammoSpeed, int dmg) {
+    public void CreateBulletRpc(NetworkObjectReference playerRef, Vector2 firePos, float rotation, float ammoSpeed, int dmg) 
+    {
+        if (sceneSwitching)
+        {
+            return;
+        }
         if (playerRef.TryGet(out NetworkObject netObj))
         {
             if (netObj.IsSpawned)

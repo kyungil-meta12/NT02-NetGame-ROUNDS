@@ -22,6 +22,11 @@ public class Bullet : PoolObject
 
     void FixedUpdate()
     {
+        if (NetworkPacketManager.Inst.sceneSwitching)
+        {
+            return;
+        }
+
         // 부딫히지 않고 멀리 날아갈 경우 스스로 인스턴스 반환
         var movedDist = (rb.position - startPoint).magnitude;
         if(movedDist >= 100f)
@@ -33,6 +38,11 @@ public class Bullet : PoolObject
     // 충돌하면 인스턴스 반환
     void OnCollisionEnter2D(Collision2D c)
     {
+        if(NetworkPacketManager.Inst.sceneSwitching || !MemoryPool.Inst)
+        {
+            return;
+        }
+
         // 충돌 각도에 따라 파티클 방향이 달라짐
         var n = c.contacts[0].normal;
         var degrees = Mathf.Atan2(n.y, n.x) * Mathf.Rad2Deg;

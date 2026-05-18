@@ -421,7 +421,7 @@ MonoBehaviour:
   gunAxis: {fileID: 6459683156501884271}
   deathParticlePrefab: {fileID: 8885057346391128513, guid: 7ec5935a6ff43cd41845c47d81958b64, type: 3}
   totalHP: 100
-  hpBar: {fileID: 0}
+  hpBar: {fileID: 4323994037623588279}
   guns:
   - {fileID: 1977947850721096023}
   - {fileID: 1755660240718329603}
@@ -872,7 +872,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0}
   m_AnchorMax: {x: 0.5, y: 0}
-  m_AnchoredPosition: {x: -0.000001911525, y: 0}
+  m_AnchoredPosition: {x: -0.000001911525, y: 116}
   m_SizeDelta: {x: 400, y: 50}
   m_Pivot: {x: 0.5, y: 0}
 --- !u!114 &4323994037623588279
