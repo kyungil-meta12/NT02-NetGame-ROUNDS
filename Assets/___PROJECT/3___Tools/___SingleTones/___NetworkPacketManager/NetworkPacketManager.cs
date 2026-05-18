@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -37,6 +38,7 @@ public class NetworkPacketManager : NetworkBehaviour
     public override void OnNetworkSpawn()
     {
         NetworkManager.Singleton.SceneManager.OnSceneEvent += HandleSceneEvent;
+        NetworkManager.Singleton.SceneManager.OnLoadEventCompleted += HandleSceneLoadCompleted;
     }
 
     public override void OnNetworkDespawn()
@@ -54,6 +56,13 @@ public class NetworkPacketManager : NetworkBehaviour
         {
             sceneSwitching = false;
         }
+    }
+
+    private void HandleSceneLoadCompleted(string sceneName, LoadSceneMode loadSceneMode, List<ulong> clientsCompleted, List<ulong> clientsTimedOut)
+    {
+        GameManager.Inst.sceneLoadCompleted = true;
+        GameManager.Inst.controllable = true;
+        print("Scene load completed");
     }
 
     #region Scene Management (씬 관리)

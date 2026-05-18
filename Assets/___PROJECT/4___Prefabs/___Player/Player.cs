@@ -57,8 +57,6 @@ public class Player : NetworkBehaviour
     private bool jumpInput = false;
     private int jumpCount = 0;
     private Vector2 mouseWorldPos;
-    // CardSelectScene에서는 비활성화함
-    private bool controllable = true;
 
 
     private int groundLayer;
@@ -148,7 +146,7 @@ public class Player : NetworkBehaviour
 
     void Update()
     {
-        if (!controllable || NetworkPacketManager.Inst.sceneSwitching) // Player가 필요없는 씬에서는 업데이트를 하지 않음
+        if (NetworkPacketManager.Inst.sceneSwitching) // Player가 필요없는 씬에서는 업데이트를 하지 않음
         {
             return;
         }
@@ -238,10 +236,10 @@ public class Player : NetworkBehaviour
 
             // 현재 씬이 카드 선택 씬이 아닐 때만 조작 가능하도록 설정
             string currentScene = SceneManager.GetActiveScene().name;
-            controllable = currentScene != "CardSelectScene";
+            bool isRoundScene = currentScene != "CardSelectScene";
 
             // 조작 가능한 플레이 씬(스테이지)일 경우 처리
-            if (controllable)
+            if (isRoundScene)
             {
                 // 시네머신 타겟 그룹에 나를 추가 (카메라가 추적하도록)
                 GameObject tragetGroundObj = GameObject.Find("Target Group");

@@ -29,6 +29,12 @@ public class GameManager : NetworkBehaviour
     [HideInInspector]
     public string localIP;
 
+    // 로딩 완료 플래그 // true가 되면 로딩화면이 사라짐
+    public bool sceneLoadCompleted = false;
+
+    // 플레이어 컨트롤 가능 플래그 //  true가 되면 컨트롤 가능
+    public bool controllable = true;
+
     // 패배한 플레이어의 CliendId를 저장 (기본값 999)
     // Server만 작성 가능, Evryone 읽기가능
     public NetworkVariable<ulong> loserClientId = new NetworkVariable<ulong>(999,
@@ -36,7 +42,7 @@ public class GameManager : NetworkBehaviour
 
     // 서버에서 관리하는 현재 라운드
     public NetworkVariable<int>currentRound = new(1, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
-
+    
     public TMPro.TMP_InputField ipInputField;
 
     void Awake(){ 
