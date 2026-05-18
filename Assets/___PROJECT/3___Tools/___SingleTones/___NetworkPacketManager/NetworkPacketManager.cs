@@ -1,4 +1,3 @@
-using UltimateClean;
 using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -63,16 +62,6 @@ public class NetworkPacketManager : NetworkBehaviour
     [Rpc(SendTo.Server)]
     public void RequestNextStageServerRpc(string sceneName)
     {
-        // 1. 만약 목적지가 결과창이라면 바로 이동
-        if (sceneName == "ResultScene")
-        {
-            Debug.Log("모든 스테이지 종료. 결과창으로 이동합니다.");
-            NetworkManager.Singleton.SceneManager.LoadScene("ResultScene", LoadSceneMode.Single);
-            return;
-        }
-
-        // 2. 카드 선택 완료 후 다음 스테이지로 가는 경우
-        // 클라이언트가 보낸 sceneName(예: Stage2)으로 이동합니다.
         if (!string.IsNullOrEmpty(sceneName))
         {
             Debug.Log($"서버가 다음 씬으로 이동을 승인함: {sceneName}");
@@ -96,8 +85,9 @@ public class NetworkPacketManager : NetworkBehaviour
         // 연결된 모든 클라이언트가 자동으로 해당 씬을 함께 로드합니다.
         if (IsServer)
         {
+            // 서버 공유 라운드 값 증가
+            GameManager.Inst.currentRound.Value++;
             NetworkManager.Singleton.SceneManager.LoadScene(sceneName, LoadSceneMode.Single);
-            sceneSwitching = true;
         }
     }
 
@@ -150,14 +140,15 @@ public class NetworkPacketManager : NetworkBehaviour
         }
         if (playerRef.TryGet(out NetworkObject netObj))
         {
+            // 플레이어 각자 라운드를 1씩 올리도록 한다
+            netObj.GetComponent<Player>().ExecuteDeathEffect(deathColor);
+
             if (IsServer)
             {
                 GameManager.Inst.loserClientId.Value = netObj.OwnerClientId;
                 GameManager.Inst.SetGameEnd(true);
             }
-
-            netObj.GetComponent<Player>().ExecuteDeathEffect(deathColor);
-
+           
             if (IsServer)
             {
                 TransitionToCardSelectRpc("CardSelectScene");

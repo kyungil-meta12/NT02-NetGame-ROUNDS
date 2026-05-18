@@ -62,6 +62,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::SceneRelay
   sceneNames:
   - StartScene
-  - Abandoned station
-  - Island pack
-  - Mounts
+  - Round1
+  - Round2
+  - Round3

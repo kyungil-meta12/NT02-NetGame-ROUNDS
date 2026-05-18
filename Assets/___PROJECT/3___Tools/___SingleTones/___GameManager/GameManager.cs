@@ -21,7 +21,6 @@ public class GameManager : NetworkBehaviour
     public bool isGameEnd = false;
 
     [HideInInspector]
-    public int currentRound = 1; // 1부터 시작
     public int maxRound = 3;
 
     [HideInInspector]
@@ -34,6 +33,9 @@ public class GameManager : NetworkBehaviour
     // Server만 작성 가능, Evryone 읽기가능
     public NetworkVariable<ulong> loserClientId = new NetworkVariable<ulong>(999,
         NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
+
+    // 서버에서 관리하는 현재 라운드
+    public NetworkVariable<int>currentRound = new(1, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
 
     public TMPro.TMP_InputField ipInputField;
 
@@ -132,10 +134,10 @@ public class GameManager : NetworkBehaviour
     /// <summary>
     /// 라운드 증가
     /// </summary>
-    public void IncreaseRound()
-    {
-        currentRound++;
-    }
+    // public void IncreaseRound()
+    // {
+    //     currentRound++;
+    // }
 
     public void ResetGameStatus()
     {

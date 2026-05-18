@@ -399,7 +399,7 @@ public class Player : NetworkBehaviour
         var playerDeathEffect = newParticle.GetComponent<PlayerDeath>();
         playerDeathEffect.createColor = deathColor;
     }
-
+    
     // isOwner == true일 때 입력 받기
     void InputControl()
     {

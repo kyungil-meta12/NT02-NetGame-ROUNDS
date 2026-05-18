@@ -2005,7 +2005,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 1, y: 1}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: -1059.5, y: -160}
+  m_AnchoredPosition: {x: -1059.5, y: -1232}
   m_SizeDelta: {x: 440.97144, y: 150.55396}
   m_Pivot: {x: 1, y: 1}
 --- !u!114 &1703243939
@@ -48486,23 +48486,19 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 729403480395688675, guid: a89df20b8a9f6054aa1f4d2fb76cdfe3, type: 3}
       propertyPath: sceneNames.Array.size
-      value: 4
+      value: 3
       objectReference: {fileID: 0}
     - target: {fileID: 729403480395688675, guid: a89df20b8a9f6054aa1f4d2fb76cdfe3, type: 3}
       propertyPath: 'sceneNames.Array.data[0]'
-      value: Abandoned station
+      value: Round1
       objectReference: {fileID: 0}
     - target: {fileID: 729403480395688675, guid: a89df20b8a9f6054aa1f4d2fb76cdfe3, type: 3}
       propertyPath: 'sceneNames.Array.data[1]'
-      value: Island pack
+      value: Round2
       objectReference: {fileID: 0}
     - target: {fileID: 729403480395688675, guid: a89df20b8a9f6054aa1f4d2fb76cdfe3, type: 3}
       propertyPath: 'sceneNames.Array.data[2]'
-      value: Mounts
-      objectReference: {fileID: 0}
-    - target: {fileID: 729403480395688675, guid: a89df20b8a9f6054aa1f4d2fb76cdfe3, type: 3}
-      propertyPath: 'sceneNames.Array.data[3]'
-      value: ResultScene
+      value: Round3
       objectReference: {fileID: 0}
     - target: {fileID: 5368442715030903794, guid: a89df20b8a9f6054aa1f4d2fb76cdfe3, type: 3}
       propertyPath: m_LocalPosition.x
@@ -48543,10 +48539,6 @@ PrefabInstance:
     - target: {fileID: 5368442715030903794, guid: a89df20b8a9f6054aa1f4d2fb76cdfe3, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 5720815552293809927, guid: a89df20b8a9f6054aa1f4d2fb76cdfe3, type: 3}
-      propertyPath: duration
-      value: 7
       objectReference: {fileID: 0}
     - target: {fileID: 7263526513670783670, guid: a89df20b8a9f6054aa1f4d2fb76cdfe3, type: 3}
       propertyPath: m_Name
