@@ -69,7 +69,7 @@ public class GameManager : NetworkBehaviour
             serverRunning = true;
             Debug.Log($"호스트 시작 성공!");
 
-            NetworkManager.Singleton.SceneManager.LoadScene("Abandoned station", LoadSceneMode.Single);
+            NetworkManager.Singleton.SceneManager.LoadScene("Round1", LoadSceneMode.Single);
         }
         else
         {
