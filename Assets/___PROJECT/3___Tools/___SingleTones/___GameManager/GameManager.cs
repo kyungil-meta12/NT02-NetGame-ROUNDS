@@ -33,7 +33,7 @@ public class GameManager : NetworkBehaviour
     public bool sceneLoadCompleted = false;
 
     // 플레이어 컨트롤 가능 플래그 //  true가 되면 컨트롤 가능
-    public bool controllable = true;
+    public bool controllable = false;
 
     // 패배한 플레이어의 CliendId를 저장 (기본값 999)
     // Server만 작성 가능, Evryone 읽기가능

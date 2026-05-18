@@ -108,13 +108,15 @@ public class Player : NetworkBehaviour
             PlayerManager.Inst.SaveAppearance(bodyIndex, faceIndex, bodies[bodyIndex]);
             netBodyIndex.Value = PlayerManager.Inst.Appearance.bodyIndex;
             netFaceIndex.Value = PlayerManager.Inst.Appearance.faceIndex;
-
             // Stat으로부터 현재의 총 타입을 불러온다.
             netGunType.Value = PlayerManager.Inst.Stat.gunType;
             print($"This Player network spwaned: id: {NetworkObject.OwnerClientId}");
 
             // 플레이어 상태 세팅
             SetPlayerState();
+
+            // 첫 스폰 때는 컨트롤 활성화
+            GameManager.Inst.controllable = true;
         }
         else
         {
@@ -146,7 +148,7 @@ public class Player : NetworkBehaviour
 
     void Update()
     {
-        if (NetworkPacketManager.Inst.sceneSwitching) // Player가 필요없는 씬에서는 업데이트를 하지 않음
+        if (!GameManager.Inst.controllable || NetworkPacketManager.Inst.sceneSwitching) // Player가 필요없는 씬에서는 업데이트를 하지 않음
         {
             return;
         }

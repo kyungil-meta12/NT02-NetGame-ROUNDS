@@ -44,6 +44,7 @@ public class NetworkPacketManager : NetworkBehaviour
     public override void OnNetworkDespawn()
     {
         NetworkManager.Singleton.SceneManager.OnSceneEvent -= HandleSceneEvent;
+        NetworkManager.Singleton.SceneManager.OnLoadEventCompleted -= HandleSceneLoadCompleted;
     }
 
     private void HandleSceneEvent(SceneEvent sceneEvent)
@@ -51,6 +52,12 @@ public class NetworkPacketManager : NetworkBehaviour
         if (sceneEvent.SceneEventType == SceneEventType.Load || sceneEvent.SceneEventType == SceneEventType.Unload)
         {
             sceneSwitching = true;
+
+            // 씬이 언로드 될 때는 플레이어 컨트롤 비활성화
+            if(sceneEvent.SceneEventType == SceneEventType.Unload)
+            {
+                GameManager.Inst.controllable = false;
+            }
         }
         else if (sceneEvent.SceneEventType == SceneEventType.LoadComplete)
         {
