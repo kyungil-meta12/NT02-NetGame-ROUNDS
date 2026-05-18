@@ -242,7 +242,7 @@ GameObject:
   - component: {fileID: 5616227567461344434}
   - component: {fileID: 3366699875970522906}
   m_Layer: 5
-  m_Name: AmmiIndicator
+  m_Name: AmmoIndicator
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

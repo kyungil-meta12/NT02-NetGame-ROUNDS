@@ -5,35 +5,30 @@ using UnityEngine.UI;
 public class HpBar : MonoBehaviour
 {
     public Slider hpSlider;
-    
-    float maxValue;
 
+    /// <summary>
+    /// 최대 체력을 설정한다.
+    /// </summary>
+    /// <param name="hp"></param>
     public void SetTotalHp(int hp)
     {
-        float inputHp = (float)hp;
-        maxValue = inputHp;
-        
-        //SetBar(inputHp, 0f, inputHp);
-        hpSlider.maxValue = maxValue;
-        hpSlider.value = inputHp;
+        hpSlider.maxValue = hp;
+        hpSlider.value = hp;
     }
 
-    public void SetCurrentHp(int prev, int curr)
+    // 슬라이더를 최초 값으로 리셋한다.
+    public void Reset()
     {
-        float diff = (float)(prev - curr);
-        
-        // float newProgress = BarTarget - diff / maxValue;
-        // newProgress = Mathf.Clamp(newProgress, 0f, 1f);
-        // UpdateBar01(newProgress);
-        hpSlider.value = maxValue - diff / maxValue;
+        hpSlider.value = hpSlider.maxValue;
     }
-    
-    [ContextMenu("데미지 테스트")]
-    public void TakeDamage()
+
+    /// <summary>
+    /// 현재 체력을 설정한다.
+    /// </summary>
+    /// <param name="prev"></param>
+    /// <param name="curr"></param>
+    public void SetHp(int val)
     {
-        // float newProgress = BarTarget - 0.1f;
-        // newProgress = Mathf.Clamp(newProgress, 0f, 1f);
-        // UpdateBar01(newProgress);
-        hpSlider.value -= 0.1f;
+        hpSlider.value = val;
     }
 }

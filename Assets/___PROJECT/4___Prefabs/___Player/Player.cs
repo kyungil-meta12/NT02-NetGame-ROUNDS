@@ -245,7 +245,6 @@ public class Player : NetworkBehaviour
         {
             netCurrHP.Value = totalHP;
         }
-
     }
 
     // 총 타입 변경 이벤트
@@ -313,7 +312,14 @@ public class Player : NetworkBehaviour
     // HP 변경 이벤트
     public void OnHPChanged(int prevValue, int newValue)
     {
-        hpBar.SetCurrentHp(prevValue, newValue);
+        if(prevValue > newValue)
+        {
+            if(IsOwner && DamageFeedback.Inst)
+            {
+                DamageFeedback.Inst.SetFeedback();
+            }
+        }
+        hpBar.SetHp(newValue); // 슬라이더 값 변경
     }
 
     // 대미지를 받으면 얼굴 표정이 바뀐다.
