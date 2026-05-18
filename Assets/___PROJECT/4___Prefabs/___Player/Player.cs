@@ -204,23 +204,9 @@ public class Player : NetworkBehaviour
         {
             if (sceneEvent.ClientId == NetworkManager.Singleton.LocalClientId)
             {
-                // [수정] 즉시 호출 대신 코루틴으로 호출하여 객체 로드 시간을 벌어줌
-                StartCoroutine(SafeSetPlayerState(sceneEvent.SceneName));
+                SetPlayerState();
             }
         }
-    }
-
-    // [추가] 안전한 설정을 위한 코루틴
-    private IEnumerator SafeSetPlayerState(string sceneName)
-    {
-        // 씬이 "GameStart"나 "ResultScene"이면 설정하지 않음
-        if (sceneName == "GameStart" || sceneName == "ResultScene") yield break;
-
-        // 한 프레임 대기 (모든 Find 명령이 성공할 수 있도록)
-        yield return null;
-
-        lastSceneName = sceneName;
-        SetPlayerState();
     }
 
     // 플레이어 상태 설정
