@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Linq;
+using MoreMountains.Feedbacks;
 using TMPro;
 using UltimateClean;
 using Unity.Netcode;
@@ -12,6 +13,8 @@ using Random = UnityEngine.Random;
 //카드셀렉트씬 카드 배치용 클래스
 public class CardSetter : MonoBehaviour
 {
+    public MMFeedbacks stackFeedback;
+    
     [Header("UI Reference")]
     public GameObject cardUIPanel;
     public TextMeshProUGUI selectedNumberText;
@@ -44,6 +47,9 @@ public class CardSetter : MonoBehaviour
     public IEnumerator Start()
     {
         Debug.Log("카드 세터 시작됨");
+        
+        //[추가] 시작시 바로 카드 펼치기
+        stackFeedback?.PlayFeedbacks();
 
         Debug.Log($"대기 시작... 현재 패배자 ID: {GameManager.Inst.loserClientId.Value}");
         // 패배자 ID 동기화 대기
@@ -112,6 +118,9 @@ public class CardSetter : MonoBehaviour
     {
         selectedIndex = index;
         selectedNumberText.text = $"{index + 1} 번째 카드";
+        
+        //[추가] 카드 선택 후 바로 ConfirmCard호출
+        ConfirmCard();
     }
 
     //카드 확정
@@ -130,6 +139,9 @@ public class CardSetter : MonoBehaviour
 
         Debug.Log($"클라이언트가 서버에게 {nextSceneName} 로드를 요청합니다.");
         NetworkPacketManager.Inst.RequestNextStageServerRpc(nextSceneName);
+        
+        //[추가] 카드 스택 모션 호출
+        stackFeedback?.PlayFeedbacks();
     }
 
     // 효과 적용 부분만 따로 관리
