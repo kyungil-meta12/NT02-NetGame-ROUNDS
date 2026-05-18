@@ -65,11 +65,49 @@ public class NetworkPacketManager : NetworkBehaviour
         if (!string.IsNullOrEmpty(sceneName))
         {
             Debug.Log($"서버가 다음 씬으로 이동을 승인함: {sceneName}");
+
+            // 모든 플레이어 일괄 체력 리셋
+            if (IsServer)
+            {
+                ResetAllPlayerHp();
+            }
+            else
+            {
+                ResetAllPlayerHpServerRpc();
+            }
+
             NetworkManager.Singleton.SceneManager.LoadScene(sceneName, LoadSceneMode.Single);
         }
         else
         {
             Debug.LogError("전달된 씬 이름이 비어있습니다!");
+        }
+    }
+
+    /// <summary>
+    /// 클라이언트(호스트X) -> 서버 모든 플레이어 체력 리셋 요청
+    /// </summary>
+    [Rpc(SendTo.Server)]
+    private void ResetAllPlayerHpServerRpc()
+    {
+        ResetAllPlayerHp();
+    }
+
+    /// <summary>
+    /// 접속해 있는 모든 클라이언트의 Player HP를 최대값으로 초기화한다.
+    /// </summary>
+    private void ResetAllPlayerHp()
+    {
+        // 플레이어들을 일괄 체력 리셋
+        foreach (var client in NetworkManager.Singleton.ConnectedClients.Values)
+        {
+            if (client.PlayerObject.TryGetComponent<NetworkObject>(out var netObj))
+            {
+                if (netObj.TryGetComponent<Player>(out var player))
+                {
+                    player.netCurrHP.Value = player.totalHP;
+                }
+            }
         }
     }
 

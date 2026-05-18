@@ -71,7 +71,7 @@ public class Player : NetworkBehaviour
     // [변경] 조준 각도는 즉각적인 반응을 위해 NetworkVariable 유지 (나머지 RPC는 매니저로 이동)
     private NetworkVariable<float> netGunRotaion = new(0f, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Owner);
     private NetworkVariable<bool> netLookingLeft = new(false, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Owner);
-    private NetworkVariable<int> netCurrHP;
+    public NetworkVariable<int> netCurrHP;
     private NetworkVariable<GunType> netGunType = new(GunType.None, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Owner);
     private NetworkVariable<int> netFaceIndex = new(-1, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Owner);
     private NetworkVariable<int> netBodyIndex = new(-1, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Owner);
@@ -272,11 +272,11 @@ public class Player : NetworkBehaviour
                 }
             }
 
-            // 플레이어 체력 및 스탯 초기화
-            if (IsServer)
-            {
-                netCurrHP.Value = totalHP;
-            }
+            // // 플레이어 체력 및 스탯 초기화
+            // if (IsServer)
+            // {
+            //     netCurrHP.Value = totalHP;
+            // }
 
             // PlayerManager 데이터 기반으로 외형/총기 최종 적용
             ApplyPlayerManagerData();
