@@ -1,9 +1,11 @@
 using System.Net;
 using System.Net.Sockets;
+using TMPro;
 using Unity.Netcode;
 using Unity.Netcode.Transports.UTP;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.SceneManagement;
 
 /// <summary>
 /// 게임 매니저 싱글톤 오브젝트 // 씬 전환 시 인스턴스 유지됨
@@ -33,6 +35,8 @@ public class GameManager : NetworkBehaviour
     public NetworkVariable<ulong> loserClientId = new NetworkVariable<ulong>(999,
         NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
 
+    public TMPro.TMP_InputField ipInputField;
+
     void Awake(){ 
         if(Inst && Inst != this) 
         { 
@@ -50,6 +54,62 @@ public class GameManager : NetworkBehaviour
     {
         Inst = null;
         Destroy(gameObject);
+    }
+
+    // 호스트 버튼 연결용
+    public void StartHost()
+    {
+        if (serverRunning) return;
+
+        // 호스트 시작
+        if (NetworkManager.Singleton.StartHost())
+        {
+            serverRunning = true;
+            Debug.Log($"호스트 시작 성공!");
+
+            NetworkManager.Singleton.SceneManager.LoadScene("Abandoned station", LoadSceneMode.Single);
+        }
+        else
+        {
+            Debug.Log($"호스트 시작 실패!");
+        }       
+    }
+
+    // 조인 버튼 연결용
+    public void StartClient()
+    {
+        if(NetworkManager.Singleton == null)
+        {
+            Debug.Log($"NetworkManager가 씬에 없습니다.");
+            return;
+        }
+
+        if(ipInputField == null)
+        {
+            Debug.Log($"InputField가 연결되지 않았습니다! 인스펙터에서 드래그해주세요.");
+            return;
+        }
+
+        if (serverRunning) return;
+
+        // IP 주소 설정
+        // 입력창이 비어있으면 로컬(127.0.0.1), 적혀있으면 해당 IP 사용
+        string targetIP = string.IsNullOrEmpty(ipInputField.text) ? "127.0.0.1" : ipInputField.text;
+
+        // NetworkManager에 붙어있는 Transport 컴포넌트를 가져와서 주소값 변경
+        var transport = NetworkManager.Singleton.GetComponent<UnityTransport>();
+        transport.ConnectionData.Address = targetIP;
+
+        // 클라이언트 시작
+        if (NetworkManager.Singleton.StartClient())
+        {
+            serverRunning = true;
+            Debug.Log($"{targetIP}로 접속을 시도합니다...");
+        }
+        else
+        {
+            Debug.Log($"클라이언트 시작 실패!");
+        }
     }
 
     /// <summary>
