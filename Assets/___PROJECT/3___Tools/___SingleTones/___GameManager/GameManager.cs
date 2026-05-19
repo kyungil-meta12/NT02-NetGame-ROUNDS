@@ -59,29 +59,6 @@ public class GameManager : NetworkBehaviour
         DontDestroyOnLoad(gameObject);
     }
 
-    // [추가] 닉네임 저장 로직
-    private void SaveNickname()
-    {
-        string nickName = "UnknownPlayer";
-
-        // 1. 입력창에 텍스트가 있다면 사용
-        if (nameInputField != null && !string.IsNullOrEmpty(nameInputField.text))
-        {
-            nickName = nameInputField.text;
-        }
-        // 2. 입력창이 비어있다면 랜덤 닉네임 생성
-        else
-        {
-            nickName = "Player_" + UnityEngine.Random.Range(100, 999);
-        }
-
-        // 3. 로컬에 저장 및 즉시 반영
-        PlayerPrefs.SetString("PlayerName", nickName);
-        PlayerPrefs.Save(); // [필수] 물리적으로 파일에 저장
-
-        Debug.Log($"[GameManager] 닉네임 로컬 저장 완료: {nickName}");
-    }
-
     /// <summary>
     /// 결과 화면 UI를 설정하는 함수
     /// </summary>
@@ -91,57 +68,59 @@ public class GameManager : NetworkBehaviour
     /// <param name="loserNameText">패배자 이름을 표시할 TMP 텍스트</param>
     public void SetupResultUI(GameObject victoryUI, GameObject defeatUI, TextMeshProUGUI winnerNameText, TextMeshProUGUI loserNameText)
     {
-        if (NetworkManager.Singleton == null) return;
+        // if (NetworkManager.Singleton == null) return;
 
-        // 내 클라이언트 ID와 서버가 저장한 패배자 ID 가져오기
-        ulong myId = NetworkManager.Singleton.LocalClientId;
-        ulong loserId = loserClientId.Value;
+        // // 내 클라이언트 ID와 서버가 저장한 패배자 ID 가져오기
+        // ulong myId = NetworkManager.Singleton.LocalClientId;
+        // ulong loserId = loserClientId.Value;
 
-        // 초기화: 모든 패널을 일단 끄고 텍스트를 비웁니다 (겹침 방지)
-        victoryUI.SetActive(false);
-        defeatUI.SetActive(false);
+        // // 초기화: 모든 패널을 일단 끄고 텍스트를 비웁니다 (겹침 방지)
+        // victoryUI.SetActive(false);
+        // defeatUI.SetActive(false);
         
-        // 닉네임 찾기 로직
-        string winName = "Winner";
-        string loseName = "Loser";
+        // // 닉네임 찾기 로직
+        // string winName = "Winner";
+        // string loseName = "Loser";
 
-        // 씬에 생성된 모든 PlayerManager를 검색하여 승자와 패자의 이름을 구분
-        PlayerManager[] allPlayers = FindObjectsByType<PlayerManager>(FindObjectsSortMode.None);
-        Debug.Log($"[결과] 현재 씬에 존재하는 플레이어 수: {allPlayers.Length}");
-        foreach (var pm in allPlayers)
-        {
-            string nameData = pm.playerName.Value.ToString();
-            Debug.Log($"[결과] ID: {pm.OwnerClientId}, 이름: {nameData}");
+        // // 씬에 생성된 모든 PlayerManager를 검색하여 승자와 패자의 이름을 구분
+        // PlayerManager[] allPlayers = FindObjectsByType<PlayerManager>(FindObjectsSortMode.None);
+        // Debug.Log($"[결과] 현재 씬에 존재하는 플레이어 수: {allPlayers.Length}");
+        // foreach (var pm in allPlayers)
+        // {
+        //     Debug.Log($"[결과] 플레이어 ID: {pm.OwnerClientId}, 이름 변수 값: '{pm.playerName.Value}'");
+        //     if (pm.OwnerClientId == loserId)
+        //     {
+        //         loseName = pm.playerName.Value.ToString();
+        //     }
+        //     else
+        //     {
+        //         winName = pm.playerName.Value.ToString();
+        //     }
+        // }
 
-            if (pm.OwnerClientId == loserId)
-                loseName = nameData;
-            else
-                winName = nameData;
-        }
-
-        // 4. 승패 판정에 따라 해당 패널만 켜고 이름을 넣어줍니다.
-        if (myId == loserId)
-        {
-            // 내가 졌을 때
-            defeatUI.SetActive(true);
-            if (loserNameText != null)
-            {
-                // 패배 화면에는 본인의 이름이나 "YOU LOSE"를 강조해서 표시
-                loserNameText.text = loseName;
-            }
-            Debug.Log($"결과 화면 : 패배 패널 활성화 (패배자: {loseName})");
-        }
-        else
-        {
-            // 내가 이겼을 때
-            victoryUI.SetActive(true);
-            if (winnerNameText != null)
-            {
-                // 승리 화면에는 본인의 이름을 황금색 등으로 표시 가능
-                winnerNameText.text = winName;
-            }
-            Debug.Log($"결과 화면 : 승리 패널 활성화 (승리자: {winName})");
-        }
+        // // 4. 승패 판정에 따라 해당 패널만 켜고 이름을 넣어줍니다.
+        // if (myId == loserId)
+        // {
+        //     // 내가 졌을 때
+        //     defeatUI.SetActive(true);
+        //     if (loserNameText != null)
+        //     {
+        //         // 패배 화면에는 본인의 이름이나 "YOU LOSE"를 강조해서 표시
+        //         loserNameText.text = loseName;
+        //     }
+        //     Debug.Log($"결과 화면 : 패배 패널 활성화 (패배자: {loseName})");
+        // }
+        // else
+        // {
+        //     // 내가 이겼을 때
+        //     victoryUI.SetActive(true);
+        //     if (winnerNameText != null)
+        //     {
+        //         // 승리 화면에는 본인의 이름을 황금색 등으로 표시 가능
+        //         winnerNameText.text = winName;
+        //     }
+        //     Debug.Log($"결과 화면 : 승리 패널 활성화 (승리자: {winName})");
+        // }
     }
 
     /// <summary>
@@ -159,7 +138,7 @@ public class GameManager : NetworkBehaviour
         if (serverRunning) return;
 
         // [추가] 접속 전 저장
-        SaveNickname();
+        PlayerManager.Inst.myName = nameInputField.text;
 
         // 호스트 시작
         if (NetworkManager.Singleton.StartHost())
@@ -185,9 +164,9 @@ public class GameManager : NetworkBehaviour
         }
 
         // [추가] 접속 전 저장
-        SaveNickname();
+        PlayerManager.Inst.myName = nameInputField.text;
 
-        if(ipInputField == null)
+        if (ipInputField == null)
         {
             Debug.Log($"InputField가 연결되지 않았습니다! 인스펙터에서 드래그해주세요.");
             return;
