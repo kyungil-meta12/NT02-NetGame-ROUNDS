@@ -4,6 +4,10 @@ using UnityEngine;
 [RequireComponent(typeof(GunSpec))]
 public class GunController : MonoBehaviour
 {
+    public AudioSource audioSource;
+    public AudioClip[] fireSounds;
+    private int currentFireSoundIndex;
+    
     public PoolObject flashPrefab;
     public PoolObject bulletPrefab;
     public PoolObject shellPrefab;
@@ -100,6 +104,8 @@ public class GunController : MonoBehaviour
 
             // 로컬 반동 연출 (반응성을 위해 즉시 실행)
             transform.localPosition = new Vector2(-0.6f, 0f);
+
+            PlayGunSound();
         }
     }
 
@@ -187,6 +193,7 @@ public class GunController : MonoBehaviour
         ammoSpeed = spec.ammoSpeed + (spec.ammoSpeed * 0.5f * PlayerManager.Inst.Stat.ammoSpeedLevel);
         fireInterval = spec.fireInterval - (spec.fireInterval * 0.25f * PlayerManager.Inst.Stat.fireSpeedLevel);
         isMultiShot = type == GunType.Shotgun || PlayerManager.Inst.Stat.isMultiShot;
+        SetGunSound(type);
 
         reloadDuration = spec.reloadTime;
         recoilRecoverySpeed = spec.recoilRecoverySpeed;
@@ -219,5 +226,34 @@ public class GunController : MonoBehaviour
                 AmmoIndicator.Inst.InputReloadTime(currReloadTime, reloadDuration);
             }
         }
+    }
+    
+    //GunType에 따라 발사 사운드 세팅
+    public void SetGunSound(GunType gunType)
+    {
+        switch (gunType)
+        {
+            case GunType.Pistol:
+                audioSource.clip = fireSounds[0];
+                break;
+            case GunType.Smg:
+                audioSource.clip = fireSounds[1];
+                break;
+            case GunType.Shotgun:
+                audioSource.clip = fireSounds[2];
+                break;
+            case GunType.AR:
+                audioSource.clip = fireSounds[3];
+                break;
+            case GunType.Sniper:
+                audioSource.clip = fireSounds[4];
+                break;
+        }
+    }
+    
+    //발사 사운드 재생
+    public void PlayGunSound()
+    {
+        audioSource.Play();
     }
 }
