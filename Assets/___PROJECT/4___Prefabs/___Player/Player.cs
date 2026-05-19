@@ -17,7 +17,7 @@ public class Player : NetworkBehaviour
     public GameObject deathParticlePrefab;
 
     [Space(10)]
-    public int totalHP;
+    public static int totalHP = 100;
 
     [Space(10)]
     public HpBar hpBar;
@@ -74,7 +74,7 @@ public class Player : NetworkBehaviour
     // [변경] 조준 각도는 즉각적인 반응을 위해 NetworkVariable 유지 (나머지 RPC는 매니저로 이동)
     private NetworkVariable<float> netGunRotaion = new(0f, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Owner);
     private NetworkVariable<bool> netLookingLeft = new(false, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Owner);
-    public NetworkVariable<int> netCurrHP;
+    public NetworkVariable<int> netCurrHP = new(0, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
     private NetworkVariable<GunType> netGunType = new(GunType.None, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Owner);
     private NetworkVariable<int> netFaceIndex = new(-1, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Owner);
     private NetworkVariable<int> netBodyIndex = new(-1, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Owner);
@@ -89,7 +89,6 @@ public class Player : NetworkBehaviour
     {
         rb = GetComponent<Rigidbody2D>();
         faceTimer.SetRunningState(false);
-        netCurrHP = new(totalHP, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
     }
     
     public override void OnNetworkSpawn()
@@ -101,14 +100,18 @@ public class Player : NetworkBehaviour
         netCurrHP.OnValueChanged += OnHPChanged;
         netNickname.OnValueChanged += OnNameChanged;
 
+        // 씬 전환 이벤트 구독
+        NetworkManager.Singleton.SceneManager.OnSceneEvent += OnSceneLoaded;
+
         hpBar.SetTotalHp(totalHP);
+        if (IsServer)
+        {
+            netCurrHP.Value = totalHP;
+        }
 
         // [변경] 물리 및 권한 설정 (클라이언트 이동 보장)
         if (IsOwner)
         {
-            // 씬 전환 이벤트 구독
-            NetworkManager.Singleton.SceneManager.OnSceneEvent += OnSceneLoaded;
-
             rb.bodyType = RigidbodyType2D.Dynamic;
             rb.simulated = true;
             // PlayerManager에 외모 데이터를 저장한 후 ThisAppearance로부터 인덱스 정보를 불러온다.
@@ -143,7 +146,6 @@ public class Player : NetworkBehaviour
             OnBodyIndexChanged(-1, netBodyIndex.Value);
             OnFaceIndexChanged(-1, netFaceIndex.Value);
             OnGunTypeChanged(GunType.None, netGunType.Value);
-            OnNameChanged("", netNickname.Value);
             print($"Other Player network spwaned: id: {NetworkObject.OwnerClientId}");
         }
 
@@ -168,7 +170,7 @@ public class Player : NetworkBehaviour
 
     void Update()
     {
-        if (!GameManager.Inst.controllable || NetworkPacketManager.Inst.sceneSwitching) // Player가 필요없는 씬에서는 업데이트를 하지 않음
+        if (!IsSpawned || !isRoundScene || !GameManager.Inst.controllable || NetworkPacketManager.Inst.sceneSwitching) // Player가 필요없는 씬에서는 업데이트를 하지 않음
         {
             return;
         }
@@ -194,6 +196,11 @@ public class Player : NetworkBehaviour
 
     private void FixedUpdate()
     {
+        if (!IsSpawned || !isRoundScene || !GameManager.Inst.controllable || NetworkPacketManager.Inst.sceneSwitching) // Player가 필요없는 씬에서는 업데이트를 하지 않음
+        {
+            return;
+        }
+        
         if (IsOwner)
         {
             UpdateMove();
@@ -222,6 +229,11 @@ public class Player : NetworkBehaviour
     {
         if (sceneEvent.SceneEventType == SceneEventType.LoadComplete || sceneEvent.SceneEventType == SceneEventType.SynchronizeComplete)
         {
+            // 현재 씬이 라운드/로비 씬이 아닐 때만 조작 가능하도록 설정
+            string currentScene = SceneManager.GetActiveScene().name;
+            isRoundScene = currentScene != "CardSelectScene" && currentScene != "ResultScene";
+            isLobbyScene = currentScene == "LobbyScene";
+
             if (IsOwner)
             {
                 SetPlayerState();
@@ -256,11 +268,6 @@ public class Player : NetworkBehaviour
             // 물리 및 입력 초기화
             jumpCount = 0;
             jumpInput = false;
-
-            // 현재 씬이 라운드/로비 씬이 아닐 때만 조작 가능하도록 설정
-            string currentScene = SceneManager.GetActiveScene().name;
-            isRoundScene = currentScene != "CardSelectScene" && currentScene != "ResultScene" && currentScene != "StartScebe";
-            isLobbyScene = currentScene == "LobbyScene";
 
             // 조작 가능한 플레이 씬(스테이지)일 경우 처리
             if (isRoundScene)

@@ -3,7 +3,7 @@ using UnityEngine;
 // 네트워크 매니저가 중복 생성되지 않도록 하는 모듈
 public class NetManInstance : MonoBehaviour
 {
-    private static NetManInstance Inst;
+    public static NetManInstance Inst;
 
     void Awake()
     {
@@ -15,5 +15,10 @@ public class NetManInstance : MonoBehaviour
         }
 
         Inst = this;
+    }
+
+    public void Destroy()
+    {
+        Inst = null;
     }
 }

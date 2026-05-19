@@ -122,7 +122,7 @@ public class NetworkPacketManager : NetworkBehaviour
             {
                 if (netObj.TryGetComponent<Player>(out var player))
                 {
-                    player.netCurrHP.Value = player.totalHP;
+                    player.netCurrHP.Value = Player.totalHP;
                 }
             }
         }

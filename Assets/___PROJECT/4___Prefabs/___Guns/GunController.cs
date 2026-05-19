@@ -51,7 +51,7 @@ public class GunController : MonoBehaviour
 
     void Update()
     {
-        if (NetworkPacketManager.Inst.sceneSwitching)
+        if (!NetworkPacketManager.Inst || NetworkPacketManager.Inst.sceneSwitching)
         {
             return;
         }
