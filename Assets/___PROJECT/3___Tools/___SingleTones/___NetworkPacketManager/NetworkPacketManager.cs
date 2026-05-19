@@ -19,7 +19,8 @@ public class NetworkPacketManager : NetworkBehaviour
     {
         if (Inst && Inst != this)
         {
-            DestroyImmediate(this);
+            gameObject.SetActive(false);
+            Destroy(gameObject);
             return;
         }
         Inst = this;

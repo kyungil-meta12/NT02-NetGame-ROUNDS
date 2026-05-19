@@ -48,8 +48,9 @@ public class GameManager : NetworkBehaviour
     void Awake()
     { 
         if(Inst && Inst != this) 
-        { 
-            DestroyImmediate(this); 
+        {
+            gameObject.SetActive(false);
+            Destroy(gameObject); 
             return; 
         } 
         Inst = this; 
@@ -100,7 +101,7 @@ public class GameManager : NetworkBehaviour
             serverRunning = true;
             Debug.Log($"호스트 시작 성공!");
 
-            NetworkManager.Singleton.SceneManager.LoadScene("Round1", LoadSceneMode.Single);
+            NetworkManager.Singleton.SceneManager.LoadScene("LobbyScene", LoadSceneMode.Single);
         }
         else
         {
