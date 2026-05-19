@@ -326,7 +326,7 @@ public class GameManager : NetworkBehaviour
 #endif
 
     // 현재 PC의 로컬 IP 얻기
-    private string GetLocalIPAddress()
+    public string GetLocalIPAddress()
     {
         var host = Dns.GetHostEntry(Dns.GetHostName());
         foreach (var ip in host.AddressList)
