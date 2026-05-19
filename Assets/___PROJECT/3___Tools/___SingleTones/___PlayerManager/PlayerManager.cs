@@ -42,14 +42,9 @@ public struct AppearanceData
 /// <summary>
 /// 플레이어 관련 데이터를 관리하는 싱글톤 모듈 // 씬 전환 시 인스턴스 유지됨
 /// </summary>
-public class PlayerManager : NetworkBehaviour
+public class PlayerManager : MonoBehaviour
 {
     public static PlayerManager Inst;
-
-    // 네트워크를 통해 동기화될 닉네임 변수
-    public NetworkVariable<FixedString32Bytes> playerName =
-        new NetworkVariable<FixedString32Bytes>("",
-            NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Owner);
 
     [Header("테스트 모드 사용 여부")]
     public bool testMode;
@@ -62,30 +57,12 @@ public class PlayerManager : NetworkBehaviour
     /// </summary>
     [HideInInspector]
     public StatData Stat;
+    [HideInInspector]
     public AppearanceData Appearance = new();
     private bool appearanceCreated = false;
 
-    public override void OnNetworkSpawn()
-    {
-        Debug.Log($"[Spawn] 플레이어 스폰됨. ID: {OwnerClientId}, IsOwner: {IsOwner}");
-
-        DontDestroyOnLoad(gameObject);
-
-        if (IsOwner)
-        {
-            Inst = this;
-            string savedName = PlayerPrefs.GetString("PlayerName", "Unknown");
-            Debug.Log($"[Local] 저장된 이름 불러오기 시도: {savedName}");
-
-            // 이 한 줄이 실행될 때 권한이 없으면 아래 OnValueChanged 로그가 절대 안 찍힙니다.
-            playerName.Value = savedName;
-        }
-
-        // 이 부분은 서버/클라이언트 모두에서 실행되어야 합니다.
-        playerName.OnValueChanged += (oldV, newV) => {
-            Debug.Log($"[Network] 닉네임 변수 값이 바뀌었습니다! 새 이름: {newV}");
-        };
-    }
+    [HideInInspector]
+    public string myName;
 
     void Awake()
     {

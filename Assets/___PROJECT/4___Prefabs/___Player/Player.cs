@@ -1,5 +1,7 @@
 using System.Collections;
+using TMPro;
 using Unity.Cinemachine;
+using Unity.Collections;
 using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -19,6 +21,9 @@ public class Player : NetworkBehaviour
 
     [Space(10)]
     public HpBar hpBar;
+
+    [Space(10)]
+    public TextMeshProUGUI nickNameText;
 
     [Space(10)]
     public GameObject[] guns;
@@ -73,6 +78,7 @@ public class Player : NetworkBehaviour
     private NetworkVariable<GunType> netGunType = new(GunType.None, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Owner);
     private NetworkVariable<int> netFaceIndex = new(-1, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Owner);
     private NetworkVariable<int> netBodyIndex = new(-1, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Owner);
+    private NetworkVariable<FixedString64Bytes> netNickname = new("", NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Owner);
 
     private bool isLobbyScene = false;
     private bool isRoundScene = false;
@@ -91,6 +97,7 @@ public class Player : NetworkBehaviour
         netBodyIndex.OnValueChanged += OnBodyIndexChanged;
         netGunType.OnValueChanged += OnGunTypeChanged;
         netCurrHP.OnValueChanged += OnHPChanged;
+        netNickname.OnValueChanged += OnNameChanged;
 
         hpBar.SetTotalHp(totalHP);
 
@@ -109,12 +116,17 @@ public class Player : NetworkBehaviour
             PlayerManager.Inst.SaveAppearance(bodyIndex, faceIndex, bodies[bodyIndex]);
             netBodyIndex.Value = PlayerManager.Inst.Appearance.bodyIndex;
             netFaceIndex.Value = PlayerManager.Inst.Appearance.faceIndex;
+
             // Stat으로부터 현재의 총 타입을 불러온다.
             netGunType.Value = PlayerManager.Inst.Stat.gunType;
+
+            // PlayerManager에서 접속할 때 입력했던 이름을 불러온다
+            netNickname.Value = PlayerManager.Inst.myName;
+
             print($"This Player network spwaned: id: {NetworkObject.OwnerClientId}");
 
             // 플레이어 상태 세팅
-            SetPlayerState();
+            //SetPlayerState();
 
             // 첫 스폰 때는 컨트롤 활성화
             GameManager.Inst.controllable = true;
@@ -126,6 +138,7 @@ public class Player : NetworkBehaviour
             OnBodyIndexChanged(-1, netBodyIndex.Value);
             OnFaceIndexChanged(-1, netFaceIndex.Value);
             OnGunTypeChanged(GunType.None, netGunType.Value);
+            OnNameChanged("", netNickname.Value);
             print($"Other Player network spwaned: id: {NetworkObject.OwnerClientId}");
         }
 
@@ -140,8 +153,9 @@ public class Player : NetworkBehaviour
         netBodyIndex.OnValueChanged -= OnBodyIndexChanged;
         netGunType.OnValueChanged -= OnGunTypeChanged;
         netCurrHP.OnValueChanged -= OnHPChanged;
+        netNickname.OnValueChanged -= OnNameChanged;
 
-        if(IsOwner)
+        if (IsOwner)
         {
             NetworkManager.Singleton.SceneManager.OnSceneEvent -= OnSceneLoaded;
         }
@@ -201,7 +215,7 @@ public class Player : NetworkBehaviour
     // 씬 전환 이벤트를 통해 플레이어의 상태를 초기화한다.
     void OnSceneLoaded(SceneEvent sceneEvent)
     {
-        if (sceneEvent.SceneEventType == SceneEventType.LoadComplete)
+        if (sceneEvent.SceneEventType == SceneEventType.LoadComplete || sceneEvent.SceneEventType == SceneEventType.SynchronizeComplete)
         {
             if (sceneEvent.ClientId == NetworkManager.Singleton.LocalClientId)
             {
@@ -383,6 +397,12 @@ public class Player : NetworkBehaviour
             }
         }
         hpBar.SetHp(newValue); // 슬라이더 값 변경
+    }
+
+    // 이름 변경 이벤트
+    public void OnNameChanged(FixedString64Bytes prev, FixedString64Bytes curr)
+    {
+        nickNameText.text = curr.ToString();
     }
 
     // 대미지를 받으면 얼굴 표정이 바뀐다.
