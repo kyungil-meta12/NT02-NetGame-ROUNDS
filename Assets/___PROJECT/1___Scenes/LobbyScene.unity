@@ -14216,7 +14216,6 @@ GameObject:
   - component: {fileID: 741979616}
   - component: {fileID: 741979619}
   - component: {fileID: 741979618}
-  - component: {fileID: 741979617}
   m_Layer: 11
   m_Name: Big Box (5)
   m_TagString: Untagged
@@ -14239,25 +14238,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 66583035}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!251 &741979617
-PlatformEffector2D:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 741979615}
-  m_Enabled: 1
-  m_UseColliderMask: 1
-  m_ColliderMask:
-    serializedVersion: 2
-    m_Bits: 4294967295
-  m_RotationalOffset: 0
-  m_UseOneWay: 1
-  m_UseOneWayGrouping: 0
-  m_SurfaceArc: 140
-  m_UseSideFriction: 0
-  m_UseSideBounce: 0
-  m_SideArc: 1
 --- !u!61 &741979618
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -23965,7 +23945,6 @@ GameObject:
   - component: {fileID: 1317246421}
   - component: {fileID: 1317246424}
   - component: {fileID: 1317246423}
-  - component: {fileID: 1317246422}
   m_Layer: 11
   m_Name: Big Box (4)
   m_TagString: Untagged
@@ -23988,25 +23967,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 66583035}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!251 &1317246422
-PlatformEffector2D:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1317246420}
-  m_Enabled: 1
-  m_UseColliderMask: 1
-  m_ColliderMask:
-    serializedVersion: 2
-    m_Bits: 4294967295
-  m_RotationalOffset: 0
-  m_UseOneWay: 1
-  m_UseOneWayGrouping: 0
-  m_SurfaceArc: 140
-  m_UseSideFriction: 0
-  m_UseSideBounce: 0
-  m_SideArc: 1
 --- !u!61 &1317246423
 BoxCollider2D:
   m_ObjectHideFlags: 0
