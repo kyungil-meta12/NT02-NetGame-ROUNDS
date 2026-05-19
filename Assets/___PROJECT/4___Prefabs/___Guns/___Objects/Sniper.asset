@@ -12,9 +12,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7aa10b5a07c65d243a281a7f1d59bd42, type: 3}
   m_Name: Sniper
   m_EditorClassIdentifier: Assembly-CSharp::GunSpecValue
-  gunType: 4
   maxAmmo: 5
-  damage: 20
+  damage: 50
   ammoSpeed: 50
   reloadTime: 2
   fireInterval: 1.5
