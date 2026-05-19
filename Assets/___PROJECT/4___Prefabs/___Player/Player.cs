@@ -57,7 +57,7 @@ public class Player : NetworkBehaviour
     private bool jumpInput = false;
     private int jumpCount = 0;
     private Vector2 mouseWorldPos;
-
+    private Transform camTarget;
 
     private int groundLayer;
     private int faceIndex;
@@ -74,7 +74,7 @@ public class Player : NetworkBehaviour
     private NetworkVariable<int> netFaceIndex = new(-1, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Owner);
     private NetworkVariable<int> netBodyIndex = new(-1, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Owner);
 
-    private bool isLobbyScene;
+    private bool isLobbyScene = false;
 
     void Awake()
     {
@@ -260,6 +260,14 @@ public class Player : NetworkBehaviour
                         }
                     }
                 }
+
+                // 카메라 타겟 찾기
+                GameObject camTargetObj = GameObject.Find("CameraTargetShotPoint");
+                if(camTargetObj)
+                {
+                    camTarget = camTargetObj.transform;
+                }
+
                 // 총기 상태 초기화 (총기 컨트롤러가 있을 때만
                 if(gunController)
                 {
@@ -398,6 +406,11 @@ public class Player : NetworkBehaviour
         
         // 뱡향 지정
         lookingLeft = mouseWorldPos.x < transform.position.x;
+
+        // 카메라 타겟에 위치 지정
+        // 마우스가 있는 방향으로 약간의 오프셋을 주도록 한다
+        var vec2Pos = (Vector2)transform.position;
+        camTarget.position = vec2Pos + (mouseWorldPos - vec2Pos) * 0.5f;
 
         // [변경] wasPressedThisFrame 입력을 FixedUpdate에서 유실하지 않도록 플래그로 저장
         if (Keyboard.current.spaceKey.wasPressedThisFrame && jumpCount < 1 + PlayerManager.Inst.Stat.jumpLevel)
