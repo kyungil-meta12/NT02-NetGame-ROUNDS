@@ -83,6 +83,8 @@ public class Player : NetworkBehaviour
     private bool isLobbyScene = false;
     private bool isRoundScene = false;
 
+    public string Nickname => netNickname.Value.ToString();
+
     void Awake()
     {
         rb = GetComponent<Rigidbody2D>();
