@@ -128,7 +128,10 @@ public class Player : NetworkBehaviour
             print($"This Player network spwaned: id: {NetworkObject.OwnerClientId}");
 
             // 플레이어 상태 세팅
-            //SetPlayerState();
+            if(PlayerManager.Inst.testMode)
+            {
+                SetPlayerState();
+            }
 
             // 첫 스폰 때는 컨트롤 활성화
             GameManager.Inst.controllable = true;
@@ -219,7 +222,7 @@ public class Player : NetworkBehaviour
     {
         if (sceneEvent.SceneEventType == SceneEventType.LoadComplete || sceneEvent.SceneEventType == SceneEventType.SynchronizeComplete)
         {
-            if (sceneEvent.ClientId == NetworkManager.Singleton.LocalClientId)
+            if (IsOwner)
             {
                 SetPlayerState();
             }
@@ -289,9 +292,10 @@ public class Player : NetworkBehaviour
                     camTarget = null;
                 }
 
-                // 총기 상태 초기화 (총기 컨트롤러가 있을 때만
+                // 총기 상태 초기화 (총기 컨트롤러가 있을 때만 동작)
                 if(gunController)
                 {
+                    netGunType.Value = PlayerManager.Inst.Stat.gunType;
                     gunController.ResetGun();
                 }
 

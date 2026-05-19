@@ -409,44 +409,44 @@ MonoBehaviour:
     descriptionText: {fileID: 7465677150318635120}
   cards:
   - image: {fileID: -586807851487928654, guid: a76cc66d839ecbb43ae54382f15fd9dd, type: 3}
-    titleText: "\uB354\uBE14 \uC810\uD504"
+    titleText: "\uBA40\uD2F0 \uC810\uD504"
     descriptionText: "\uC810\uD504 +1<br><br>\uACF5\uC911\uC5D0\uC11C \uD55C\uBC88
       \uB354 \uC810\uD504\uD55C\uB2E4."
   - image: {fileID: 598551898483338459, guid: a4c5eee92df535f4487b9dce8328f0a3, type: 3}
-    titleText: "\uD0C4\uD658 \uCD94\uAC00"
-    descriptionText: "\uD0C4\uD658 \uCD5C\uB300\uCE58 +10<br><br>\uD0C4\uD658 \uCD5C\uB300\uCE58\uB97C
+    titleText: "\uC0AC\uC774\uC988 \uC5C5"
+    descriptionText: "\uD0C4\uD658 \uCD5C\uB300\uCE58 +50%<br><br>\uD0C4\uD658 \uCD5C\uB300\uCE58\uB97C
       \uCD94\uAC00\uD55C\uB2E4."
   - image: {fileID: 5702939079018767606, guid: 42d5c2f8fa9f94a4396d00ea23c286b1, type: 3}
-    titleText: "\uC18D\uB3C4 \uC5C5"
-    descriptionText: "\uD50C\uB808\uC774\uC5B4 \uC18D\uB3C4 +20%<br><br>\uC18D\uB3C4\uAC00
+    titleText: "\uC2A4\uD53C\uB4DC \uC5C5"
+    descriptionText: "\uD50C\uB808\uC774\uC5B4 \uC18D\uB3C4 +25%<br><br>\uC18D\uB3C4\uAC00
       \uC99D\uAC00\uD55C\uB2E4."
   - image: {fileID: 4832045231417606754, guid: 1c17dbe33bc8d5245abb603c83641860, type: 3}
     titleText: "\uD30C\uC6CC \uC0F7"
-    descriptionText: "\uB370\uBBF8\uC9C0 +10<br><br>\uACF5\uACA9\uB825\uC774 \uC99D\uAC00\uD55C\uB2E4."
+    descriptionText: "\uB370\uBBF8\uC9C0 +25%<br><br>\uACF5\uACA9\uB825\uC774 \uC99D\uAC00\uD55C\uB2E4."
   - image: {fileID: -7144642614502659479, guid: f50e8b06abd458d42a22fa9d80396fcc, type: 3}
-    titleText: "\uD328\uC2A4\uD2B8 \uC0F7"
-    descriptionText: "\uD0C4\uD658 \uC18D\uB3C4 +20%<br><br>\uD0C4\uD658\uC758 \uC18D\uB3C4\uAC00
+    titleText: "\uD328\uC2A4\uD2B8 \uBD88\uB9BF"
+    descriptionText: "\uD0C4\uD658 \uC18D\uB3C4 +50%<br><br>\uD0C4\uD658\uC758 \uC18D\uB3C4\uAC00
       \uC99D\uAC00\uD55C\uB2E4."
   - image: {fileID: -6068046880505212259, guid: d8f226234ab01ca40aee45cde1a957a1, type: 3}
-    titleText: "\uC5F0\uC0AC \uC18D\uB3C4"
-    descriptionText: "\uC5F0\uC0AC \uC18D\uB3C4 +20%<br><br>\uD0C4\uD658\uC758 \uC5F0\uC0AC
+    titleText: "\uB808\uD53C\uB4DC \uC0F7"
+    descriptionText: "\uC5F0\uC0AC \uC18D\uB3C4 +25%<br><br>\uD0C4\uD658\uC758 \uC5F0\uC0AC
       \uC18D\uB3C4\uAC00 \uC99D\uAC00\uD55C\uB2E4."
   - image: {fileID: 2843675851291821527, guid: f4bd1f203abf7924aa43b66d8c3e9e16, type: 3}
     titleText: "\uBA40\uD2F0 \uC0F7"
     descriptionText: "\uBA40\uD2F0 \uC0F7 +1<br><br>\uD0C4\uD658\uC758 \uAC1C\uC218\uAC00
       \uB298\uC5B4\uB09C\uB2E4."
   - image: {fileID: 876618001444212155, guid: dd4abf91ee15f6c43ac4aa4b45b55c2d, type: 3}
-    titleText: "\uC0F7\uAC74"
-    descriptionText: "\uCD1D\uC744 \uC0F7\uAC74\uC73C\uB85C \uAD50\uCCB4\uD55C\uB2E4."
+    titleText: SG
+    descriptionText: "\uCD1D\uC744 SG\uB85C \uAD50\uCCB4\uD55C\uB2E4."
   - image: {fileID: 8311834746389097198, guid: 1f5aaabc7a6546e48a1093ea9efb8af1, type: 3}
-    titleText: "\uC790\uB3D9\uC18C\uCD1D"
-    descriptionText: "\uCD1D\uC744 AR\uAC74\uC73C\uB85C \uAD50\uCCB4\uD55C\uB2E4."
+    titleText: AR
+    descriptionText: "\uCD1D\uC744 AR\uB85C \uAD50\uCCB4\uD55C\uB2E4."
   - image: {fileID: -1518990609848816936, guid: ca89142466585e0488ffd4bb534a73e0, type: 3}
     titleText: SMG
     descriptionText: "\uCD1D\uC744 SMG\uB85C \uAD50\uCCB4\uD55C\uB2E4."
   - image: {fileID: 381862995586490532, guid: 61ea67447548a3347816f34d76d76e03, type: 3}
-    titleText: "\uC2A4\uB098\uC774\uD37C"
-    descriptionText: "\uCD1D\uC744 \uC2A4\uB098\uC774\uD37C\uB85C \uAD50\uCCB4\uD55C\uB2E4."
+    titleText: SR
+    descriptionText: "\uCD1D\uC744 SR\uB85C \uAD50\uCCB4\uD55C\uB2E4."
 --- !u!4 &215798211
 Transform:
   m_ObjectHideFlags: 0

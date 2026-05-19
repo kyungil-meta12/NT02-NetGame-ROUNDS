@@ -46,7 +46,7 @@ public class PlayerManager : MonoBehaviour
 {
     public static PlayerManager Inst;
 
-    [Header("테스트 모드 사용 여부")]
+    [Header("테스트 모드 사용 여부(SetPlayerState()가 OnNetworkSpawn()에서 호출됨)")]
     public bool testMode;
 
     [Header("테스트 모드 값(런타임에 변경 불가)")]
