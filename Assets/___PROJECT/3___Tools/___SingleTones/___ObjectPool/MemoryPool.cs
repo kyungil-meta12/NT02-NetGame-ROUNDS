@@ -13,7 +13,7 @@ public class MemoryPool : MonoBehaviour
     { 
         if(Inst && Inst != this)
         { 
-            DestroyImmediate(this); 
+            DestroyImmediate(gameObject); 
             return; 
         } 
         Inst = this; 

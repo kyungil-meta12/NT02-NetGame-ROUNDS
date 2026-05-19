@@ -29,7 +29,8 @@ public class AmmoIndicator : MonoBehaviour
     {
         if(Inst && Inst != this)
         {
-            DestroyImmediate(this);
+            DestroyImmediate(gameObject);
+            return;
         }
 
         numTextRt = numText.GetComponent<RectTransform>();

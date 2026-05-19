@@ -330,6 +330,37 @@ PrefabInstance:
       insertIndex: -1
       addedObject: {fileID: 251710307}
   m_SourcePrefab: {fileID: 100100000, guid: a5ed96966948b2348b46dab87f87bbcf, type: 3}
+--- !u!1 &186919564
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 186919565}
+  m_Layer: 0
+  m_Name: Player2_SpawnPoint
+  m_TagString: SpawnPoint
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &186919565
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 186919564}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -127.38, y: 25.49, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &215798209
 GameObject:
   m_ObjectHideFlags: 0
@@ -1841,7 +1872,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1726689504}
   m_Layer: 0
-  m_Name: SpawnPoint
+  m_Name: Player1_SpawnPoint
   m_TagString: SpawnPoint
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1856,7 +1887,7 @@ Transform:
   m_GameObject: {fileID: 1726689503}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -143.12, y: 26, z: 0}
+  m_LocalPosition: {x: -161.02, y: 25.49, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -52489,5 +52520,6 @@ SceneRoots:
   - {fileID: 215798211}
   - {fileID: 5677742330105699237}
   - {fileID: 1726689504}
+  - {fileID: 186919565}
   - {fileID: 2042736769}
   - {fileID: 1241763443}

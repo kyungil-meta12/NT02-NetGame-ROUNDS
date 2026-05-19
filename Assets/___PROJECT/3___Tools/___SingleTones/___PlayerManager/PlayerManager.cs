@@ -82,7 +82,7 @@ public class PlayerManager : NetworkBehaviour
     {
         if(Inst && Inst != this)
         {
-            DestroyImmediate(this);
+            DestroyImmediate(gameObject);
             return;
         }
         Inst = this;

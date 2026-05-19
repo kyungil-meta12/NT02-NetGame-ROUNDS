@@ -15,13 +15,12 @@ public class DamageFeedback : MonoBehaviour
     {
         if(Inst && Inst != this)
         {
-            DestroyImmediate(this);
+            DestroyImmediate(gameObject);
             return;
         }
-        Inst = this;
-
         img = GetComponentInChildren<Image>();
         SetOpacity(opacity);
+        Inst = this;
     }
 
     void OnDestroy()

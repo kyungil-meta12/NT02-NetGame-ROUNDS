@@ -220,18 +220,19 @@ public class Player : NetworkBehaviour
         }
 
         // 스폰 위치로 이동
-        // 씬마다 "SpawnPoind" 태그가 달린 오브젝트가 있어야함.
-        GameObject spawnObj = GameObject.FindWithTag("SpawnPoint");
-        if(spawnObj != null)
+        // 씬마다 "PlayerN_pawnPoint" 태그가 달린 오브젝트가 있어야함.
+        // 호스트는 좌측, 클라이언트는 우측에 배치
+        GameObject spawnObj = GameObject.Find(IsHost ? "Player1_SpawnPoint" : "Player2_SpawnPoint");
+        if(spawnObj)
         {
             Vector2 spawnPos = spawnObj.transform.position;
             transform.position = spawnPos;
-            if(rb != null)
+            if (rb != null)
             {
                 rb.position = spawnPos;
                 rb.linearVelocity = Vector2.zero;
             }
-
+        
             // 물리 및 입력 초기화
             jumpCount = 0;
             jumpInput = false;
@@ -258,7 +259,7 @@ public class Player : NetworkBehaviour
                         }
                     }
                 }
-                // 총기 상태 초기화 (총기 컨트롤러가 있을 때만0
+                // 총기 상태 초기화 (총기 컨트롤러가 있을 때만
                 if(gunController != null)
                 {
                     gunController.ResetGun();
@@ -274,6 +275,11 @@ public class Player : NetworkBehaviour
 
             // PlayerManager 데이터 기반으로 외형/총기 최종 적용
             ApplyPlayerManagerData();
+        }
+
+        else
+        {
+            Debug.LogError("스폰 포인트를 찾을 수 없음");
         }
     }
 
