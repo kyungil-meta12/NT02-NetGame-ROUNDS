@@ -6,7 +6,6 @@ using TMPro;
 using UltimateClean;
 using Unity.Netcode;
 using UnityEngine;
-using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 using Random = UnityEngine.Random;
 
