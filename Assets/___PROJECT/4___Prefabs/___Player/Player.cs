@@ -172,6 +172,10 @@ public class Player : NetworkBehaviour
     {
         if (!IsSpawned || !isRoundScene || !GameManager.Inst.controllable || NetworkPacketManager.Inst.sceneSwitching) // Player가 필요없는 씬에서는 업데이트를 하지 않음
         {
+            // 조작 상태 초기화 
+            moveLeft = false;
+            moveRight = false;
+            gunController.PullTrigger(false);
             return;
         }
 
