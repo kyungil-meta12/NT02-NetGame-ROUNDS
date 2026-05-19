@@ -132,28 +132,18 @@ public class GameManager : NetworkBehaviour
         // [추가] 접속 전 저장
         PlayerManager.Inst.myName = nameInputField.text;
 
-        if (NetworkManager.Singleton.NetworkConfig.NetworkTransport is UnityTransport unityTransport)
+        string myLocalIP;
+        if (ipInputField.text.Length == 0)
         {
-            string myLocalIP;
-            if (ipInputField.text.Length == 0)
-            {
-                myLocalIP = "127.0.0.1";
-            }
-            else
-            {
-                myLocalIP = GetLocalIPAddress();
-            }
-
-            if (!string.IsNullOrEmpty(myLocalIP))
-            {
-                unityTransport.ConnectionData.Address = myLocalIP;
-                Debug.Log($"[Host] 호스트 IP가 {myLocalIP}로 설정되었습니다.");
-            }
-            else
-            {
-                Debug.LogError("로컬 IP 주소를 찾을 수 없어 기본값으로 시작합니다.");
-            }
+            myLocalIP = "127.0.0.1";
         }
+        else
+        {
+            myLocalIP = ipInputField.text;
+        }
+
+        var transport = NetworkManager.Singleton.GetComponent<UnityTransport>();
+        transport.SetConnectionData(myLocalIP, 7777, "0.0.0.0");
 
         // 호스트 시작
         if (NetworkManager.Singleton.StartHost())
@@ -195,7 +185,7 @@ public class GameManager : NetworkBehaviour
 
         // NetworkManager에 붙어있는 Transport 컴포넌트를 가져와서 주소값 변경
         var transport = NetworkManager.Singleton.GetComponent<UnityTransport>();
-        transport.ConnectionData.Address = targetIP;
+        transport.SetConnectionData(targetIP, 7777);
 
         // 클라이언트 시작
         if (NetworkManager.Singleton.StartClient())
