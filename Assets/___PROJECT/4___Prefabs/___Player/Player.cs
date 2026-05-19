@@ -74,7 +74,7 @@ public class Player : NetworkBehaviour
     private NetworkVariable<int> netFaceIndex = new(-1, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Owner);
     private NetworkVariable<int> netBodyIndex = new(-1, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Owner);
 
-    private string lastSceneName;
+    private bool isLobbyScene;
 
     void Awake()
     {
@@ -240,6 +240,7 @@ public class Player : NetworkBehaviour
             // 현재 씬이 카드 선택 씬이 아닐 때만 조작 가능하도록 설정
             string currentScene = SceneManager.GetActiveScene().name;
             bool isRoundScene = currentScene != "CardSelectScene";
+            isLobbyScene = currentScene == "LobbyScene";
 
             // 조작 가능한 플레이 씬(스테이지)일 경우 처리
             if (isRoundScene)
@@ -260,7 +261,7 @@ public class Player : NetworkBehaviour
                     }
                 }
                 // 총기 상태 초기화 (총기 컨트롤러가 있을 때만
-                if(gunController != null)
+                if(gunController)
                 {
                     gunController.ResetGun();
                 }
@@ -392,24 +393,26 @@ public class Player : NetworkBehaviour
         moveLeft = Keyboard.current.aKey.isPressed;
         moveRight = Keyboard.current.dKey.isPressed;
 
+        // 마우스 위치 얻기
+        mouseWorldPos = MouseManager.Inst.worldPos;
+        
+        // 뱡향 지정
+        lookingLeft = mouseWorldPos.x < transform.position.x;
+
         // [변경] wasPressedThisFrame 입력을 FixedUpdate에서 유실하지 않도록 플래그로 저장
         if (Keyboard.current.spaceKey.wasPressedThisFrame && jumpCount < 1 + PlayerManager.Inst.Stat.jumpLevel)
         {
             jumpInput = true;
         }
 
-        // 마우스 위치 얻기
-        mouseWorldPos = MouseManager.Inst.worldPos;
         gunAxisRotation = Mathf.Rad2Deg * Mathf.Atan2(mouseWorldPos.y - body.position.y, mouseWorldPos.x - body.position.x);
-
-        // 뱡향 지정
-        lookingLeft = mouseWorldPos.x < transform.position.x;
+        gunController.InputDirection(lookingLeft);
 
         // [수정] 총 컨트롤 (방아쇠 당기기/놓기, 재장전, 방향입력)
-        if (gunController)
+        // 로비에서는 총이 동작하지 않도록 한다
+        if (!isLobbyScene)
         {
             gunController.PullTrigger(MouseManager.Inst.IsLeftPressing());
-            gunController.InputDirection(lookingLeft);
             if (Keyboard.current.rKey.wasPressedThisFrame)
             {
                 gunController.ReloadGun();
