@@ -20,6 +20,7 @@ public class BGMController : MonoBehaviour
     {
         if (bgmSlider != null)
         {
+            bgmSlider.Options = new List<string>(bgmClips.Count);
             for(int i = 0; i < bgmClips.Count; i++)
             {
                 bgmSlider.Options[i] = bgmClips[i].name;
