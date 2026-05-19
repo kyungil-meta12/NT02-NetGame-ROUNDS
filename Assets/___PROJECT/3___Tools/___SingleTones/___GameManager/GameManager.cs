@@ -110,15 +110,13 @@ public class GameManager : NetworkBehaviour
         Debug.Log($"[결과] 현재 씬에 존재하는 플레이어 수: {allPlayers.Length}");
         foreach (var pm in allPlayers)
         {
-            Debug.Log($"[결과] 플레이어 ID: {pm.OwnerClientId}, 이름 변수 값: '{pm.playerName.Value}'");
+            string nameData = pm.playerName.Value.ToString();
+            Debug.Log($"[결과] ID: {pm.OwnerClientId}, 이름: {nameData}");
+
             if (pm.OwnerClientId == loserId)
-            {
-                loseName = pm.playerName.Value.ToString();
-            }
+                loseName = nameData;
             else
-            {
-                winName = pm.playerName.Value.ToString();
-            }
+                winName = nameData;
         }
 
         // 4. 승패 판정에 따라 해당 패널만 켜고 이름을 넣어줍니다.

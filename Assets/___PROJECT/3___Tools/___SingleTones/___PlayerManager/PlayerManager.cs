@@ -65,40 +65,18 @@ public class PlayerManager : NetworkBehaviour
     public AppearanceData Appearance = new();
     private bool appearanceCreated = false;
 
-    public override void OnNetworkSpawn()
-    {
-        Debug.Log($"[Spawn] 플레이어 스폰됨. ID: {OwnerClientId}, IsOwner: {IsOwner}");
-
-        DontDestroyOnLoad(gameObject);
-
-        if (IsOwner)
-        {
-            Inst = this;
-            string savedName = PlayerPrefs.GetString("PlayerName", "Unknown");
-            Debug.Log($"[Local] 저장된 이름 불러오기 시도: {savedName}");
-
-            // 이 한 줄이 실행될 때 권한이 없으면 아래 OnValueChanged 로그가 절대 안 찍힙니다.
-            playerName.Value = savedName;
-        }
-
-        // 이 부분은 서버/클라이언트 모두에서 실행되어야 합니다.
-        playerName.OnValueChanged += (oldV, newV) => {
-            Debug.Log($"[Network] 닉네임 변수 값이 바뀌었습니다! 새 이름: {newV}");
-        };
-    }
-
     void Awake()
     {
-        if(Inst && Inst != this)
+        if (Inst && Inst != this)
         {
-            DestroyImmediate(gameObject);
+            //DestroyImmediate(gameObject);
             return;
         }
         Inst = this;
         DontDestroyOnLoad(gameObject);
 
         // Awake에서 Player의 OnNetworkSpawn보다 확실하게 먼저 초기화되도록 한다
-        if(!testMode) 
+        if (!testMode)
         {
             Stat = new StatData
             {
@@ -121,6 +99,34 @@ public class PlayerManager : NetworkBehaviour
         {
             Stat = TestStat;
         }
+    }
+
+    public override void OnNetworkSpawn()
+    {
+        DontDestroyOnLoad(gameObject);
+     
+        Debug.Log($"[Spawn] 플레이어 스폰됨. ID: {OwnerClientId}, IsOwner: {IsOwner}");
+
+        if (IsOwner)
+        {
+            Inst = this;
+            string savedName = PlayerPrefs.GetString("PlayerName", "Unknown");
+            playerName.Value = savedName;
+            Debug.Log($"[Local] 저장된 이름 불러오기 시도: {savedName}");            
+        }
+
+        playerName.OnValueChanged = OnNameChanged;
+    }
+
+    private void OnNameChanged(FixedString32Bytes oldV, FixedString32Bytes newV)
+    {
+        Debug.Log($"[Network] ID {OwnerClientId} 이름 동기화 완료 : {newV}");
+    }
+
+    public override void OnNetworkDespawn()
+    {
+        playerName.OnValueChanged -= OnNameChanged;
+        if (IsOwner) Inst = null;
     }
 
     /// <summary>
