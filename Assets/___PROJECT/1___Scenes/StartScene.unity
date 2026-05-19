@@ -18281,6 +18281,18 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
+      - m_Target: {fileID: 224062016678292245}
+        m_TargetAssemblyTypeName: IpAddressText, Assembly-CSharp
+        m_MethodName: SetIpAddressText
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!114 &2063315607
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -18715,6 +18727,7 @@ GameObject:
   - component: {fileID: 223305196734712864}
   - component: {fileID: 114817721475771694}
   - component: {fileID: 114562784829046912}
+  - component: {fileID: 224062016678292245}
   m_Layer: 5
   m_Name: Main Canvas
   m_TagString: Untagged
@@ -19070,6 +19083,19 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0, y: 0}
+--- !u!114 &224062016678292245
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1530778140380286}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a3745643357c6164b8e44230c919c0a9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::IpAddressText
+  text: {fileID: 6704255908509479297}
 --- !u!222 &520085289946220013
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -20164,7 +20190,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: '127.0.0.1
+  m_text: '
 
 '
   m_isRightToLeft: 0
