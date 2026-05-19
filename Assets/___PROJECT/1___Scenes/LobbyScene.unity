@@ -6717,7 +6717,7 @@ MonoBehaviour:
       Offset: {x: 0, y: 0}
   CenterOnActivate: 1
   TargetOffset: {x: 0, y: 0, z: 0}
-  Damping: {x: 1, y: 1, z: 1}
+  Damping: {x: 0.1, y: 0.1, z: 0.1}
   Lookahead:
     Enabled: 0
     Time: 0
@@ -14217,7 +14217,7 @@ GameObject:
   - component: {fileID: 741979619}
   - component: {fileID: 741979618}
   - component: {fileID: 741979617}
-  m_Layer: 0
+  m_Layer: 11
   m_Name: Big Box (5)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -14830,6 +14830,17 @@ RectTransform:
   m_CorrespondingSourceObject: {fileID: 7002961180597347935, guid: b25f6bc2eeb88ea47ab12198ec312e67, type: 3}
   m_PrefabInstance: {fileID: 757005480}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &757005483 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 994568174779973362, guid: b25f6bc2eeb88ea47ab12198ec312e67, type: 3}
+  m_PrefabInstance: {fileID: 757005480}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a5ee0234090484337addeac1461eaa6b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &762801435
 GameObject:
   m_ObjectHideFlags: 0
@@ -16169,8 +16180,8 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 819909632}
   serializedVersion: 2
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 891.3539, y: 493.52982, z: 10}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -16285,7 +16296,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: dcfbbfb5c4a2d0d42ac60f926c055247, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::BGMController
-  bgmSlider: {fileID: 0}
+  bgmSlider: {fileID: 757005483}
   bgmClips: []
 --- !u!1 &827067230
 GameObject:
@@ -17310,6 +17321,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 872990323}
+  - component: {fileID: 872990324}
   m_Layer: 0
   m_Name: Player1_SpawnPoint
   m_TagString: SpawnPoint
@@ -17332,6 +17344,19 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &872990324
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 872990322}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3d0949bcbe2351849a57fe559779d459, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::SpwanPointSwap
+  otherPoint: {fileID: 1584271224}
 --- !u!1 &876988794
 GameObject:
   m_ObjectHideFlags: 0
@@ -23941,7 +23966,7 @@ GameObject:
   - component: {fileID: 1317246424}
   - component: {fileID: 1317246423}
   - component: {fileID: 1317246422}
-  m_Layer: 0
+  m_Layer: 11
   m_Name: Big Box (4)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
