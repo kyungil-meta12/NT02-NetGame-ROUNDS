@@ -391,7 +391,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Unity.Netcode.Runtime::Unity.Netcode.NetworkObject
-  GlobalObjectIdHash: 983207352
+  GlobalObjectIdHash: 861737861
   InScenePlacedSourceGlobalObjectIdHash: 0
   DeferredDespawnTick: 0
   Ownership: 1
@@ -585,7 +585,7 @@ BoxCollider2D:
     drawMode: 0
     adaptiveTiling: 0
   m_AutoTiling: 0
-  m_Size: {x: 1.2, y: 1.15}
+  m_Size: {x: 1.22, y: 1.15}
   m_EdgeRadius: 0.2
 --- !u!58 &2940092214305843162
 CircleCollider2D:
@@ -597,7 +597,7 @@ CircleCollider2D:
   m_Enabled: 1
   serializedVersion: 3
   m_Density: 1
-  m_Material: {fileID: 0}
+  m_Material: {fileID: 6200000, guid: 8ecb81b1a29e3a44ebbc0d731cf3915e, type: 2}
   m_IncludeLayers:
     serializedVersion: 2
     m_Bits: 0
