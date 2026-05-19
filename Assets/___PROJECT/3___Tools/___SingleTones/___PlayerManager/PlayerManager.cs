@@ -1,7 +1,4 @@
 using System;
-using Unity.Collections;
-using Unity.Collections.LowLevel.Unsafe;
-using Unity.Netcode;
 using UnityEngine;
 
 /// <summary>
@@ -107,6 +104,23 @@ public class PlayerManager : MonoBehaviour
     {
         Inst = null;
         Destroy(gameObject);
+    }
+
+    /// <summary>
+    /// 인스턴스를 유지하면서 닉네임, 외모를 제외한 모든 스탯을 초기화한다
+    /// </summary>
+    public void ResetCurrentStat()
+    {
+        Stat.moveSpeedLevel = 0;
+        Stat.jumpLevel = 0;
+        Stat.gunType = GunType.Pistol;
+        Stat.multiShotSpreadLevel = 0;
+        Stat.multiShellCountLevel = 0;
+        Stat.isMultiShot = false;
+        Stat.totalAmmoLevel = 0;
+        Stat.ammoSpeedLevel = 0;
+        Stat.fireSpeedLevel = 0;
+        Stat.damageLevel = 0;
     }
 
     /// <summary>

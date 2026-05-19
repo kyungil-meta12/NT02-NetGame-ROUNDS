@@ -146,6 +146,15 @@ public class NetworkPacketManager : NetworkBehaviour
         }
     }
 
+    [Rpc(SendTo.Everyone)]
+    public void RequestCurrentRoundRpc()
+    {
+        if(IsServer)
+        {
+            GameManager.Inst.currentRound.Value = 1;
+        }
+    }
+
     #endregion
 
     #region Player Packets (플레이어 관련)

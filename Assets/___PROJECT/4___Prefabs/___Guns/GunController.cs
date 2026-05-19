@@ -104,8 +104,6 @@ public class GunController : MonoBehaviour
 
             // 로컬 반동 연출 (반응성을 위해 즉시 실행)
             transform.localPosition = new Vector2(-0.6f, 0f);
-
-            PlayGunSound();
         }
     }
 
@@ -125,6 +123,9 @@ public class GunController : MonoBehaviour
 
         // 비소유자 화면에서도 반동이 보이도록 설정
         transform.localPosition = new Vector2(-0.6f, 0f);
+
+        // 사운드 재생
+        PlayGunSound();
     }
 
     public void ExecuteCreateBullets(Vector2 pos, float rotation, float ammoSpeed, int dmg)

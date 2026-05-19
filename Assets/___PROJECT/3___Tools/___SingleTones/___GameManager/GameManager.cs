@@ -112,6 +112,18 @@ public class GameManager : NetworkBehaviour
         Destroy(gameObject);
     }
 
+    /// <summary>
+    /// 인스턴스를 유지하면서 현재 모든 상태를 초기화 한다.
+    /// </summary>
+    public void ResetCurrentState()
+    {
+        sceneLoadCompleted = false;
+        controllable = false;
+        isPaused = false;
+        isGameEnd = false;
+        NetworkPacketManager.Inst.RequestCurrentRoundRpc();
+    }
+
     // 호스트 버튼 연결용
     public void StartHost()
     {

@@ -257,9 +257,9 @@ public class Player : NetworkBehaviour
             jumpCount = 0;
             jumpInput = false;
 
-            // 현재 씬이 카드 선택 씬이 아닐 때만 조작 가능하도록 설정
+            // 현재 씬이 라운드/로비 씬이 아닐 때만 조작 가능하도록 설정
             string currentScene = SceneManager.GetActiveScene().name;
-            isRoundScene = currentScene != "CardSelectScene";
+            isRoundScene = currentScene != "CardSelectScene" && currentScene != "ResultScene" && currentScene != "StartScebe";
             isLobbyScene = currentScene == "LobbyScene";
 
             // 조작 가능한 플레이 씬(스테이지)일 경우 처리
