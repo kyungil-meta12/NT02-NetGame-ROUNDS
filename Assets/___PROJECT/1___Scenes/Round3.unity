@@ -6550,7 +6550,7 @@ AudioSource:
   serializedVersion: 4
   OutputAudioMixerGroup: {fileID: 0}
   m_audioClip: {fileID: 0}
-  m_Resource: {fileID: 0}
+  m_Resource: {fileID: 8300000, guid: 2df0fcdef0914384cab0c86864e43d68, type: 3}
   m_PlayOnAwake: 1
   m_Volume: 1
   m_Pitch: 1
@@ -6649,7 +6649,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::BGMController
   bgmSlider: {fileID: 691560054}
-  bgmClips: []
+  bgmClips:
+  - {fileID: 8300000, guid: 2df0fcdef0914384cab0c86864e43d68, type: 3}
+  - {fileID: 8300000, guid: 416e8bd7ab52c5240b46c75dded14960, type: 3}
+  - {fileID: 8300000, guid: b6959816992f5c545901615c2161b233, type: 3}
+  - {fileID: 8300000, guid: 3a5790691b9a52647a704163335be087, type: 3}
 --- !u!4 &342535207
 Transform:
   m_ObjectHideFlags: 0
