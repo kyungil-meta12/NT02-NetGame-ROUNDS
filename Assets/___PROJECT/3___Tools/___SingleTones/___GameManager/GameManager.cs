@@ -42,8 +42,10 @@ public class GameManager : NetworkBehaviour
 
     // 서버에서 관리하는 현재 라운드
     public NetworkVariable<int>currentRound = new(1, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
-    
+
+    [Header("Login References")]
     public TMPro.TMP_InputField ipInputField;
+    public TMP_InputField nameInputField;
 
     void Awake()
     { 
@@ -57,27 +59,90 @@ public class GameManager : NetworkBehaviour
         DontDestroyOnLoad(gameObject);
     }
 
-    public void SetupResultUI(GameObject victoryUI, GameObject defeatUI)
+    // [추가] 닉네임 저장 로직
+    private void SaveNickname()
+    {
+        string nickName = "UnknownPlayer";
+
+        // 1. 입력창에 텍스트가 있다면 사용
+        if (nameInputField != null && !string.IsNullOrEmpty(nameInputField.text))
+        {
+            nickName = nameInputField.text;
+        }
+        // 2. 입력창이 비어있다면 랜덤 닉네임 생성
+        else
+        {
+            nickName = "Player_" + UnityEngine.Random.Range(100, 999);
+        }
+
+        // 3. 로컬에 저장 및 즉시 반영
+        PlayerPrefs.SetString("PlayerName", nickName);
+        PlayerPrefs.Save(); // [필수] 물리적으로 파일에 저장
+
+        Debug.Log($"[GameManager] 닉네임 로컬 저장 완료: {nickName}");
+    }
+
+    /// <summary>
+    /// 결과 화면 UI를 설정하는 함수
+    /// </summary>
+    /// <param name="victoryUI">승리 패널 오브젝트</param>
+    /// <param name="defeatUI">패배 패널 오브젝트</param>
+    /// <param name="winnerNameText">승리자 이름을 표시할 TMP 텍스트</param>
+    /// <param name="loserNameText">패배자 이름을 표시할 TMP 텍스트</param>
+    public void SetupResultUI(GameObject victoryUI, GameObject defeatUI, TextMeshProUGUI winnerNameText, TextMeshProUGUI loserNameText)
     {
         if (NetworkManager.Singleton == null) return;
 
+        // 내 클라이언트 ID와 서버가 저장한 패배자 ID 가져오기
         ulong myId = NetworkManager.Singleton.LocalClientId;
         ulong loserId = loserClientId.Value;
 
-        // 패널 초기화 (둘 다 끄기)
+        // 초기화: 모든 패널을 일단 끄고 텍스트를 비웁니다 (겹침 방지)
         victoryUI.SetActive(false);
         defeatUI.SetActive(false);
+        
+        // 닉네임 찾기 로직
+        string winName = "Winner";
+        string loseName = "Loser";
 
-        // 승패 판정 후 해당 패널만 활성화
+        // 씬에 생성된 모든 PlayerManager를 검색하여 승자와 패자의 이름을 구분
+        PlayerManager[] allPlayers = FindObjectsByType<PlayerManager>(FindObjectsSortMode.None);
+        Debug.Log($"[결과] 현재 씬에 존재하는 플레이어 수: {allPlayers.Length}");
+        foreach (var pm in allPlayers)
+        {
+            Debug.Log($"[결과] 플레이어 ID: {pm.OwnerClientId}, 이름 변수 값: '{pm.playerName.Value}'");
+            if (pm.OwnerClientId == loserId)
+            {
+                loseName = pm.playerName.Value.ToString();
+            }
+            else
+            {
+                winName = pm.playerName.Value.ToString();
+            }
+        }
+
+        // 4. 승패 판정에 따라 해당 패널만 켜고 이름을 넣어줍니다.
         if (myId == loserId)
         {
+            // 내가 졌을 때
             defeatUI.SetActive(true);
-            Debug.Log($"결과 화면 : 패배 패널 활성화");
+            if (loserNameText != null)
+            {
+                // 패배 화면에는 본인의 이름이나 "YOU LOSE"를 강조해서 표시
+                loserNameText.text = loseName;
+            }
+            Debug.Log($"결과 화면 : 패배 패널 활성화 (패배자: {loseName})");
         }
         else
         {
+            // 내가 이겼을 때
             victoryUI.SetActive(true);
-            Debug.Log("결과 화면 : 승리 패널 활성화");
+            if (winnerNameText != null)
+            {
+                // 승리 화면에는 본인의 이름을 황금색 등으로 표시 가능
+                winnerNameText.text = winName;
+            }
+            Debug.Log($"결과 화면 : 승리 패널 활성화 (승리자: {winName})");
         }
     }
 
@@ -94,6 +159,9 @@ public class GameManager : NetworkBehaviour
     public void StartHost()
     {
         if (serverRunning) return;
+
+        // [추가] 접속 전 저장
+        SaveNickname();
 
         // 호스트 시작
         if (NetworkManager.Singleton.StartHost())
@@ -117,6 +185,9 @@ public class GameManager : NetworkBehaviour
             Debug.Log($"NetworkManager가 씬에 없습니다.");
             return;
         }
+
+        // [추가] 접속 전 저장
+        SaveNickname();
 
         if(ipInputField == null)
         {

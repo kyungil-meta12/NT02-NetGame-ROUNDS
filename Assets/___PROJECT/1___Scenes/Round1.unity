@@ -14298,6 +14298,17 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: dcdf959eea5b24c87ab626c662c26994, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::UltimateClean.SceneTransition
+--- !u!114 &757005482 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 994568174779973362, guid: b25f6bc2eeb88ea47ab12198ec312e67, type: 3}
+  m_PrefabInstance: {fileID: 757005480}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a5ee0234090484337addeac1461eaa6b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &762801435
 GameObject:
   m_ObjectHideFlags: 0
@@ -15561,8 +15572,8 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 819909632}
   serializedVersion: 2
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 891.3539, y: 493.52982, z: 10}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -15677,7 +15688,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: dcfbbfb5c4a2d0d42ac60f926c055247, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::BGMController
-  bgmSlider: {fileID: 0}
+  bgmSlider: {fileID: 757005482}
   bgmClips: []
 --- !u!1 &827067230
 GameObject:
