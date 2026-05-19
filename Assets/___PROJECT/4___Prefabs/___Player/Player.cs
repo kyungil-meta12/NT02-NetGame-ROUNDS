@@ -75,6 +75,7 @@ public class Player : NetworkBehaviour
     private NetworkVariable<int> netBodyIndex = new(-1, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Owner);
 
     private bool isLobbyScene = false;
+    private bool isRoundScene = false;
 
     void Awake()
     {
@@ -239,7 +240,7 @@ public class Player : NetworkBehaviour
 
             // 현재 씬이 카드 선택 씬이 아닐 때만 조작 가능하도록 설정
             string currentScene = SceneManager.GetActiveScene().name;
-            bool isRoundScene = currentScene != "CardSelectScene";
+            isRoundScene = currentScene != "CardSelectScene";
             isLobbyScene = currentScene == "LobbyScene";
 
             // 조작 가능한 플레이 씬(스테이지)일 경우 처리
@@ -266,6 +267,10 @@ public class Player : NetworkBehaviour
                 if(camTargetObj)
                 {
                     camTarget = camTargetObj.transform;
+                }
+                else
+                {
+                    camTarget = null;
                 }
 
                 // 총기 상태 초기화 (총기 컨트롤러가 있을 때만
@@ -410,7 +415,10 @@ public class Player : NetworkBehaviour
         // 카메라 타겟에 위치 지정
         // 마우스가 있는 방향으로 약간의 오프셋을 주도록 한다
         var vec2Pos = (Vector2)transform.position;
-        camTarget.position = vec2Pos + (mouseWorldPos - vec2Pos) * 0.5f;
+        if(camTarget)
+        {
+            camTarget.position = vec2Pos + (mouseWorldPos - vec2Pos) * 0.5f;
+        }
 
         // [변경] wasPressedThisFrame 입력을 FixedUpdate에서 유실하지 않도록 플래그로 저장
         if (Keyboard.current.spaceKey.wasPressedThisFrame && jumpCount < 1 + PlayerManager.Inst.Stat.jumpLevel)
@@ -419,16 +427,23 @@ public class Player : NetworkBehaviour
         }
 
         gunAxisRotation = Mathf.Rad2Deg * Mathf.Atan2(mouseWorldPos.y - body.position.y, mouseWorldPos.x - body.position.x);
-        gunController.InputDirection(lookingLeft);
+
+        if(gunController)
+        {
+            gunController.InputDirection(lookingLeft);
+        }
 
         // [수정] 총 컨트롤 (방아쇠 당기기/놓기, 재장전, 방향입력)
         // 로비에서는 총이 동작하지 않도록 한다
         if (!isLobbyScene)
         {
-            gunController.PullTrigger(MouseManager.Inst.IsLeftPressing());
-            if (Keyboard.current.rKey.wasPressedThisFrame)
+            if(gunController)
             {
-                gunController.ReloadGun();
+                gunController.PullTrigger(MouseManager.Inst.IsLeftPressing());
+                if (Keyboard.current.rKey.wasPressedThisFrame)
+                {
+                    gunController.ReloadGun();
+                }
             }
         }
     }
