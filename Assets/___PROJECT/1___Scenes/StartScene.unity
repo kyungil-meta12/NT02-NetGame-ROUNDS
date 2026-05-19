@@ -3458,6 +3458,10 @@ PrefabInstance:
       propertyPath: ipInputField
       value: 
       objectReference: {fileID: 2077316851}
+    - target: {fileID: 8670181400144482030, guid: 49d7eacf9ecd87e4e9f2e04f2b6d088b, type: 3}
+      propertyPath: nameInputField
+      value: 
+      objectReference: {fileID: 1709470140}
     - target: {fileID: 9208115326019364314, guid: 49d7eacf9ecd87e4e9f2e04f2b6d088b, type: 3}
       propertyPath: m_Name
       value: Game Manager
@@ -9835,9 +9839,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: 'Join Code
-
-'
+  m_text: Nick Name
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: ce0cdb4a9773d48c486e31d69a0e3c48, type: 2}
   m_sharedMaterial: {fileID: -4461743736596542180, guid: ce0cdb4a9773d48c486e31d69a0e3c48, type: 2}
@@ -11113,7 +11115,7 @@ GameObject:
   - component: {fileID: 1709470141}
   - component: {fileID: 1709470140}
   m_Layer: 5
-  m_Name: Input Field - JoinCode
+  m_Name: Input Field - NickName
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -14065,7 +14067,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 21300000, guid: 454541f6ecedb4181a4c368a41e63ee3, type: 3}
+  m_Sprite: {fileID: 21300000, guid: bbaf73fbc4fe44494861040705519479, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1

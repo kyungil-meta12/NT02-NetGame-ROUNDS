@@ -1,6 +1,7 @@
 using System;
 using UnityEngine;
 using Unity.Netcode;
+using Unity.Collections;
 
 /// <summary>
 /// 각 플레이어가 가지는 스탯 데이터
@@ -40,9 +41,14 @@ public struct AppearanceData
 /// <summary>
 /// 플레이어 관련 데이터를 관리하는 싱글톤 모듈 // 씬 전환 시 인스턴스 유지됨
 /// </summary>
-public class PlayerManager : MonoBehaviour
+public class PlayerManager : NetworkBehaviour
 {
     public static PlayerManager Inst;
+
+    // 네트워크를 통해 동기화될 닉네임 변수
+    public NetworkVariable<FixedString32Bytes> playerName =
+        new NetworkVariable<FixedString32Bytes>("",
+            NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Owner);
 
     [Header("테스트 모드 사용 여부")]
     public bool testMode;
@@ -57,6 +63,20 @@ public class PlayerManager : MonoBehaviour
     public StatData Stat;
     public AppearanceData Appearance = new();
     private bool appearanceCreated = false;
+
+    public override void OnNetworkSpawn()
+    {
+        if (IsOwner)
+        {
+            Inst = this;
+            // 시작화면에서 저장해둔 닉네임을 불러와서 네트워크 변수에 저장
+            string savedName = PlayerPrefs.GetString("PlayerName", "Unknown");
+            playerName.Value = savedName;
+
+            // 씬 전환 시 파괴 방지
+            DontDestroyOnLoad(gameObject);
+        }
+    }
 
     void Awake()
     {
