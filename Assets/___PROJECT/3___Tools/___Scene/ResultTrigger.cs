@@ -1,4 +1,5 @@
 using TMPro;
+using System.Collections;
 using UnityEngine;
 
 public class ResultTrigger : MonoBehaviour
@@ -10,10 +11,21 @@ public class ResultTrigger : MonoBehaviour
 
     void Start()
     {
-        // 이미 생성되어 있는 GameManager 인스턴스에 명령을 내립니다.
+        StartCoroutine(DelayedSetup());
+    }
+
+    private IEnumerator DelayedSetup()
+    {
+        yield return new WaitForSeconds(0.2f);
+
         if (GameManager.Inst != null)
         {
+            Debug.Log($"ResultTrigger : 결과 화면 UI 설정을 시작합니다.");
             GameManager.Inst.SetupResultUI(victoryUI, defeatUI, winnerNameText, loserNameText);
+        }
+        else
+        {
+            Debug.Log($"ResultTrigger : GameManager 인스턴스를 찾을 수 없습니다!");
         }
     }
 }

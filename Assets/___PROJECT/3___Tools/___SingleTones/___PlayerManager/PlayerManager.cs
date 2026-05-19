@@ -1,7 +1,8 @@
 using System;
-using UnityEngine;
-using Unity.Netcode;
 using Unity.Collections;
+using Unity.Collections.LowLevel.Unsafe;
+using Unity.Netcode;
+using UnityEngine;
 
 /// <summary>
 /// 각 플레이어가 가지는 스탯 데이터
@@ -66,16 +67,24 @@ public class PlayerManager : NetworkBehaviour
 
     public override void OnNetworkSpawn()
     {
+        Debug.Log($"[Spawn] 플레이어 스폰됨. ID: {OwnerClientId}, IsOwner: {IsOwner}");
+
+        DontDestroyOnLoad(gameObject);
+
         if (IsOwner)
         {
             Inst = this;
-            // 시작화면에서 저장해둔 닉네임을 불러와서 네트워크 변수에 저장
             string savedName = PlayerPrefs.GetString("PlayerName", "Unknown");
-            playerName.Value = savedName;
+            Debug.Log($"[Local] 저장된 이름 불러오기 시도: {savedName}");
 
-            // 씬 전환 시 파괴 방지
-            DontDestroyOnLoad(gameObject);
+            // 이 한 줄이 실행될 때 권한이 없으면 아래 OnValueChanged 로그가 절대 안 찍힙니다.
+            playerName.Value = savedName;
         }
+
+        // 이 부분은 서버/클라이언트 모두에서 실행되어야 합니다.
+        playerName.OnValueChanged += (oldV, newV) => {
+            Debug.Log($"[Network] 닉네임 변수 값이 바뀌었습니다! 새 이름: {newV}");
+        };
     }
 
     void Awake()
