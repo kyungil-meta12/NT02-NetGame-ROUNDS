@@ -146,6 +146,7 @@ public class Player : NetworkBehaviour
             OnBodyIndexChanged(-1, netBodyIndex.Value);
             OnFaceIndexChanged(-1, netFaceIndex.Value);
             OnGunTypeChanged(GunType.None, netGunType.Value);
+            OnNameChanged("", netNickname.Value);
             print($"Other Player network spwaned: id: {NetworkObject.OwnerClientId}");
         }
 
