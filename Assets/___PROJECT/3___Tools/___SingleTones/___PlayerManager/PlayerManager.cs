@@ -3,28 +3,24 @@ using UnityEngine;
 
 /// <summary>
 /// 각 플레이어가 가지는 스탯 데이터
-/// INetworkSerializble을 상속받아 RPC로 전송할 수 있게 만듭니다.
 /// </summary>
 [Serializable]
 public struct StatData
 {
-    // 예시
-    // 추가 이동 속도, 추가 연사 딜레이 감소 등...
-    // 이 값들은 카드 선택 시 변경할 수 있음 // 각 능력치 마다 메서드를 추가하여 변경하는 코드를 작성
-    
     //플레이어 스탯 변수
     public int moveSpeedLevel;         //이동속도
-    public int jumpLevel;               //점프 횟수
+    public int jumpLevel;              //점프 횟수
+
     //총 스탯 변수
     [Space(10)]
-    public GunType gunType;                 //총 타입
-    public bool isMultiShot;                //멀티샷용 bool변수
+    public GunType gunType;            //총 타입
+    public bool isMultiShot;           //멀티샷용 bool변수
     public int multiShotSpreadLevel;   //멀티샷 퍼짐 정도
-    public int multiShellCountLevel;         //멀티샷 개수
-    public int totalAmmoLevel;               //탄알집 용량
+    public int multiShellCountLevel;   //멀티샷 개수
+    public int totalAmmoLevel;         //탄알집 용량
     public int ammoSpeedLevel;         //탄환 속도
-    public int damageLevel;                  //탄환 데미지
-    public int fireSpeedLevel;      //연사 속도
+    public int damageLevel;            //탄환 데미지
+    public int fireSpeedLevel;         //연사 속도
 }
 
 /// <summary>
