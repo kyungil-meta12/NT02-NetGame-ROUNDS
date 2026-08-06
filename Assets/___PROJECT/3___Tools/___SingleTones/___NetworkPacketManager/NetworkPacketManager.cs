@@ -209,7 +209,19 @@ public class NetworkPacketManager : NetworkBehaviour
 
             if (IsServer)
             {
+                // 현재 라운드에서 진 플레이어 기록
                 GameManager.Inst.loserClientId.Value = netObj.OwnerClientId;
+
+                // 죽은 사람의 데스 카운트 증가
+                if (!GameManager.Inst.deathCount.ContainsKey(netObj.OwnerClientId))
+                {
+                    GameManager.Inst.deathCount.Add(netObj.OwnerClientId, 1);
+                }
+                else
+                {
+                    GameManager.Inst.deathCount[netObj.OwnerClientId]++;
+                }
+
                 GameManager.Inst.SetGameEnd(true);
             }
            

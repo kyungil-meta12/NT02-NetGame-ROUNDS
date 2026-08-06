@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Net;
 using System.Net.Sockets;
 using TMPro;
@@ -40,6 +41,9 @@ public class GameManager : NetworkBehaviour
     public NetworkVariable<ulong> loserClientId = new NetworkVariable<ulong>(999,
         NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
 
+    // 각 플레이어가 죽은 횟수를 저장하는 딕셔너리
+    public Dictionary<ulong, int> deathCount = new();
+
     // 서버에서 관리하는 현재 라운드
     public NetworkVariable<int>currentRound = new(1, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
 
@@ -74,20 +78,28 @@ public class GameManager : NetworkBehaviour
         string winName = "Winner";
         string loseName = "Loser";
 
-        foreach (var player in allPlayers)
-        {
-            string name = player.Nickname; // 추가하신 프로퍼티 사용
+        // 최종 승패 로직 수정
+        ulong myID = NetworkManager.Singleton.LocalClientId;
+        ulong otherID = 0;
+        bool isWin = false;
 
-            if (player.OwnerClientId == loserId)
-                loseName = name;
-            else
-                winName = name;
+        // 플레이어가 단 둘 뿐이므로 내 아이디와 다른 아이디의 Key가 상대의 ID이다.
+        foreach (var count in deathCount)
+        {
+            if(count.Key != myID)
+            {
+                otherID = count.Key;
+                break;
+            }
         }
 
-        // [수정] 조건문을 명확하게 분리합니다.
-        ulong myId = NetworkManager.Singleton.LocalClientId;
+        // 내가 이긴 경우
+        if (deathCount[myID] < deathCount[otherID])
+        {
+            isWin = true;
+        }
 
-        if (myId == loserId)
+        if (isWin)
         {
             // 내가 패배자일 때
             defeatUI.SetActive(true);
