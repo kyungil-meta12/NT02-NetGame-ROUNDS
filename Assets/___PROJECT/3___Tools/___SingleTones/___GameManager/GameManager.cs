@@ -74,7 +74,6 @@ public class GameManager : NetworkBehaviour
     {
         Player[] allPlayers = FindObjectsByType<Player>(FindObjectsInactive.Include, FindObjectsSortMode.None);
 
-        ulong loserId = loserClientId.Value;
         string winName = "Winner";
         string loseName = "Loser";
 
